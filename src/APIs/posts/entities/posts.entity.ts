@@ -38,8 +38,8 @@ export class Post {
   @Column({ length: 100, nullable: false })
   title: string;
 
-  @Column('longtext', { nullable: false })
-  content: string;
+  // @Column('longtext', { nullable: false })
+  // content: string;
 
   @Column({ default: 0 })
   like_count: number;
