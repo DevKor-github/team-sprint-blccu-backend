@@ -6,12 +6,14 @@ import { CommentsModule } from './APIs/comments/comments.module';
 import { PostsModule } from './APIs/posts/posts.module';
 import { UsersModule } from './APIs/users/users.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './APIs/auth/auth.module';
 
 @Module({
   imports: [
     CommentsModule,
     PostsModule,
     UsersModule,
+    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

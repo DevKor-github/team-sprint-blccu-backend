@@ -14,9 +14,12 @@ export class User {
   id: string;
 
   @Column()
-  username: string;
+  kakaoId: number;
 
   @Column()
+  username: string;
+
+  @Column({ default: '' })
   description: string;
 
   @Column()
