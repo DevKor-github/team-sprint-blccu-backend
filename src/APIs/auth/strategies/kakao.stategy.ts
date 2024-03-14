@@ -6,10 +6,9 @@ import { Strategy, Profile } from 'passport-kakao';
 export class KakaoStategy extends PassportStrategy(Strategy, 'kakao') {
   constructor() {
     super({
-      clientID: process.env.KAKAO_CLIENT_ID,
-      clientSecret: '',
+      clientID: process.env.KAKAO_RESTAPI_KEY,
       callbackURL: process.env.KAKAO_CALLBACK_URL,
-      scope: ['account_email', 'profile_nickname'],
+      scope: ['profile_image', 'profile_nickname'],
     });
   }
   async validate(
@@ -21,12 +20,16 @@ export class KakaoStategy extends PassportStrategy(Strategy, 'kakao') {
   ) {
     try {
       const { _json } = profile;
-      console.log(_json);
+      const userData = _json.properties;
       const user = {
         kakaoId: _json.id,
-        username: _json.username,
-        profile_image: _json.profile_image,
+        username: userData.nickname,
+        profile_image: userData.profile_image,
       };
+      // 프로필 이미지 비동의 시 기본값 설정해주기!
+      if (!userData.profile_image) {
+        user.profile_image = '';
+      }
       done(null, user);
     } catch (error) {
       done(error);

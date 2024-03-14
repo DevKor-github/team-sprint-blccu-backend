@@ -1,6 +1,5 @@
 import { PostBackground } from 'src/APIs/postBackgrounds/entities/postBackground.entity';
 import { PostCategory } from 'src/APIs/postCategories/entities/postCategory.entity';
-import { PostImage } from 'src/APIs/postImages/entities/postImage.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
 import {
   Column,
@@ -21,10 +20,6 @@ export class Post {
   @ManyToOne(() => PostCategory)
   @JoinColumn({ name: 'post_category_id' })
   postCategory: PostCategory;
-
-  @JoinColumn({ name: 'post_image_id' })
-  @ManyToOne(() => PostImage)
-  postImage: PostImage;
 
   @JoinColumn({ name: 'post_background_id' })
   @ManyToOne(() => PostBackground)

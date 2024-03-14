@@ -7,6 +7,7 @@ import { PostsModule } from './APIs/posts/posts.module';
 import { UsersModule } from './APIs/users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './APIs/auth/auth.module';
+import { NeighborsModule } from './APIs/neighbors/neighbors.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule } from './APIs/auth/auth.module';
     PostsModule,
     UsersModule,
     AuthModule,
+    NeighborsModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

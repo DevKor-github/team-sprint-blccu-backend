@@ -5,16 +5,20 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
-  PrimaryGeneratedColumn,
+  // PrimaryColumn,
+  // PrimaryGeneratedColumn,
 } from 'typeorm';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  // @PrimaryGeneratedColumn('uuid')
+  // id: string;
 
-  @Column()
+  @Column({ type: 'bigint', primary: true })
   kakaoId: number;
+
+  @Column({ default: '' })
+  current_refresh_token: string;
 
   @Column()
   username: string;
@@ -31,11 +35,11 @@ export class User {
   @DeleteDateColumn()
   date_deleted: Date;
 
-  @JoinTable({
-    name: 'neighbor',
-    joinColumns: [{ name: 'to_user' }],
-    inverseJoinColumns: [{ name: 'from_user' }],
-  })
-  @ManyToMany(() => User, (users) => users.id)
-  neighbor: User;
+  // @JoinTable({
+  //   name: 'neighbor',
+  //   joinColumns: [{ name: 'to_user' }],
+  //   inverseJoinColumns: [{ name: 'from_user' }],
+  // })
+  // @ManyToMany(() => User, (users) => users.kakaoId)
+  // neighbor: User[];
 }

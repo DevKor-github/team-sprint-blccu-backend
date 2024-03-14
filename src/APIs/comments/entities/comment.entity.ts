@@ -17,7 +17,7 @@ export class Comment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User, (users) => users.id, { nullable: false })
+  @ManyToOne(() => User, (users) => users.kakaoId, { nullable: false })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

@@ -14,7 +14,7 @@ export class StickerBlock {
   id: string;
 
   @JoinColumn({ name: 'user_id' })
-  @ManyToOne(() => User, (users) => users.id)
+  @ManyToOne(() => User, (users) => users.kakaoId)
   user: User;
 
   @JoinColumn({ name: 'sticker_id' })
