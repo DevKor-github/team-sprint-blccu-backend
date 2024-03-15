@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './APIs/auth/auth.module';
 import { NeighborsModule } from './APIs/neighbors/neighbors.module';
 import { PostBackgroundsModule } from './APIs/postBackgrounds/postBackgrounds.module';
+import { PostCategoriesModule } from './APIs/postCategories/PostCategories.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PostBackgroundsModule } from './APIs/postBackgrounds/postBackgrounds.mo
     AuthModule,
     NeighborsModule,
     PostBackgroundsModule,
+    PostCategoriesModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

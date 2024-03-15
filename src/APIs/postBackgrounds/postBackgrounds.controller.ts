@@ -16,7 +16,7 @@ export class PostBackgroundsController {
     description: '업로드 할 파일',
     type: ImageUploadDto,
   })
-  @Post('upload')
+  @Post()
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
     const url = await this.postBackgroundsService.imageUpload(file);
     return url;

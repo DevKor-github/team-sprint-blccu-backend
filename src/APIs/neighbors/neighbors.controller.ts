@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -61,7 +62,7 @@ export class NeighborsController {
   @ApiOkResponse({ description: '언팔로우 성공' })
   @ApiNotFoundResponse({ description: '존재하지 않는 이웃 정보이다.' })
   @UseGuards(AuthGuard('jwt'))
-  @Post('unfollow/:follow_id')
+  @Post('unfollow')
   @HttpCode(200)
   unfollowUser(@Body('unfollow_id') unfollow_id: number, @Req() req: Request) {
     const kakaoId = parseInt(req.user.userId);
