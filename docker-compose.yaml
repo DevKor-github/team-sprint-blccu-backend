@@ -1,4 +1,4 @@
-version: "1"
+version: "3.7"
 
 services:
   my-backend:
@@ -8,12 +8,12 @@ services:
     ports:
       - 3000:3000
     env_file:
-      - ./.env
+      - ./.env.prod
 
   my-database: 
     image: "mysql:latest"     
     restart: always
     env_file:
-      - ./.env
+      - ./.env.prod
     ports:
       - 3306:3306      
