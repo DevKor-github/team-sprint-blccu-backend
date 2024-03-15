@@ -9,4 +9,4 @@ RUN npm install
 
 COPY . /myfolder/
 
-CMD ["npm", "start:dev"]
+CMD ["npm", "run", "start:dev"]
