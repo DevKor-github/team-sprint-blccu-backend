@@ -26,7 +26,7 @@ export class Comment {
   post: Post;
 
   @Column({ length: 15 })
-  user_name: string;
+  username: string;
 
   @Column({ length: 1500 })
   content: string;

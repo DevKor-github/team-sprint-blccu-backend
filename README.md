@@ -6,4 +6,5 @@
 
 ## ERD
 
-![Blccu V2 (1)](https://github.com/do-huni/Sprint-blccu-local/assets/119511836/eb76bdd5-1c93-46c6-b55d-92ab60ecfd54)
+
+![Blccu V2](https://github.com/do-huni/Sprint-blccu-local/assets/119511836/ffd4ef8d-88f3-4384-8def-8ebc22e16373)

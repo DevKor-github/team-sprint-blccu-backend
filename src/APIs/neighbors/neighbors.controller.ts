@@ -1,8 +1,10 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
   Param,
+  Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -10,6 +12,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { NeighborsService } from './neighbors.service';
 import {
+  ApiBody,
   ApiConflictResponse,
   ApiCookieAuth,
   ApiCreatedResponse,
@@ -20,7 +23,7 @@ import {
 } from '@nestjs/swagger';
 
 @ApiTags('이웃 API')
-@Controller('neighbor')
+@Controller('neighbors')
 export class NeighborsController {
   constructor(private readonly neighborsService: NeighborsService) {}
 
@@ -28,13 +31,17 @@ export class NeighborsController {
     summary: '이웃 추가하기',
     description: '로그인된 유저가 follow_id를 팔로우한다.',
   })
+  @ApiBody({
+    description: '팔로우 할 유저의 kakaoId',
+    type: Number,
+  })
   @ApiCookieAuth('refreshToken')
   @ApiCreatedResponse({ description: '이웃 추가 성공' })
   @ApiConflictResponse({ description: '이미 팔로우한 상태이다.' })
   @UseGuards(AuthGuard('jwt'))
-  @Get('follow/:follow_id')
+  @Post('follow')
   @HttpCode(201)
-  followUser(@Param('follow_id') follow_id: number, @Req() req: Request) {
+  followUser(@Body('follow_id') follow_id: number, @Req() req: Request) {
     const kakaoId = parseInt(req.user.userId);
     return this.neighborsService.followUser({
       from_user: kakaoId,
@@ -42,22 +49,25 @@ export class NeighborsController {
     });
   }
 
-  //post로 바꾸삼
   @ApiOperation({
     summary: '이웃 삭제하기',
     description: '로그인된 유저가 follow_id를 언팔로우 한다.',
+  })
+  @ApiBody({
+    description: '언팔로우 할 유저의 kakaoId',
+    type: Number,
   })
   @ApiCookieAuth('refreshToken')
   @ApiOkResponse({ description: '언팔로우 성공' })
   @ApiNotFoundResponse({ description: '존재하지 않는 이웃 정보이다.' })
   @UseGuards(AuthGuard('jwt'))
-  @Get('unfollow/:follow_id')
+  @Post('unfollow/:follow_id')
   @HttpCode(200)
-  unfollowUser(@Param('follow_id') follow_id: number, @Req() req: Request) {
+  unfollowUser(@Body('unfollow_id') unfollow_id: number, @Req() req: Request) {
     const kakaoId = parseInt(req.user.userId);
     return this.neighborsService.unfollowUser({
       from_user: kakaoId,
-      to_user: follow_id,
+      to_user: unfollow_id,
     });
   }
 
