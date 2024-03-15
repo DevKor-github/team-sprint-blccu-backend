@@ -3,9 +3,9 @@
 FROM node:18 as build
 
 COPY ./package.json /myfolder/
-COPY ./yarn.lock /myfolder/
+COPY ./package-lock.json /myfolder/
 WORKDIR /myfolder/
-RUN yarn install
+RUN npm install
 
 COPY . /myfolder/
 
