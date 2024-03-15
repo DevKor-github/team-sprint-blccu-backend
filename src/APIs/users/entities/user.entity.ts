@@ -3,8 +3,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   // PrimaryColumn,
   // PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -19,6 +17,9 @@ export class User {
 
   @Column({ default: '' })
   current_refresh_token: string;
+
+  @Column({ default: false })
+  isAdmin: boolean;
 
   @Column()
   username: string;

@@ -25,7 +25,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({
-    summary: '카카오 로그인 api',
+    summary: '카카오 로그인',
     description:
       '카카오 서버에 로그인을 요청한다. 응답으로 도착한 kakaoId를 기반으로 jwt accessToken과 refreshToken을 클라이언트에게 쿠키로 전송한다',
   })
@@ -49,7 +49,7 @@ export class AuthController {
   }
 
   @ApiOperation({
-    summary: 'accessToken refresh API',
+    summary: 'accessToken refresh',
     description: 'refreshToken을 기반으로 accessToken을 재발급한다.',
   })
   @ApiCreatedResponse({
@@ -61,7 +61,7 @@ export class AuthController {
   })
   @ApiCookieAuth('refreshToken')
   @Get('refresh')
-  @HttpCode(200)
+  @HttpCode(201)
   async refresh(@Req() req: Request, @Res() res: Response) {
     try {
       const newAccessToken = await this.authService.refresh(
