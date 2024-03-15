@@ -2,12 +2,11 @@
 
 FROM node:18 as build
 
-WORKDIR /usr/src/my-app
+COPY ./package.json /myfolder/
+COPY ./yarn.lock /myfolder/
+WORKDIR /myfolder/
+RUN yarn install
 
-COPY package*.json .
+COPY . /myfolder/
 
-RUN npm install
-
-COPY . .
-
-CMD ["npm", "start"]
+CMD ["npm", "start:dev"]

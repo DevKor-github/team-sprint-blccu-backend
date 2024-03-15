@@ -4,7 +4,6 @@ import { AwsService } from 'src/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { PostBackground } from './entities/postBackground.entity';
 import { Repository } from 'typeorm';
-import { runInThisContext } from 'vm';
 
 @Injectable()
 export class PostBackgroundsService {

@@ -1,27 +1,19 @@
 version: "1"
 
 services:
-  web:
+  my-backend:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    volumes:
-      - ./app:/usr/src/my-app/app
+      dockerfile: Dockerfile
     ports:
-      - "8081:8081"
+      - 3000:3000
     env_file:
-      - .env
-    environment:
-      REDIS_URL: redis://redis:6379
-      PORT: 8081      
-    depends_on:
-      - redis
+      - ./.env
+
   my-database: 
-    image: "mysql:latest"    
-    environment:
-      DATABASE_TYPE: 'mysql'
-      DATABASE_HOST: 'localhost'
-      DATABASE_PORT:3306
-      DATABASE_USERNAME:root
-      DATABASE_PASSWORD:root
-      DATABASE_DATABASE:localDB
+    image: "mysql:latest"     
+    restart: always
+    env_file:
+      - ./.env
+    ports:
+      - 3306:3306      
