@@ -4,6 +4,7 @@ import { AwsService } from 'src/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { PostBackground } from './entities/postBackground.entity';
 import { Repository } from 'typeorm';
+import { runInThisContext } from 'vm';
 
 @Injectable()
 export class PostBackgroundsService {
@@ -28,5 +29,14 @@ export class PostBackgroundsService {
     );
     this.postBackgroundsRepository.save({ image_url });
     return { image_url };
+  }
+
+  async fetchAll() {
+    return await this.postBackgroundsRepository.find();
+  }
+
+  async delete({ id }) {
+    // s3 서버에서 이미지 삭제하는 것까지 구현하기!!
+    return await this.postBackgroundsRepository.delete({ id });
   }
 }

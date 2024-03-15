@@ -1,4 +1,11 @@
-import { Controller, Post, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UploadedFile,
+} from '@nestjs/common';
 import { PostBackgroundsService } from './postBackgrounds.service';
 import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ImageUploadDto } from './dto/image-upload.dto';
@@ -20,5 +27,17 @@ export class PostBackgroundsController {
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
     const url = await this.postBackgroundsService.imageUpload(file);
     return url;
+  }
+
+  @ApiOperation({ summary: '내지 모두 불러오기' })
+  @Get()
+  async fetchAll() {
+    return await this.postBackgroundsService.fetchAll();
+  }
+
+  @ApiOperation({ summary: '내지 삭제하기' })
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    return await this.postBackgroundsService.delete({ id });
   }
 }
