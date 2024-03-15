@@ -1,6 +1,7 @@
 import { User } from 'src/APIs/users/entities/user.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -8,20 +9,20 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class PostBlock {
-  @JoinColumn({ name: 'user_id' })
-  @ManyToOne(() => User)
-  user_id: User;
-
+export class Report {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
-  type: string;
+  title: string;
 
   @Column()
   content: string;
 
-  @Column()
-  index: number;
+  @CreateDateColumn()
+  date_created: string;
+
+  @JoinColumn({ name: 'user_id' })
+  @ManyToOne(() => User)
+  user: User;
 }

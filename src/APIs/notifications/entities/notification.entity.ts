@@ -3,6 +3,7 @@ import { User } from 'src/APIs/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -37,6 +38,9 @@ export class Notification {
 
   @CreateDateColumn()
   date_created: Date;
+
+  @DeleteDateColumn()
+  date_deleted: Date;
 
   @Column()
   is_checked: boolean;
