@@ -92,9 +92,23 @@ export class NeighborsService {
 
   async getFollowers({ kakaoId }) {
     const follows = await this.neighborsRepository.find({
-      select: {
-        from_user: { current_refresh_token: false },
-        to_user: { current_refresh_token: false },
+      from_user: {
+        kakaoId: true,
+        isAdmin: true,
+        username: true,
+        description: true,
+        profile_image: true,
+        date_created: true,
+        date_deleted: true,
+      },
+      to_user: {
+        kakaoId: true,
+        isAdmin: true,
+        username: true,
+        description: true,
+        profile_image: true,
+        date_created: true,
+        date_deleted: true,
       },
       where: {
         to_user: { kakaoId: kakaoId },
