@@ -7,6 +7,7 @@ import {
   IUsersServiceFindUserByKakaoId,
 } from './interfaces/users.service.interface';
 import { UserResponseDto } from './dto/user-response.dto';
+import { PatchUserDto } from './dto/patch-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -14,6 +15,13 @@ export class UsersService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
   ) {}
+
+  // 배포 때 삭제 !!!!
+  async getAll() {
+    return this.usersRepository.find();
+  }
+  // ===========================
+
   async create({ kakaoId, username, profile_image }: IUsersServiceCreate) {
     const result = await this.usersRepository.save({
       kakaoId: kakaoId,
@@ -57,5 +65,16 @@ export class UsersService {
       ...user,
       current_refresh_token,
     });
+  }
+
+  async patchUser({ kakaoId, description, username }): Promise<PatchUserDto> {
+    let user: PatchUserDto = { kakaoId };
+    if (description) {
+      user = { ...user, description };
+    }
+    if (username) {
+      user = { ...user, username };
+    }
+    return await this.usersRepository.save(user);
   }
 }
