@@ -24,6 +24,24 @@ export class UsersService {
 
   async findUserByKakaoId({ kakaoId }: IUsersServiceFindUserByKakaoId) {
     const result = await this.usersRepository.findOne({
+      select: {
+        kakaoId: true,
+        isAdmin: true,
+        username: true,
+        description: true,
+        profile_image: true,
+        date_created: true,
+        date_deleted: true,
+      },
+      where: { kakaoId: kakaoId },
+    });
+    console.log(result);
+    return result;
+  }
+  async findUserByKakaoIdWithToken({
+    kakaoId,
+  }: IUsersServiceFindUserByKakaoId) {
+    const result = await this.usersRepository.findOne({
       where: { kakaoId: kakaoId },
     });
     console.log(result);

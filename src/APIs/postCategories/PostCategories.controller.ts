@@ -28,9 +28,10 @@ export class PostCategoriesController {
   @Post()
   async createPostCategory(
     @Req() req: Request,
-    @Body('name') name: CreatePostCategoryDto,
+    @Body() body: CreatePostCategoryDto,
   ) {
     const kakaoId = req.user.userId;
+    const name = body.name;
     return await this.postCategoriesService.create({ kakaoId, name });
   }
 

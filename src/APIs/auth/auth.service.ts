@@ -58,7 +58,7 @@ export class AuthService {
       const kakaoId = decodedRefreshToken.userId;
 
       // 데이터베이스에서 User 객체 가져오기
-      const user = await this.usersService.findUserByKakaoId(kakaoId);
+      const user = await this.usersService.findUserByKakaoIdWithToken(kakaoId);
 
       // 2차 검증
       const isRefreshTokenMatching = await bcrypt.compare(

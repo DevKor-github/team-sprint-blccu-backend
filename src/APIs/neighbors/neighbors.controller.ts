@@ -22,6 +22,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { FollowDto } from './dto/follow.dto';
 
 @ApiTags('이웃 API')
 @Controller('neighbors')
@@ -32,21 +33,18 @@ export class NeighborsController {
     summary: '이웃 추가하기',
     description: '로그인된 유저가 follow_id를 팔로우한다.',
   })
-  @ApiBody({
-    description: '팔로우 할 유저의 kakaoId',
-    type: Number,
-  })
   @ApiCookieAuth('refreshToken')
   @ApiCreatedResponse({ description: '이웃 추가 성공' })
   @ApiConflictResponse({ description: '이미 팔로우한 상태이다.' })
   @UseGuards(AuthGuard('jwt'))
   @Post('follow')
   @HttpCode(201)
-  followUser(@Body('follow_id') follow_id: number, @Req() req: Request) {
+  followUser(@Body() body: FollowDto, @Req() req: Request) {
     const kakaoId = parseInt(req.user.userId);
+    const to_user = body.follow_id;
     return this.neighborsService.followUser({
       from_user: kakaoId,
-      to_user: follow_id,
+      to_user,
     });
   }
 
@@ -54,21 +52,18 @@ export class NeighborsController {
     summary: '이웃 삭제하기',
     description: '로그인된 유저가 follow_id를 언팔로우 한다.',
   })
-  @ApiBody({
-    description: '언팔로우 할 유저의 kakaoId',
-    type: Number,
-  })
   @ApiCookieAuth('refreshToken')
   @ApiOkResponse({ description: '언팔로우 성공' })
   @ApiNotFoundResponse({ description: '존재하지 않는 이웃 정보이다.' })
   @UseGuards(AuthGuard('jwt'))
   @Post('unfollow')
   @HttpCode(200)
-  unfollowUser(@Body('unfollow_id') unfollow_id: number, @Req() req: Request) {
+  unfollowUser(@Body() body: FollowDto, @Req() req: Request) {
     const kakaoId = parseInt(req.user.userId);
+    const to_user = body.follow_id;
     return this.neighborsService.unfollowUser({
       from_user: kakaoId,
-      to_user: unfollow_id,
+      to_user,
     });
   }
 

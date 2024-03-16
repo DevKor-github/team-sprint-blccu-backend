@@ -2,15 +2,12 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Neighbor } from './entities/neighbor.entity';
 import { DataSource, Repository } from 'typeorm';
-// import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class NeighborsService {
   constructor(
     @InjectRepository(Neighbor)
     private readonly neighborsRepository: Repository<Neighbor>,
-    // @InjectRepository(User)
-    // private readonly usersRepository: Repository<User>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -38,20 +35,6 @@ export class NeighborsService {
       to_user,
     });
     return neighbor;
-    // const queryRunner = this.dataSource.createQueryRunner();
-    // await queryRunner.connect();
-    // await queryRunner.startTransaction();
-    // try {
-    //   const neighbor = await this.neighborsRepository.save({
-    //     from_user,
-    //     to_user,
-    //   });
-    //   return neighbor;
-    // } catch (e) {
-    //   await queryRunner.rollbackTransaction();
-    // } finally {
-    //   await queryRunner.release();
-    // }
   }
 
   async unfollowUser({ from_user, to_user }) {
@@ -64,6 +47,26 @@ export class NeighborsService {
 
   async getFollows({ kakaoId }) {
     const follows = await this.neighborsRepository.find({
+      select: {
+        from_user: {
+          kakaoId: true,
+          isAdmin: true,
+          username: true,
+          description: true,
+          profile_image: true,
+          date_created: true,
+          date_deleted: true,
+        },
+        to_user: {
+          kakaoId: true,
+          isAdmin: true,
+          username: true,
+          description: true,
+          profile_image: true,
+          date_created: true,
+          date_deleted: true,
+        },
+      },
       where: {
         from_user: { kakaoId: kakaoId },
       },
@@ -76,6 +79,10 @@ export class NeighborsService {
 
   async getFollowers({ kakaoId }) {
     const follows = await this.neighborsRepository.find({
+      select: {
+        from_user: { current_refresh_token: false },
+        to_user: { current_refresh_token: false },
+      },
       where: {
         to_user: { kakaoId: kakaoId },
       },
@@ -85,7 +92,4 @@ export class NeighborsService {
     });
     return follows;
   }
-  // getFollower() {} 유저 서비스에서 하자
-
-  // getFollowee() {}
 }

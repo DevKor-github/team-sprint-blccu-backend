@@ -35,12 +35,4 @@ export class User {
 
   @DeleteDateColumn()
   date_deleted: Date;
-
-  // @JoinTable({
-  //   name: 'neighbor',
-  //   joinColumns: [{ name: 'to_user' }],
-  //   inverseJoinColumns: [{ name: 'from_user' }],
-  // })
-  // @ManyToMany(() => User, (users) => users.kakaoId)
-  // neighbor: User[];
 }
