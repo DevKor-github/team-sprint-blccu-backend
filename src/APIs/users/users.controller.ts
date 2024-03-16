@@ -17,7 +17,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { UserResponseDto } from './dto/user-response.dto';
-import { PatchUserDto } from './dto/patch-user.dto';
+import { PatchUserInput } from './dto/patch-user.input';
 
 @ApiTags('유저 API')
 @Controller('users')
@@ -53,15 +53,15 @@ export class UsersController {
     summary: '로그인된 유저의 이름이나 설명을 변경',
     description: '로그인된 유저의 이름이나 설명, 혹은 둘 다를 변경한다.',
   })
-  @ApiOkResponse({ description: '변경 성공', type: PatchUserDto })
+  @ApiOkResponse({ description: '변경 성공', type: PatchUserInput })
   @ApiCookieAuth('refreshToken')
   @Patch()
   @HttpCode(200)
   @UseGuards(AuthGuard('jwt'))
   async patchUser(
     @Req() req: Request,
-    @Body() body: PatchUserDto,
-  ): Promise<PatchUserDto> {
+    @Body() body: PatchUserInput,
+  ): Promise<UserResponseDto> {
     const kakaoId = req.user.userId;
     const description = body.description;
     const username = body.username;

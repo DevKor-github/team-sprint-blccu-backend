@@ -7,7 +7,6 @@ import {
   IUsersServiceFindUserByKakaoId,
 } from './interfaces/users.service.interface';
 import { UserResponseDto } from './dto/user-response.dto';
-import { PatchUserDto } from './dto/patch-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -67,8 +66,12 @@ export class UsersService {
     });
   }
 
-  async patchUser({ kakaoId, description, username }): Promise<PatchUserDto> {
-    let user: PatchUserDto = { kakaoId };
+  async patchUser({
+    kakaoId,
+    description,
+    username,
+  }): Promise<UserResponseDto> {
+    let user = await this.findUserByKakaoId({ kakaoId });
     if (description) {
       user = { ...user, description };
     }
