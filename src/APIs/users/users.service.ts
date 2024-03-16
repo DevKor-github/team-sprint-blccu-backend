@@ -71,12 +71,12 @@ export class UsersService {
     description,
     username,
   }): Promise<UserResponseDto> {
-    let user = await this.findUserByKakaoId({ kakaoId });
+    const user = await this.findUserByKakaoId({ kakaoId });
     if (description) {
-      user = { ...user, description };
+      user.description = description;
     }
     if (username) {
-      user = { ...user, username };
+      user.username = username;
     }
     return await this.usersRepository.save(user);
   }
