@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostCategory } from './entities/postCategory.entity';
 import { Repository } from 'typeorm';
+import { CreatePostCategoryResponseDto } from './dto/create-post-category-response.dto';
 
 @Injectable()
 export class PostCategoriesService {
@@ -10,12 +11,12 @@ export class PostCategoriesService {
     private readonly postCategoriesRepository: Repository<PostCategory>,
   ) {}
 
-  create({ kakaoId, name }) {
-    return this.postCategoriesRepository.save({ user: kakaoId, name });
+  async create({ kakaoId, name }): Promise<CreatePostCategoryResponseDto> {
+    return await this.postCategoriesRepository.save({ user: kakaoId, name });
   }
 
-  fetchAll({ kakaoId }) {
-    return this.postCategoriesRepository.find({
+  async fetchAll({ kakaoId }): Promise<PostCategory[]> {
+    return await this.postCategoriesRepository.find({
       where: { user: { kakaoId } },
     });
   }

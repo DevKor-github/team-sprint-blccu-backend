@@ -3,8 +3,8 @@ import { IsNotEmpty } from 'class-validator';
 
 export class CreatePostCategoryDto {
   @ApiProperty({
-    type: 'string',
-    example: '카테고리 이름',
+    type: String,
+    description: '카테고리 이름',
   })
   @IsNotEmpty()
   name: string;

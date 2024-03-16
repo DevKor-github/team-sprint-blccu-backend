@@ -2,7 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
 export class ImageUploadDto {
-  @ApiProperty({ type: 'string', format: 'binary' })
+  @ApiProperty({
+    type: String,
+    format: 'binary',
+    description: ' multipart/form-data 이미지',
+  })
   @IsNotEmpty()
   file: any;
 }

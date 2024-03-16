@@ -24,6 +24,7 @@ import { PostCategoriesModule } from './APIs/postCategories/PostCategories.modul
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({
+      bigNumberStrings: false,
       type: process.env.DATABASE_TYPE as 'mysql',
       host: process.env.DATABASE_HOST,
       port: Number(process.env.DATABASE_PORT),

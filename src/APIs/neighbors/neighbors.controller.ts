@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   Param,
@@ -13,7 +12,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { NeighborsService } from './neighbors.service';
 import {
-  ApiBody,
   ApiConflictResponse,
   ApiCookieAuth,
   ApiCreatedResponse,
@@ -23,6 +21,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FollowDto } from './dto/follow.dto';
+import { FromUserResponseDto } from './dto/from-user-response.dto';
+import { ToUserResponseDto } from './dto/to-user-response.dto';
+import { FollowUserDto } from './dto/follow-user.dto';
 
 @ApiTags('이웃 API')
 @Controller('neighbors')
@@ -34,15 +35,18 @@ export class NeighborsController {
     description: '로그인된 유저가 follow_id를 팔로우한다.',
   })
   @ApiCookieAuth('refreshToken')
-  @ApiCreatedResponse({ description: '이웃 추가 성공' })
+  @ApiCreatedResponse({ description: '이웃 추가 성공', type: FollowUserDto })
   @ApiConflictResponse({ description: '이미 팔로우한 상태이다.' })
   @UseGuards(AuthGuard('jwt'))
   @Post('follow')
   @HttpCode(201)
-  followUser(@Body() body: FollowDto, @Req() req: Request) {
+  async followUser(
+    @Body() body: FollowDto,
+    @Req() req: Request,
+  ): Promise<FollowUserDto> {
     const kakaoId = parseInt(req.user.userId);
     const to_user = body.follow_id;
-    return this.neighborsService.followUser({
+    return await this.neighborsService.followUser({
       from_user: kakaoId,
       to_user,
     });
@@ -71,10 +75,13 @@ export class NeighborsController {
     summary: '팔로워 목록 조회',
     description: 'id의 팔로워 목록을 조회한다.',
   })
-  @ApiOkResponse({ description: '팔로워 목록 조회 성공' })
+  @ApiOkResponse({
+    description: '팔로워 목록 조회 성공',
+    type: [FromUserResponseDto],
+  })
   @HttpCode(200)
   @Get('followers/:id')
-  getFollowers(@Param('id') kakaoId: number) {
+  getFollowers(@Param('id') kakaoId: number): Promise<FromUserResponseDto[]> {
     return this.neighborsService.getFollowers({ kakaoId });
   }
 
@@ -82,10 +89,13 @@ export class NeighborsController {
     summary: '팔로우 목록 조회',
     description: 'id의 팔로우 목록을 조회한다.',
   })
-  @ApiOkResponse({ description: '팔로우 목록 조회 성공' })
+  @ApiOkResponse({
+    description: '팔로우 목록 조회 성공',
+    type: [ToUserResponseDto],
+  })
   @HttpCode(200)
   @Get('follows/:id')
-  getFollows(@Param('id') kakaoId: number) {
+  getFollows(@Param('id') kakaoId: number): Promise<ToUserResponseDto[]> {
     return this.neighborsService.getFollows({ kakaoId });
   }
 }

@@ -6,6 +6,7 @@ import {
   IUsersServiceCreate,
   IUsersServiceFindUserByKakaoId,
 } from './interfaces/users.service.interface';
+import { UserResponseDto } from './dto/user-response.dto';
 
 @Injectable()
 export class UsersService {
@@ -22,7 +23,9 @@ export class UsersService {
     return result;
   }
 
-  async findUserByKakaoId({ kakaoId }: IUsersServiceFindUserByKakaoId) {
+  async findUserByKakaoId({
+    kakaoId,
+  }: IUsersServiceFindUserByKakaoId): Promise<UserResponseDto> {
     const result = await this.usersRepository.findOne({
       select: {
         kakaoId: true,

@@ -4,6 +4,7 @@ import { AwsService } from 'src/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { PostBackground } from './entities/postBackground.entity';
 import { Repository } from 'typeorm';
+import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 
 @Injectable()
 export class PostBackgroundsService {
@@ -13,11 +14,13 @@ export class PostBackgroundsService {
     @InjectRepository(PostBackground)
     private readonly postBackgroundsRepository: Repository<PostBackground>,
   ) {}
-  async saveImage(file: Express.Multer.File) {
+  async saveImage(file: Express.Multer.File): Promise<ImageUploadResponseDto> {
     return await this.imageUpload(file);
   }
 
-  async imageUpload(file: Express.Multer.File) {
+  async imageUpload(
+    file: Express.Multer.File,
+  ): Promise<ImageUploadResponseDto> {
     const imageName = this.utilsService.getUUID();
     const ext = file.originalname.split('.').pop();
 
@@ -30,7 +33,7 @@ export class PostBackgroundsService {
     return { image_url };
   }
 
-  async fetchAll() {
+  async fetchAll(): Promise<PostBackground[]> {
     return await this.postBackgroundsRepository.find();
   }
 

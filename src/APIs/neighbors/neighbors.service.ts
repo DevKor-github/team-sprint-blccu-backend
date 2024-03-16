@@ -2,7 +2,9 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Neighbor } from './entities/neighbor.entity';
 import { DataSource, Repository } from 'typeorm';
-import { findSourceMap } from 'module';
+import { FromUserResponseDto } from './dto/from-user-response.dto';
+import { ToUserResponseDto } from './dto/to-user-response.dto';
+import { FollowUserDto } from './dto/follow-user.dto';
 
 @Injectable()
 export class NeighborsService {
@@ -32,7 +34,7 @@ export class NeighborsService {
     }
     return true;
   }
-  async followUser({ from_user, to_user }) {
+  async followUser({ from_user, to_user }): Promise<FollowUserDto> {
     const isExist = await this.isExist({ from_user, to_user });
     if (isExist) {
       throw new ConflictException('already exists');
@@ -58,7 +60,7 @@ export class NeighborsService {
     return this.neighborsRepository.delete({ from_user, to_user });
   }
 
-  async getFollows({ kakaoId }) {
+  async getFollows({ kakaoId }): Promise<ToUserResponseDto[]> {
     const follows = await this.neighborsRepository.find({
       select: {
         from_user: {
@@ -90,19 +92,10 @@ export class NeighborsService {
     return follows;
   }
 
-  async getFollowers({ kakaoId }) {
+  async getFollowers({ kakaoId }): Promise<FromUserResponseDto[]> {
     const follows = await this.neighborsRepository.find({
       select: {
         from_user: {
-          kakaoId: true,
-          isAdmin: true,
-          username: true,
-          description: true,
-          profile_image: true,
-          date_created: true,
-          date_deleted: true,
-        },
-        to_user: {
           kakaoId: true,
           isAdmin: true,
           username: true,
