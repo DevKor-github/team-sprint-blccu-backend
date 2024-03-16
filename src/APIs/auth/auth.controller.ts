@@ -27,7 +27,7 @@ export class AuthController {
   @ApiOperation({
     summary: '카카오 로그인',
     description:
-      '!swagger에서 execute 불가능! 직접 url 이동하기!\n카카오 서버에 로그인을 요청한다. 응답으로 도착한 kakaoId를 기반으로 jwt accessToken과 refreshToken을 클라이언트에게 쿠키로 전송한다',
+      '[swagger 불가능, url 직접 이동] 카카오 서버에 로그인을 요청한다. 응답으로 도착한 kakaoId를 기반으로 jwt accessToken과 refreshToken을 클라이언트에게 쿠키로 전송한다',
   })
   @ApiMovedPermanentlyResponse({
     description: `카카오에서 인증 완료 후 클라이언트 루트 url로 리다이렉트 한다.`,
