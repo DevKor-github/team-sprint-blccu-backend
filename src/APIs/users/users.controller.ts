@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Param,
   Patch,
   Req,
   UseGuards,
@@ -70,5 +71,31 @@ export class UsersController {
       description,
       username,
     });
+  }
+
+  @ApiOperation({
+    summary: '이름이 포함된 유저 검색',
+    description: '이름에 username이 포함된 유저를 검색한다.',
+  })
+  @ApiOkResponse({ description: '조회 성공', type: [UserResponseDto] })
+  @HttpCode(200)
+  @Get('username/:username')
+  async findUsersByName(
+    @Param('username') username: string,
+  ): Promise<UserResponseDto[]> {
+    return await this.usersService.findUsersByName({ username });
+  }
+
+  @ApiOperation({
+    summary: 'kakaoId에 정확히 부합하는 유저 검색',
+    description: 'kakaoId가 param과 일치하는 유저를 검색한다.',
+  })
+  @ApiOkResponse({ description: '조회 성공', type: UserResponseDto })
+  @HttpCode(200)
+  @Get('kakaoId/:kakaoId')
+  async findUserByKakaoId(
+    @Param('kakaoId') kakaoId: number,
+  ): Promise<UserResponseDto> {
+    return await this.usersService.findUserByKakaoId({ kakaoId });
   }
 }

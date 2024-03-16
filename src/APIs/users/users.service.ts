@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import {
   IUsersServiceCreate,
@@ -79,5 +79,22 @@ export class UsersService {
       user.username = username;
     }
     return await this.usersRepository.save(user);
+  }
+  async findUsersByName({ username }): Promise<UserResponseDto[]> {
+    const users = await this.usersRepository.find({
+      select: {
+        kakaoId: true,
+        isAdmin: true,
+        username: true,
+        description: true,
+        profile_image: true,
+        date_created: true,
+        date_deleted: true,
+      },
+      where: {
+        username: ILike(`%${username}%`),
+      },
+    });
+    return users;
   }
 }

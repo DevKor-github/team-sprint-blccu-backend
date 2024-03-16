@@ -3,8 +3,9 @@ import { IsOptional, IsString } from 'class-validator';
 
 export class PatchUserInput {
   @ApiProperty({
-    description: 'username 변경',
+    description: '[optional] username 변경',
     type: String,
+    example: 'optional',
     required: false,
   })
   @IsString()
@@ -12,8 +13,9 @@ export class PatchUserInput {
   username?: string;
 
   @ApiProperty({
-    description: 'description 변경',
+    description: '[optional] description 변경',
     type: String,
+    example: 'optional',
     required: false,
   })
   @IsString()
