@@ -12,7 +12,12 @@ export class PostCategoriesService {
   ) {}
 
   async create({ kakaoId, name }): Promise<CreatePostCategoryResponseDto> {
-    return await this.postCategoriesRepository.save({ user: kakaoId, name });
+    const result = await this.postCategoriesRepository.save({
+      user: kakaoId,
+      name,
+    });
+    result.user = BigInt(result.user);
+    return result;
   }
 
   async fetchAll({ kakaoId }): Promise<PostCategory[]> {

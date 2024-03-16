@@ -68,7 +68,8 @@ export class PostCategoriesController {
 
   @ApiOperation({
     summary: '유저의 지정 카테고리 삭제하기',
-    description: '로그인된 유저의 id값과 일치하는 카테고리를 삭제한다',
+    description:
+      '로그인된 유저의 카테고리 중 param:id와 일치하는 카테고리를 삭제한다',
   })
   @ApiCookieAuth('refreshToken')
   @Delete(':id')
