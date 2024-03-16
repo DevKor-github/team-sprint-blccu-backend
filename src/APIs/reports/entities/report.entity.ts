@@ -25,4 +25,7 @@ export class Report {
   @JoinColumn({ name: 'user_id' })
   @ManyToOne(() => User)
   user: User;
+
+  @Column()
+  report_url: string;
 }

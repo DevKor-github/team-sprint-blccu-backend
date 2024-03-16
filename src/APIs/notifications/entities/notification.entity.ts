@@ -1,4 +1,3 @@
-import { Post } from 'src/APIs/posts/entities/posts.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
 import {
   Column,
@@ -22,10 +21,6 @@ export class Notification {
   @JoinColumn({ name: 'target_user_id' })
   @ManyToOne(() => User)
   target_user_id: User;
-
-  @JoinColumn({ name: 'post_id' })
-  @ManyToOne(() => Post)
-  post_id: Post;
 
   @Column()
   not_type: number;
