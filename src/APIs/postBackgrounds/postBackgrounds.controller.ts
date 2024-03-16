@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PostBackgroundsService } from './postBackgrounds.service';
 import {
@@ -19,6 +20,7 @@ import {
 import { ImageUploadDto } from '../../commons/dto/image-upload.dto';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 import { PostBackground } from './entities/postBackground.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('내지 API')
 @Controller('postbg')
@@ -38,6 +40,7 @@ export class PostBackgroundsController {
     type: ImageUploadResponseDto,
   })
   @Post()
+  @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
   async uploadImage(
     @UploadedFile() file: Express.Multer.File,
