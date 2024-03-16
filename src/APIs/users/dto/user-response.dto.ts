@@ -8,20 +8,20 @@ export class UserResponseDto {
   // current_refresh_token: string;
 
   @ApiProperty({ description: '어드민 유저 여부', type: Boolean })
-  isAdmin?: boolean;
+  isAdmin: boolean;
 
   @ApiProperty({ description: '유저 이름', type: String })
-  username?: string;
+  username: string;
 
   @ApiProperty({ description: '유저 설명', type: String })
-  description?: string;
+  description: string;
 
   @ApiProperty({ description: '프로필 이미지 url', type: String })
-  profile_image?: string;
+  profile_image: string;
 
   @ApiProperty({ description: '생성된 날짜', type: Date })
-  date_created?: Date;
+  date_created: Date;
 
   @ApiProperty({ description: '삭제된 날짜', type: Date })
-  date_deleted?: Date;
+  date_deleted: Date;
 }
