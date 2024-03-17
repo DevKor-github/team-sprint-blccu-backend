@@ -15,6 +15,7 @@ import { PostsService } from './posts.service';
 import { Posts } from './entities/posts.entity';
 import { CreatePostInput } from './dto/create-post.input';
 import { FetchPostsDto } from './dto/fetch-posts.dto';
+import { CreatePostResponseDto } from './dto/create-post-response.dto';
 
 @ApiTags('게시글 API')
 @Controller('posts')
@@ -30,7 +31,7 @@ export class PostsController {
   @ApiCreatedResponse({ description: '생성 성공', type: Posts })
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(201)
-  async createPost(@Req() req: Request): Promise<Posts> {
+  async createPost(@Req() req: Request): Promise<CreatePostResponseDto> {
     const kakaoId = req.user.userId;
     return await this.postsService.create({ kakaoId });
   }

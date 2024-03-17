@@ -18,7 +18,7 @@ import {
 export class Posts {
   // 이름 충돌 때문에 posts 복수형으로 사용
   @ApiProperty({ description: '포스트의 고유 아이디', type: Number })
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn()
   id: number;
 
   @ApiProperty({ description: '연결된 카테고리', type: PostCategory })

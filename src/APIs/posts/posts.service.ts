@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { Page } from '../../utils/page';
 import { FetchPostsDto } from './dto/fetch-posts.dto';
+import { CreatePostResponseDto } from './dto/create-post-response.dto';
 
 @Injectable()
 export class PostsService {
@@ -34,7 +35,7 @@ export class PostsService {
     return { imageUrl };
   }
 
-  async create({ kakaoId }): Promise<Posts> {
+  async create({ kakaoId }): Promise<CreatePostResponseDto> {
     return await this.postsRepository.save({ user: kakaoId });
   }
 
