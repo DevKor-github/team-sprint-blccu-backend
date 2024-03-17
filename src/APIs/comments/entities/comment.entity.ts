@@ -1,4 +1,4 @@
-import { Post } from 'src/APIs/posts/entities/posts.entity';
+import { Posts } from 'src/APIs/posts/entities/posts.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
 import {
   Column,
@@ -21,9 +21,9 @@ export class Comment {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Post, (posts) => posts.id, { nullable: false })
+  @ManyToOne(() => Posts, (posts) => posts.id, { nullable: false })
   @JoinColumn({ name: 'post_id' })
-  post: Post;
+  post: Posts;
 
   @Column({ length: 15 })
   username: string;

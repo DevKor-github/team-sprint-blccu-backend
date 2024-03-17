@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Post } from './entities/posts.entity';
+import { Posts } from './entities/posts.entity';
 import { User } from '../users/entities/user.entity';
 import { JwtStrategy } from '../auth/strategies/jwt.strategy';
 import { PostsController } from './posts.controller';
@@ -9,7 +9,7 @@ import { AwsModule } from 'src/aws/aws.module';
 import { PostsService } from './posts.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Post, User]), UtilsModule, AwsModule],
+  imports: [TypeOrmModule.forFeature([Posts, User]), UtilsModule, AwsModule],
   providers: [JwtStrategy, PostsService],
   controllers: [PostsController],
 })

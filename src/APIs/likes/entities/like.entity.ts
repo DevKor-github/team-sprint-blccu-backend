@@ -1,4 +1,4 @@
-import { Post } from 'src/APIs/posts/entities/posts.entity';
+import { Posts } from 'src/APIs/posts/entities/posts.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
 import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -12,6 +12,6 @@ export class Like {
   user: User;
 
   @JoinColumn({ name: 'post_id' })
-  @ManyToOne(() => Post)
-  post: Post;
+  @ManyToOne(() => Posts)
+  post: Posts;
 }
