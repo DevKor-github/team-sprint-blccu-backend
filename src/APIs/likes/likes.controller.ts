@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
+  Param,
   Post,
   Req,
   UseGuards,
@@ -18,6 +20,8 @@ import { ToggleLikeDto } from './dto/toggle-like.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { ToggleLikeResponseDto } from './dto/toggle-like-response.dto';
+import { Like } from './entities/like.entity';
+import { FetchLikesResponseDto } from './dto/fetch-likes-response.dto';
 
 @ApiTags('좋아요 API')
 @Controller('likes')
@@ -42,5 +46,16 @@ export class LikesController {
     const kakaoId = req.user.userId;
     const id = body.id;
     return this.likesService.toggleLike({ id, kakaoId });
+  }
+
+  @ApiOperation({
+    summary: '좋아요 누른 대상 조회하기',
+    description: '{id}인 게시글에 좋아요를 누른 사람들을 확인한다.',
+  })
+  @ApiOkResponse({ description: '조회 성공', type: [FetchLikesResponseDto] })
+  @HttpCode(200)
+  @Get(':id')
+  async fetchLikes(@Param('id') id: number): Promise<Like[]> {
+    return await this.likesService.fetchLikes({ id });
   }
 }

@@ -4,6 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Like } from './entities/like.entity';
 import { Posts } from '../posts/entities/posts.entity';
 import { ToggleLikeResponseDto } from './dto/toggle-like-response.dto';
+import { FetchLikesDto } from './dto/fetch-likes.dto';
 
 @Injectable()
 export class LikesService {
@@ -54,5 +55,12 @@ export class LikesService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async fetchLikes({ id }: FetchLikesDto): Promise<Like[]> {
+    return await this.likesRepository.find({
+      relations: { user: true },
+      where: { post: { id } },
+    });
   }
 }
