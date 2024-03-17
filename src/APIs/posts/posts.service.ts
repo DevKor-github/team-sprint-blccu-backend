@@ -49,7 +49,6 @@ export class PostsService {
   }: CreatePostDto): Promise<Posts> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.query('SELECT * FROM users');
     await queryRunner.startTransaction();
     try {
       const post = await this.postsRepository.findOne({

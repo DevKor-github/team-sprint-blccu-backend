@@ -28,7 +28,7 @@ export class PostsController {
       '게시글을 db에 등록한다.기본적으로 임시저장 상태이며 저장 api를 호출하면 발행된다',
   })
   @Post()
-  @ApiCreatedResponse({ description: '생성 성공', type: Posts })
+  @ApiCreatedResponse({ description: '생성 성공', type: CreatePostResponseDto })
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(201)
   async createPost(@Req() req: Request): Promise<CreatePostResponseDto> {
