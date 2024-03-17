@@ -8,6 +8,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { Page } from '../../utils/page';
 import { FetchPostsDto } from './dto/fetch-posts.dto';
 import { CreatePostResponseDto } from './dto/create-post-response.dto';
+import { PublishPostDto } from './dto/publish-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -46,7 +47,8 @@ export class PostsService {
     postBackground,
     allow_comment,
     scope,
-  }: CreatePostDto): Promise<Posts> {
+    title,
+  }: CreatePostDto): Promise<PublishPostDto> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -58,6 +60,7 @@ export class PostsService {
       });
       const updatedPost = await this.postsRepository.save({
         ...post,
+        title,
         allow_comment,
         scope,
         postBackground: { id: postBackground },
@@ -73,7 +76,7 @@ export class PostsService {
       await queryRunner.release();
     }
   }
-  async fetchPosts(page: FetchPostsDto) {
+  async fetchPosts(page: FetchPostsDto): Promise<Page<Posts>> {
     const total = await this.postsRepository.count({
       where: { isPublished: true },
     });

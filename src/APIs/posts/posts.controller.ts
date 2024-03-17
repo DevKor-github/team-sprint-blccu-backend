@@ -12,10 +12,12 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { PostsService } from './posts.service';
-import { Posts } from './entities/posts.entity';
 import { CreatePostInput } from './dto/create-post.input';
 import { FetchPostsDto } from './dto/fetch-posts.dto';
 import { CreatePostResponseDto } from './dto/create-post-response.dto';
+import { PublishPostDto } from './dto/publish-post.dto';
+import { Page } from 'src/utils/page';
+import { Posts } from './entities/posts.entity';
 
 @ApiTags('게시글 API')
 @Controller('posts')
@@ -37,18 +39,19 @@ export class PostsController {
   }
 
   @ApiOperation({
-    summary: '게시글 발행',
-    description:
-      '게시글을 발행한다. 빈 값을 매핑하고 조회 가능 상태로 변경한다.',
+    summary: '게시글 발행 혹은 수정',
+    description: `게시글을 발행한다. 빈 값을 매핑하고 조회 가능 상태로 변경한다. 
+    없으면 생성하고 있으면 update하는 로직으로 
+    바로 게시글 생성에 사용해도 되고, 수정용으로 사용해도 된다.`,
   })
   @Post('publish')
-  @ApiCreatedResponse({ description: '발행 성공', type: Posts })
+  @ApiCreatedResponse({ description: '발행 성공', type: PublishPostDto })
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(201)
   async publishPost(
     @Req() req: Request,
     @Body() body: CreatePostInput,
-  ): Promise<Posts> {
+  ): Promise<PublishPostDto> {
     const kakaoId = req.user.userId;
     const dto = { ...body, user: kakaoId };
     return await this.postsService.publish(dto);
@@ -59,8 +62,10 @@ export class PostsController {
     description:
       'Query를 통해 페이지네이션 가능. default) pageNo: 1, pageSize: 10',
   })
+  @ApiCreatedResponse({ description: '조회 성공', type: Page<Posts> })
+  @HttpCode(200)
   @Get()
-  fetchPosts(@Query() post: FetchPostsDto) {
+  fetchPosts(@Query() post: FetchPostsDto): Promise<Page<Posts>> {
     return this.postsService.fetchPosts(post);
   }
 }

@@ -6,12 +6,20 @@ import { IsOptional, IsString } from 'class-validator';
 //페이지네이션 요청 받을때 사용하는 클래스 양식
 export class PageRequest {
   //@IsOptional() 데코레이터는 undefined도 받을 수 있다.
-  @ApiProperty({ description: '요청할 페이지 번호', type: Number })
+  @ApiProperty({
+    description: '요청할 페이지 번호',
+    type: Number,
+    nullable: true,
+  })
   @IsOptional()
   @Type(() => Number)
   pageNo?: number | 1;
 
-  @ApiProperty({ description: '한 페이지 당 아이템 갯수', type: Number })
+  @ApiProperty({
+    description: '한 페이지 당 아이템 갯수',
+    type: Number,
+    nullable: true,
+  })
   @IsOptional()
   @Type(() => Number)
   pageSize?: number | 10;
