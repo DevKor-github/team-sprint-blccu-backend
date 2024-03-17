@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Like } from './entities/like.entity';
@@ -49,6 +53,7 @@ export class LikesService {
       return result;
     } catch (e) {
       await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException(e);
     } finally {
       await queryRunner.release();
     }
