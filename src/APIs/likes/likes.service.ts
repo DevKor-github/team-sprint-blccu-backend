@@ -5,6 +5,7 @@ import { Like } from './entities/like.entity';
 import { Posts } from '../posts/entities/posts.entity';
 import { ToggleLikeResponseDto } from './dto/toggle-like-response.dto';
 import { FetchLikesDto } from './dto/fetch-likes.dto';
+import { USER_SELECT_OPTION } from '../users/dto/user-response.dto';
 
 @Injectable()
 export class LikesService {
@@ -59,6 +60,7 @@ export class LikesService {
 
   async fetchLikes({ id }: FetchLikesDto): Promise<Like[]> {
     return await this.likesRepository.find({
+      select: { user: USER_SELECT_OPTION, id: true },
       relations: { user: true },
       where: { post: { id } },
     });

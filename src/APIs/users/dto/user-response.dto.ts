@@ -1,5 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+export const USER_SELECT_OPTION = {
+  kakaoId: true,
+  isAdmin: true,
+  username: true,
+  description: true,
+  profile_image: true,
+  date_created: true,
+  date_deleted: true,
+};
+
 export class UserResponseDto {
   @ApiProperty({ description: '카카오 id', type: Number })
   kakaoId: number;

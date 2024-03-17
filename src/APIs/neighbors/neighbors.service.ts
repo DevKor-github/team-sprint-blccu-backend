@@ -5,6 +5,7 @@ import { DataSource, Repository } from 'typeorm';
 import { FromUserResponseDto } from './dto/from-user-response.dto';
 import { ToUserResponseDto } from './dto/to-user-response.dto';
 import { FollowUserDto } from './dto/follow-user.dto';
+import { USER_SELECT_OPTION } from '../users/dto/user-response.dto';
 
 @Injectable()
 export class NeighborsService {
@@ -63,24 +64,8 @@ export class NeighborsService {
   async getFollows({ kakaoId }): Promise<ToUserResponseDto[]> {
     const follows = await this.neighborsRepository.find({
       select: {
-        from_user: {
-          kakaoId: true,
-          isAdmin: true,
-          username: true,
-          description: true,
-          profile_image: true,
-          date_created: true,
-          date_deleted: true,
-        },
-        to_user: {
-          kakaoId: true,
-          isAdmin: true,
-          username: true,
-          description: true,
-          profile_image: true,
-          date_created: true,
-          date_deleted: true,
-        },
+        from_user: USER_SELECT_OPTION,
+        to_user: USER_SELECT_OPTION,
       },
       where: {
         from_user: { kakaoId: kakaoId },
@@ -95,15 +80,7 @@ export class NeighborsService {
   async getFollowers({ kakaoId }): Promise<FromUserResponseDto[]> {
     const follows = await this.neighborsRepository.find({
       select: {
-        from_user: {
-          kakaoId: true,
-          isAdmin: true,
-          username: true,
-          description: true,
-          profile_image: true,
-          date_created: true,
-          date_deleted: true,
-        },
+        from_user: USER_SELECT_OPTION,
       },
       where: {
         to_user: { kakaoId: kakaoId },

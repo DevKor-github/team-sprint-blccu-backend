@@ -6,7 +6,7 @@ import {
   IUsersServiceCreate,
   IUsersServiceFindUserByKakaoId,
 } from './interfaces/users.service.interface';
-import { UserResponseDto } from './dto/user-response.dto';
+import { USER_SELECT_OPTION, UserResponseDto } from './dto/user-response.dto';
 
 @Injectable()
 export class UsersService {
@@ -34,15 +34,7 @@ export class UsersService {
     kakaoId,
   }: IUsersServiceFindUserByKakaoId): Promise<UserResponseDto> {
     const result = await this.usersRepository.findOne({
-      select: {
-        kakaoId: true,
-        isAdmin: true,
-        username: true,
-        description: true,
-        profile_image: true,
-        date_created: true,
-        date_deleted: true,
-      },
+      select: USER_SELECT_OPTION,
       where: { kakaoId: kakaoId },
     });
     console.log(result);
@@ -82,15 +74,7 @@ export class UsersService {
   }
   async findUsersByName({ username }): Promise<UserResponseDto[]> {
     const users = await this.usersRepository.find({
-      select: {
-        kakaoId: true,
-        isAdmin: true,
-        username: true,
-        description: true,
-        profile_image: true,
-        date_created: true,
-        date_deleted: true,
-      },
+      select: USER_SELECT_OPTION,
       where: {
         username: ILike(`%${username}%`),
       },
