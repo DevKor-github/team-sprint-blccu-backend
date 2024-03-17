@@ -24,7 +24,7 @@ export class LikesService {
       const postData = await queryRunner.manager.findOne(Posts, {
         where: { id },
       });
-      if (postData) throw new NotFoundException('게시글이 존재하지 않습니다.');
+      if (!postData) throw new NotFoundException('게시글이 존재하지 않습니다.');
 
       // 좋아요 눌렀는지 확인하기
       const alreadyLiked = await this.likesRepository.findOne({
@@ -53,7 +53,7 @@ export class LikesService {
       return result;
     } catch (e) {
       await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException(e);
+      throw e;
     } finally {
       await queryRunner.release();
     }
