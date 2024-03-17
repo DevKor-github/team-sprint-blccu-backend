@@ -65,7 +65,18 @@ export class PostsController {
   @ApiCreatedResponse({ description: '조회 성공', type: Page<Posts> })
   @HttpCode(200)
   @Get()
-  fetchPosts(@Query() post: FetchPostsDto): Promise<Page<Posts>> {
-    return this.postsService.fetchPosts(post);
+  async fetchPosts(@Query() post: FetchPostsDto): Promise<Page<Posts>> {
+    return await this.postsService.fetchPosts(post);
+  }
+
+  @ApiOperation({
+    summary: '임시작성 게시글 조회',
+    description: '로그인된 유저의 임시작성 게시글을 조회한다.',
+  })
+  @UseGuards(AuthGuard('jwt'))
+  @Get('temp')
+  async fetchTempPosts(@Req() req: Request): Promise<Posts[]> {
+    const kakaoId = req.user.userId;
+    return await this.postsService.fetchTempPosts({ kakaoId });
   }
 }

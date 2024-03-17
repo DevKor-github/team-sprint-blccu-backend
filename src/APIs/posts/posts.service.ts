@@ -6,7 +6,7 @@ import { Posts } from './entities/posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { Page } from '../../utils/page';
-import { FetchPostsDto } from './dto/fetch-posts.dto';
+import { FETCH_POST_OPTION, FetchPostsDto } from './dto/fetch-posts.dto';
 import { CreatePostResponseDto } from './dto/create-post-response.dto';
 import { PublishPostDto } from './dto/publish-post.dto';
 
@@ -80,15 +80,22 @@ export class PostsService {
     const total = await this.postsRepository.count({
       where: { isPublished: true },
     });
-    console.log(page);
-    console.log(page.getLimit());
-    console.log(page.getOffset());
     const posts = await this.postsRepository.find({
+      select: FETCH_POST_OPTION,
+      relations: { user: true, postBackground: true, postCategory: true },
       where: { isPublished: true },
       order: { id: 'DESC' },
       take: page.getLimit(),
       skip: page.getOffset(),
     });
     return new Page<Posts>(total, page.pageSize, posts);
+  }
+
+  async fetchTempPosts({ kakaoId }): Promise<Posts[]> {
+    return await this.postsRepository.find({
+      select: FETCH_POST_OPTION,
+      relations: { user: true, postBackground: true, postCategory: true },
+      where: { user: { kakaoId }, isPublished: false },
+    });
   }
 }

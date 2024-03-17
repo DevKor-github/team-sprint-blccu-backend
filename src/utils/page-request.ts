@@ -9,7 +9,7 @@ export class PageRequest {
   @ApiProperty({
     description: '요청할 페이지 번호',
     type: Number,
-    nullable: true,
+    required: false,
   })
   @IsOptional()
   @Type(() => Number)
@@ -18,7 +18,7 @@ export class PageRequest {
   @ApiProperty({
     description: '한 페이지 당 아이템 갯수',
     type: Number,
-    nullable: true,
+    required: false,
   })
   @IsOptional()
   @Type(() => Number)

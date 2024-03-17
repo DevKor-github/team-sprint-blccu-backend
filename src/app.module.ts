@@ -33,7 +33,7 @@ import { PostCategoriesModule } from './APIs/postCategories/PostCategories.modul
       database: process.env.DATABASE_DATABASE,
       entities: [__dirname + '/APIs/**/*.entity.*'],
       synchronize: true,
-      logging: true,
+      logging: false,
     }),
   ],
   controllers: [AppController],
