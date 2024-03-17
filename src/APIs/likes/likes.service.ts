@@ -28,7 +28,7 @@ export class LikesService {
 
       // 좋아요 눌렀는지 확인하기
       const alreadyLiked = await this.likesRepository.findOne({
-        where: { post: { id: 1 }, user: { kakaoId: 1 } },
+        where: { post: { id }, user: { kakaoId } },
       });
 
       if (alreadyLiked) {
