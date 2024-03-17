@@ -53,12 +53,12 @@ export class PostsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const post = await this.postsRepository.findOne({
+      const post = await queryRunner.manager.findOne(Posts, {
         where: {
           id,
         },
       });
-      const updatedPost = await this.postsRepository.save({
+      const updatedPost = await queryRunner.manager.save(Posts, {
         ...post,
         title,
         allow_comment,
@@ -97,5 +97,13 @@ export class PostsService {
       relations: { user: true, postBackground: true, postCategory: true },
       where: { user: { kakaoId }, isPublished: false },
     });
+  }
+
+  async softDelete({ kakaoId, id }) {
+    return await this.postsRepository.softDelete({ user: { kakaoId }, id });
+  }
+
+  async hardDelete({ kakaoId, id }) {
+    return await this.postsRepository.delete({ user: { kakaoId }, id });
   }
 }

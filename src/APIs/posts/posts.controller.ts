@@ -1,15 +1,22 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
+  Param,
   Post,
   Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Request } from 'express';
 import { PostsService } from './posts.service';
 import { CreatePostInput } from './dto/create-post.input';
@@ -73,10 +80,37 @@ export class PostsController {
     summary: '임시작성 게시글 조회',
     description: '로그인된 유저의 임시작성 게시글을 조회한다.',
   })
+  @ApiCookieAuth('refeshToken')
   @UseGuards(AuthGuard('jwt'))
   @Get('temp')
   async fetchTempPosts(@Req() req: Request): Promise<Posts[]> {
     const kakaoId = req.user.userId;
     return await this.postsService.fetchTempPosts({ kakaoId });
+  }
+
+  @ApiOperation({
+    summary: '게시글 soft delete',
+    description:
+      '로그인 된 유저의 {id}에 해당하는 게시글을 논리삭제한다. 발행된 게시글에 사용을 권장',
+  })
+  @ApiCookieAuth('refreshToken')
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('soft/:id')
+  async softDelete(@Req() req: Request, @Param('id') id: number) {
+    const kakaoId = req.user.userId;
+    return await this.postsService.softDelete({ kakaoId, id });
+  }
+
+  @ApiOperation({
+    summary: '게시글 hard delete',
+    description:
+      '로그인 된 유저의 {id}에 해당하는 게시글을 물리삭제한다. 임시 저장된 게시글에 사용을 권장',
+  })
+  @ApiCookieAuth('refreshToken')
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('hard/:id')
+  async hardDelete(@Req() req: Request, @Param('id') id: number) {
+    const kakaoId = req.user.userId;
+    return await this.postsService.hardDelete({ kakaoId, id });
   }
 }

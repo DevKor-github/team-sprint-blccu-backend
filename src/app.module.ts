@@ -10,11 +10,13 @@ import { AuthModule } from './APIs/auth/auth.module';
 import { NeighborsModule } from './APIs/neighbors/neighbors.module';
 import { PostBackgroundsModule } from './APIs/postBackgrounds/postBackgrounds.module';
 import { PostCategoriesModule } from './APIs/postCategories/PostCategories.module';
+import { LikesModule } from './APIs/likes/likes.module';
 
 @Module({
   imports: [
     CommentsModule,
     PostsModule,
+    LikesModule,
     UsersModule,
     AuthModule,
     NeighborsModule,
