@@ -1,12 +1,9 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Like } from './entities/like.entity';
 import { Posts } from '../posts/entities/posts.entity';
+import { ToggleLikeResponseDto } from './dto/toggle-like-response.dto';
 
 @Injectable()
 export class LikesService {
@@ -16,7 +13,7 @@ export class LikesService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async toggleLike({ id, kakaoId }) {
+  async toggleLike({ id, kakaoId }): Promise<ToggleLikeResponseDto> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
