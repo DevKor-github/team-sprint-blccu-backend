@@ -86,7 +86,7 @@ export class PostsController {
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
   @ApiCookieAuth('refreshToken')
-  @Get('friends/:id')
+  @Get('friends')
   async fetchFriendsPosts(
     @Query() page: FetchPostsDto,
     @Req() req: Request,

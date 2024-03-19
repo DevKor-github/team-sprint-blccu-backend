@@ -118,8 +118,8 @@ export class PostsService {
       .where(`p.user_id = any(${subQuery})`)
       .andWhere('p.isPublished = true')
       .orderBy('p.id', 'DESC')
-      .take(page.getTake())~``
-      .skip(page.getSkip())
+      .take(page.getLimit())
+      .skip(page.getOffset())
       .getManyAndCount();
     console.log(postsAndCounts);
     return new Page<Posts>(postsAndCounts[1], page.pageSize, postsAndCounts[0]);
