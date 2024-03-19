@@ -16,7 +16,6 @@ export class PostCategoriesService {
       user: kakaoId,
       name,
     });
-    result.user = BigInt(result.user);
     return result;
   }
 
