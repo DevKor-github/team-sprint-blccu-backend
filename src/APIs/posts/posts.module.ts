@@ -7,9 +7,14 @@ import { PostsController } from './posts.controller';
 import { UtilsModule } from 'src/utils/utils.module';
 import { AwsModule } from 'src/aws/aws.module';
 import { PostsService } from './posts.service';
+import { Neighbor } from '../neighbors/entities/neighbor.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Posts, User]), UtilsModule, AwsModule],
+  imports: [
+    TypeOrmModule.forFeature([Posts, User, Neighbor]),
+    UtilsModule,
+    AwsModule,
+  ],
   providers: [JwtStrategy, PostsService],
   controllers: [PostsController],
 })

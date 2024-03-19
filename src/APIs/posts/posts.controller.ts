@@ -25,6 +25,7 @@ import { CreatePostResponseDto } from './dto/create-post-response.dto';
 import { PublishPostDto } from './dto/publish-post.dto';
 import { Page } from 'src/utils/page';
 import { Posts } from './entities/posts.entity';
+import { PagePostResponseDto } from './dto/page-post-response.dto';
 
 @ApiTags('게시글 API')
 @Controller('posts')
@@ -69,11 +70,29 @@ export class PostsController {
     description:
       'Query를 통해 페이지네이션 가능. default) pageNo: 1, pageSize: 10',
   })
-  @ApiCreatedResponse({ description: '조회 성공', type: Page<Posts> })
+  @ApiCreatedResponse({ description: '조회 성공', type: PagePostResponseDto })
   @HttpCode(200)
   @Get()
-  async fetchPosts(@Query() post: FetchPostsDto): Promise<Page<Posts>> {
+  async fetchPosts(@Query() post: FetchPostsDto): Promise<PagePostResponseDto> {
     return await this.postsService.fetchPosts(post);
+  }
+
+  @ApiOperation({
+    summary: '친구 게시글 조회',
+    description:
+      '친구의 게시글을 조회한다. Query를 통해 페이지네이션 가능. default) pageNo: 1, pageSize: 10',
+  })
+  @ApiCreatedResponse({ description: '조회 성공', type: PagePostResponseDto })
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(200)
+  @ApiCookieAuth('refreshToken')
+  @Get('friends/:id')
+  async fetchFriendsPosts(
+    @Query() page: FetchPostsDto,
+    @Req() req: Request,
+  ): Promise<PagePostResponseDto> {
+    const kakaoId = req.user.userId;
+    return await this.postsService.fetchFriendsPosts({ kakaoId, page });
   }
 
   @ApiOperation({
