@@ -9,6 +9,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  RelationId,
   UpdateDateColumn,
 } from 'typeorm';
 
@@ -17,13 +18,19 @@ export class Comment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @RelationId((comment: Comment) => comment.user)
+  userKakaoId: number;
+
   @ManyToOne(() => User, (users) => users.kakaoId, { nullable: false })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn()
   user: User;
 
+  @RelationId((comment: Comment) => comment.posts)
+  postsId: number;
+
   @ManyToOne(() => Posts, (posts) => posts.id, { nullable: false })
-  @JoinColumn({ name: 'post_id' })
-  post: Posts;
+  @JoinColumn()
+  posts: Posts;
 
   @Column({ length: 15 })
   username: string;
@@ -35,8 +42,11 @@ export class Comment {
   blame_count: number;
 
   @ManyToOne(() => Comment, (comment) => comment.children)
-  @JoinColumn({ name: 'parent_id' })
+  @JoinColumn()
   parent: Comment;
+
+  @RelationId((comment: Comment) => comment.parent)
+  parentId: Comment;
 
   @OneToMany(() => Comment, (comment) => comment.parent)
   children: Comment[];

@@ -7,6 +7,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  RelationId,
 } from 'typeorm';
 
 @Entity()
@@ -14,13 +15,19 @@ export class Notification {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn()
   @ManyToOne(() => User)
-  user_id: User;
+  user: User;
 
-  @JoinColumn({ name: 'target_user_id' })
+  @RelationId((notification: Notification) => notification.user)
+  userKakaoId: number;
+
+  @JoinColumn()
   @ManyToOne(() => User)
-  target_user_id: User;
+  targetUser: User;
+
+  @RelationId((notification: Notification) => notification.targetUser)
+  targetUserKakaoId: number;
 
   @Column()
   not_type: number;

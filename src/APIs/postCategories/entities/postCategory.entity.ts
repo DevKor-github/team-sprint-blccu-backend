@@ -6,6 +6,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  RelationId,
 } from 'typeorm';
 
 @Entity()
@@ -18,7 +19,10 @@ export class PostCategory {
   @Column()
   name: string;
 
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn()
   @ManyToOne(() => User)
   user: User;
+
+  @RelationId((postCategory: PostCategory) => postCategory.user)
+  userKakaoId: number;
 }

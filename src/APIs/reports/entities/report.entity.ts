@@ -6,6 +6,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  RelationId,
 } from 'typeorm';
 
 @Entity()
@@ -22,7 +23,10 @@ export class Report {
   @CreateDateColumn()
   date_created: string;
 
-  @JoinColumn({ name: 'user_id' })
+  @RelationId((report: Report) => report.user)
+  userKakaoId: number;
+
+  @JoinColumn()
   @ManyToOne(() => User)
   user: User;
 

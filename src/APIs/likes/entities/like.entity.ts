@@ -1,24 +1,36 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Posts } from 'src/APIs/posts/entities/posts.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
-import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  RelationId,
+} from 'typeorm';
 
 @Entity()
-export class Like {
+export class Likes {
   @ApiProperty({ description: 'PK: uuid', type: String })
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ApiProperty({ description: '좋아요를 누른 유저', type: User })
-  @JoinColumn({ name: 'from_user' })
-  @ManyToOne(() => User)
+  @JoinColumn()
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   user: User;
+
+  @RelationId((like: Likes) => like.user)
+  userKakaoId: number;
 
   @ApiProperty({
     description: '좋아요를 누른 포스트',
     type: Posts,
   })
-  @JoinColumn({ name: 'post_id' })
-  @ManyToOne(() => Posts)
-  post: Posts;
+  @JoinColumn()
+  @ManyToOne(() => Posts, { nullable: false, onDelete: 'CASCADE' })
+  posts: Posts;
+
+  @RelationId((like: Likes) => like.posts)
+  postsId: number;
 }

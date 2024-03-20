@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  RelationId,
 } from 'typeorm';
 
 @Entity()
@@ -12,7 +13,10 @@ export class StickerBlock {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @JoinColumn({ name: 'sticker_id' })
+  @RelationId((stickerBlock: StickerBlock) => stickerBlock.sticker)
+  stickerId: string;
+
+  @JoinColumn()
   @ManyToOne(() => Sticker, (stickers) => stickers.id)
   sticker: Sticker;
 

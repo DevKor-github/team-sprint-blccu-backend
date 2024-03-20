@@ -16,6 +16,8 @@ export const FETCH_POST_OPTION = {
     date_deleted: true,
   },
   title: true,
+  image_url: true,
+  main_image_url: true,
   isPublished: true,
   like_count: true,
   allow_comment: true,

@@ -4,14 +4,13 @@ import { UtilsService } from 'src/utils/utils.service';
 import { DataSource, Repository } from 'typeorm';
 import { Posts } from './entities/posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreatePostDto } from './dto/create-post.dto';
 import { Page } from '../../utils/page';
 import { FETCH_POST_OPTION, FetchPostsDto } from './dto/fetch-posts.dto';
-import { CreatePostResponseDto } from './dto/create-post-response.dto';
 import { PublishPostDto } from './dto/publish-post.dto';
 import { PagePostResponseDto } from './dto/page-post-response.dto';
 import { Neighbor } from '../neighbors/entities/neighbor.entity';
 import { FetchFriendsPostsDto } from './dto/fetch-friends-posts.dto';
+import { CreatePostDto } from './dto/create-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -41,42 +40,51 @@ export class PostsService {
     return { imageUrl };
   }
 
-  async create({ kakaoId }): Promise<CreatePostResponseDto> {
-    return await this.postsRepository.save({ user: kakaoId });
-  }
-
-  async publish({
+  async save({
     id,
-    user,
-    postCategory,
-    postBackground,
+    userKakaoId,
+    postCategoryId,
+    postBackgroundId,
     allow_comment,
     scope,
     title,
+    isPublished,
+    content,
+    image_url,
+    main_image_url,
   }: CreatePostDto): Promise<PublishPostDto> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+    let post = {};
+    console.log(userKakaoId);
     try {
-      const post = await queryRunner.manager.findOne(Posts, {
-        where: {
-          id,
-        },
-      });
-      const updatedPost = await queryRunner.manager.save(Posts, {
+      if (id) {
+        post = await queryRunner.manager.findOne(Posts, {
+          where: {
+            id,
+          },
+        });
+      }
+      const data = {
         ...post,
         title,
         allow_comment,
         scope,
-        postBackground: { id: postBackground },
-        postCategory: { id: postCategory },
-        user: { kakaoId: user },
-        isPublished: true,
-      });
+        postBackground: { id: postBackgroundId },
+        postCategory: { id: postCategoryId },
+        user: { kakaoId: userKakaoId },
+        isPublished,
+        content,
+        image_url,
+        main_image_url,
+      };
+      const updatedPost = await queryRunner.manager.save(Posts, data);
       await queryRunner.commitTransaction();
       return updatedPost;
     } catch (err) {
       await queryRunner.rollbackTransaction();
+      throw err;
     } finally {
       await queryRunner.release();
     }
@@ -115,7 +123,7 @@ export class PostsService {
         'user.profile_image',
         'user.username',
       ])
-      .where(`p.user_id = any(${subQuery})`)
+      .where(`p.userKakaoId = any(${subQuery})`)
       .andWhere('p.isPublished = true')
       .orderBy('p.id', 'DESC')
       .take(page.getLimit())
@@ -129,7 +137,7 @@ export class PostsService {
     return await this.postsRepository.find({
       select: FETCH_POST_OPTION,
       relations: { user: true, postBackground: true, postCategory: true },
-      where: { user: { kakaoId }, isPublished: false },
+      where: { isPublished: false, user: { kakaoId } },
     });
   }
 

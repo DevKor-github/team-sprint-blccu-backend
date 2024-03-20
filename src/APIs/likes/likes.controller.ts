@@ -20,7 +20,7 @@ import { ToggleLikeDto } from './dto/toggle-like.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { ToggleLikeResponseDto } from './dto/toggle-like-response.dto';
-import { Like } from './entities/like.entity';
+import { Likes } from './entities/like.entity';
 import { FetchLikesResponseDto } from './dto/fetch-likes-response.dto';
 
 @ApiTags('좋아요 API')
@@ -55,7 +55,7 @@ export class LikesController {
   @ApiOkResponse({ description: '조회 성공', type: [FetchLikesResponseDto] })
   @HttpCode(200)
   @Get(':id')
-  async fetchLikes(@Param('id') id: number): Promise<Like[]> {
+  async fetchLikes(@Param('id') id: number): Promise<Likes[]> {
     return await this.likesService.fetchLikes({ id });
   }
 }
