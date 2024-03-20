@@ -11,6 +11,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  RelationId,
   UpdateDateColumn,
 } from 'typeorm';
 
@@ -22,19 +23,31 @@ export class Posts {
   id: number;
 
   @ApiProperty({ description: '연결된 카테고리', type: PostCategory })
-  @ManyToOne(() => PostCategory, { nullable: true })
-  @JoinColumn({ name: 'post_category_id' })
+  @ManyToOne(() => PostCategory, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn()
   postCategory: PostCategory;
 
   @ApiProperty({ description: '연결된 내지', type: PostBackground })
-  @JoinColumn({ name: 'post_background_id' })
-  @ManyToOne(() => PostBackground, { nullable: true })
+  @JoinColumn()
+  @ManyToOne(() => PostBackground, { nullable: true, onDelete: 'CASCADE' })
   postBackground: PostBackground;
 
   @ApiProperty({ description: '작성자', type: User })
-  @JoinColumn({ name: 'user_id' })
-  @ManyToOne(() => User)
+  @JoinColumn()
+  @ManyToOne(() => User, { onDelete: 'SET NULL' })
   user: User;
+
+  @ApiProperty({ description: '연결된 카테고리 fk', type: String })
+  @RelationId((posts: Posts) => posts.postCategory)
+  postCategoryId: string;
+
+  @ApiProperty({ description: '연결된 내지 fk', type: String })
+  @RelationId((posts: Posts) => posts.postBackground)
+  postBackgroundId: string;
+
+  @ApiProperty({ description: '작성한 유저 fk', type: Number })
+  @RelationId((posts: Posts) => posts.user)
+  userKakaoId: number;
 
   @ApiProperty({ description: '제목(최대 100자)', type: String })
   @Column({ length: 100, default: '' })
@@ -51,6 +64,9 @@ export class Posts {
   @ApiProperty({ description: '조회수 카운트', type: Number })
   @Column({ default: 0 })
   view_count: number;
+
+  @ApiProperty({ description: '댓글수 카운트', type: Number })
+  comment_count: number;
 
   @ApiProperty({ description: '댓글 허용 여부(boolean)', type: Boolean })
   @Column({ default: true })
@@ -76,4 +92,16 @@ export class Posts {
   @ApiProperty({ description: 'soft delete column', type: Date })
   @DeleteDateColumn()
   date_deleted: Date;
+
+  @ApiProperty({ description: '게시글 내용', type: String })
+  @Column('longtext')
+  content: string;
+
+  @ApiProperty({ description: '게시글 캡쳐 이미지 url', type: String })
+  @Column({ default: '' })
+  image_url: string;
+
+  @ApiProperty({ description: '게시글 대표 이미지 url', type: String })
+  @Column({ default: '' })
+  main_image_url: string;
 }
