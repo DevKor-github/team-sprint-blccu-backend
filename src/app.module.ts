@@ -11,10 +11,12 @@ import { NeighborsModule } from './APIs/neighbors/neighbors.module';
 import { PostBackgroundsModule } from './APIs/postBackgrounds/postBackgrounds.module';
 import { PostCategoriesModule } from './APIs/postCategories/PostCategories.module';
 import { LikesModule } from './APIs/likes/likes.module';
+import { StickersModule } from './APIs/stickers/stickers.module';
 
 @Module({
   imports: [
     CommentsModule,
+    StickersModule,
     PostsModule,
     LikesModule,
     UsersModule,
@@ -34,7 +36,7 @@ import { LikesModule } from './APIs/likes/likes.module';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_DATABASE,
       entities: [__dirname + '/APIs/**/*.entity.*'],
-      synchronize: false,
+      synchronize: true,
       logging: false,
     }),
   ],

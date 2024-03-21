@@ -10,15 +10,18 @@ import {
 
 @Entity()
 export class StickerBlock {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column()
   @RelationId((stickerBlock: StickerBlock) => stickerBlock.sticker)
-  stickerId: string;
+  stickerId: number;
 
   @JoinColumn()
-  @ManyToOne(() => Sticker, (stickers) => stickers.id)
+  @ManyToOne(() => Sticker, (stickers) => stickers.id, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   sticker: Sticker;
 
   @Column()

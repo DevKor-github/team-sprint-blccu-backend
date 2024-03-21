@@ -1,12 +1,4 @@
-import { Sticker } from 'src/APIs/stickers/entities/sticker.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  RelationId,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class StickerCategory {
@@ -15,12 +7,4 @@ export class StickerCategory {
 
   @Column({ nullable: false })
   name: string;
-
-  @ManyToOne(() => Sticker)
-  @JoinColumn()
-  sticker: Sticker;
-
-  @Column()
-  @RelationId((stickerCategory: StickerCategory) => stickerCategory.sticker)
-  stickerId: string;
 }

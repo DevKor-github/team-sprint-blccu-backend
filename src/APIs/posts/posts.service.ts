@@ -113,7 +113,6 @@ export class PostsService {
           skipUpdateIfNoValuesChanged: true,
         })
         .execute();
-      console.log('//', data);
       await queryRunner.commitTransaction();
       return data;
     } catch (e) {
