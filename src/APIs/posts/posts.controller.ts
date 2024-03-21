@@ -8,10 +8,14 @@ import {
   Post,
   Query,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
+  ApiBody,
+  ApiConsumes,
   ApiCookieAuth,
   ApiCreatedResponse,
   ApiOperation,
@@ -25,6 +29,9 @@ import { Posts } from './entities/posts.entity';
 import { PagePostResponseDto } from './dto/page-post-response.dto';
 import { CreatePostInput } from './dto/create-post.input';
 import { PublishPostInput } from './dto/publish-post.input';
+import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 
 @ApiTags('게시글 API')
 @Controller('posts')
@@ -74,6 +81,30 @@ export class PostsController {
     return await this.postsService.fetchPosts(post);
   }
 
+  @ApiOperation({
+    summary: '이미지 업로드',
+    description: '이미지를 서버에 업로드한다. url을 반환 받는다.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: '업로드 할 파일',
+    type: ImageUploadDto,
+  })
+  @ApiCreatedResponse({
+    description: '이미지 서버에 파일 업로드 완료',
+    type: ImageUploadResponseDto,
+  })
+  @UseGuards(AuthGuard('jwt'))
+  @ApiCookieAuth('refreshToken')
+  @Post('image')
+  @UseInterceptors(FileInterceptor('file'))
+  @HttpCode(201)
+  async createPrivateSticker(
+    @Req() req: Request,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<ImageUploadResponseDto> {
+    return await this.postsService.saveImage(file);
+  }
   @ApiOperation({
     summary: '친구 게시글 조회',
     description:

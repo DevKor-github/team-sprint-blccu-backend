@@ -14,6 +14,7 @@ import { PostCategory } from '../postCategories/entities/postCategory.entity';
 import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
 import { User } from '../users/entities/user.entity';
 import { OpenScope } from 'src/commons/enums/open-scope.enum';
+import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 
 @Injectable()
 export class PostsService {
@@ -30,6 +31,20 @@ export class PostsService {
     return await this.imageUpload(file);
   }
 
+  async imageUpload(
+    file: Express.Multer.File,
+  ): Promise<ImageUploadResponseDto> {
+    const imageName = this.utilsService.getUUID();
+    const ext = file.originalname.split('.').pop();
+
+    const image_url = await this.awsService.imageUploadToS3(
+      `${imageName}.${ext}`,
+      file,
+      ext,
+    );
+
+    return { image_url };
+  }
   async fkValidCheck(posts) {
     try {
       if (posts.postCategoryId || posts.isPublished) {
@@ -61,19 +76,6 @@ export class PostsService {
     } catch (e) {
       throw e;
     }
-  }
-
-  async imageUpload(file: Express.Multer.File) {
-    const imageName = this.utilsService.getUUID();
-    const ext = file.originalname.split('.').pop();
-
-    const imageUrl = await this.awsService.imageUploadToS3(
-      `${imageName}.${ext}`,
-      file,
-      ext,
-    );
-
-    return { imageUrl };
   }
 
   async save(createPostDto: CreatePostDto) {

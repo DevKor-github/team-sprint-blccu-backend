@@ -29,7 +29,7 @@ export class PostBackgroundsService {
       file,
       ext,
     );
-    this.postBackgroundsRepository.save({ image_url });
+    await this.postBackgroundsRepository.save({ image_url });
     return { image_url };
   }
 
