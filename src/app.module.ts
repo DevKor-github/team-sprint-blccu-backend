@@ -34,7 +34,7 @@ import { LikesModule } from './APIs/likes/likes.module';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_DATABASE,
       entities: [__dirname + '/APIs/**/*.entity.*'],
-      synchronize: true,
+      synchronize: false,
       logging: false,
     }),
   ],
