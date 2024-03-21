@@ -104,10 +104,10 @@ export class Posts {
   content: string;
 
   @ApiProperty({ description: '게시글 캡쳐 이미지 url', type: String })
-  @Column({ default: '' })
+  @Column()
   image_url: string;
 
   @ApiProperty({ description: '게시글 대표 이미지 url', type: String })
-  @Column({ default: '' })
+  @Column()
   main_image_url: string;
 }

@@ -32,7 +32,7 @@ export class LikesService {
       if (alreadyLiked) {
         await queryRunner.manager.delete(Likes, { id: alreadyLiked.id });
         await queryRunner.manager.update(Posts, postData.id, {
-          like_count: () => 'like_count +1',
+          like_count: () => 'like_count -1',
         });
         postData.like_count -= 1;
         //   // 좋아요 카운트 락걸고 쿼리!!! xx

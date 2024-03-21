@@ -6,7 +6,6 @@ import { Posts } from './entities/posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Page } from '../../utils/page';
 import { FetchPostsDto } from './dto/fetch-posts.dto';
-import { PublishPostDto } from './dto/publish-post.dto';
 import { PagePostResponseDto } from './dto/page-post-response.dto';
 import { Neighbor } from '../neighbors/entities/neighbor.entity';
 import { FetchFriendsPostsDto } from './dto/fetch-friends-posts.dto';

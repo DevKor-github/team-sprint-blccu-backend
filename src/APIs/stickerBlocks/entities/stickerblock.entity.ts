@@ -13,6 +13,7 @@ export class StickerBlock {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column()
   @RelationId((stickerBlock: StickerBlock) => stickerBlock.sticker)
   stickerId: string;
 
