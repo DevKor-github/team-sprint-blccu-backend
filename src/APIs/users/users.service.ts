@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -20,7 +20,12 @@ export class UsersService {
     return this.usersRepository.find();
   }
   // ===========================
-
+  async adminCheck({ kakaoId }) {
+    const user = await this.findUserByKakaoId({
+      kakaoId,
+    });
+    if (!user.isAdmin) throw new UnauthorizedException('어드민이 아닙니다.');
+  }
   async create({ kakaoId, username, profile_image }: IUsersServiceCreate) {
     const result = await this.usersRepository.save({
       kakaoId: kakaoId,

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Sticker } from './entities/sticker.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +6,7 @@ import { CreateStickerDto } from './dto/create-sticker.dto';
 import { AwsService } from 'src/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class StickersService {
@@ -14,6 +15,7 @@ export class StickersService {
     private readonly utilsService: UtilsService,
     @InjectRepository(Sticker)
     private readonly stickersRepository: Repository<Sticker>,
+    private readonly usersService: UsersService,
   ) {}
   async saveImage(file: Express.Multer.File): Promise<ImageUploadResponseDto> {
     return await this.imageUpload(file);
@@ -42,6 +44,26 @@ export class StickersService {
       .insert()
       .into(Sticker, ['userKakaoId', 'image_url', 'isDefault'])
       .values({ userKakaoId, image_url, isDefault: false })
+      .orUpdate(['image_url', 'isDefault'], ['id'], {
+        skipUpdateIfNoValuesChanged: true,
+      })
+      .execute();
+    const id = insertData.identifiers[0].id;
+    const data = await this.stickersRepository.findOne({ where: { id } });
+    return data;
+  }
+
+  async createPublicSticker({
+    userKakaoId,
+    file,
+  }: CreateStickerDto): Promise<Sticker> {
+    await this.usersService.adminCheck({ kakaoId: userKakaoId });
+    const { image_url } = await this.saveImage(file);
+    const insertData = await this.stickersRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Sticker, ['userKakaoId', 'image_url', 'isDefault'])
+      .values({ userKakaoId, image_url, isDefault: true })
       .orUpdate(['image_url', 'isDefault'], ['id'], {
         skipUpdateIfNoValuesChanged: true,
       })
