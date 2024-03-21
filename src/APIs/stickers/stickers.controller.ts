@@ -14,6 +14,7 @@ import {
   ApiCookieAuth,
   ApiCreatedResponse,
   ApiProperty,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';

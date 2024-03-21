@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Sticker } from './entities/sticker.entity';
 import { InjectRepository } from '@nestjs/typeorm';
