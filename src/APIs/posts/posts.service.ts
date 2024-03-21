@@ -1,16 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { AwsService } from 'src/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { DataSource, Repository } from 'typeorm';
 import { Posts } from './entities/posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Page } from '../../utils/page';
-import { FETCH_POST_OPTION, FetchPostsDto } from './dto/fetch-posts.dto';
+import { FetchPostsDto } from './dto/fetch-posts.dto';
 import { PublishPostDto } from './dto/publish-post.dto';
 import { PagePostResponseDto } from './dto/page-post-response.dto';
 import { Neighbor } from '../neighbors/entities/neighbor.entity';
 import { FetchFriendsPostsDto } from './dto/fetch-friends-posts.dto';
 import { CreatePostDto } from './dto/create-post.dto';
+import { PostCategory } from '../postCategories/entities/postCategory.entity';
+import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
+import { User } from '../users/entities/user.entity';
+import { OpenScope } from 'src/commons/enums/open-scope.enum';
 
 @Injectable()
 export class PostsService {
@@ -27,6 +31,39 @@ export class PostsService {
     return await this.imageUpload(file);
   }
 
+  async fkValidCheck(posts) {
+    try {
+      if (posts.postCategoryId || posts.isPublished) {
+        const pc = await this.dataSource
+          .getRepository(PostCategory)
+          .createQueryBuilder('pc')
+          .where('pc.id = :id', { id: posts.postCategoryId })
+          .getOne();
+        if (!pc)
+          throw new BadRequestException('존재하지 않는 post_category입니다.');
+      }
+      if (posts.postBackgroundId || posts.isPublished) {
+        const pg = await this.dataSource
+          .getRepository(PostBackground)
+          .createQueryBuilder('pg')
+          .where('pg.id = :id', { id: posts.postBackgroundId })
+          .getOne();
+        if (!pg)
+          throw new BadRequestException('존재하지 않는 post_background입니다.');
+      }
+      if (posts.userKakaoId || posts.isPublished) {
+        const us = await this.dataSource
+          .getRepository(User)
+          .createQueryBuilder('us')
+          .where('us.kakaoId = :id', { id: posts.userKakaoId })
+          .getOne();
+        if (!us) throw new BadRequestException('존재하지 않는 user입니다.');
+      }
+    } catch (e) {
+      throw e;
+    }
+  }
+
   async imageUpload(file: Express.Multer.File) {
     const imageName = this.utilsService.getUUID();
     const ext = file.originalname.split('.').pop();
@@ -40,68 +77,73 @@ export class PostsService {
     return { imageUrl };
   }
 
-  async save({
-    id,
-    userKakaoId,
-    postCategoryId,
-    postBackgroundId,
-    allow_comment,
-    scope,
-    title,
-    isPublished,
-    content,
-    image_url,
-    main_image_url,
-  }: CreatePostDto): Promise<PublishPostDto> {
+  async save(createPostDto: CreatePostDto) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     let post = {};
-    console.log(userKakaoId);
     try {
-      if (id) {
+      if (createPostDto.id) {
         post = await queryRunner.manager.findOne(Posts, {
           where: {
-            id,
+            id: createPostDto.id,
           },
         });
+        if (!post) {
+          await delete createPostDto.id;
+          post = {};
+        }
+        // if (!post) await delete createPostDto.id;
       }
-      const data = {
-        ...post,
-        title,
-        allow_comment,
-        scope,
-        postBackground: { id: postBackgroundId },
-        postCategory: { id: postCategoryId },
-        user: { kakaoId: userKakaoId },
-        isPublished,
-        content,
-        image_url,
-        main_image_url,
-      };
-      const updatedPost = await queryRunner.manager.save(Posts, data);
+      console.log(createPostDto);
+      Object.keys(createPostDto).map((el) => {
+        const value = createPostDto[el];
+        if (createPostDto[el]) {
+          post[el] = value;
+        }
+      });
+      await this.fkValidCheck(post);
+
+      console.log(post);
+      const data = await queryRunner.manager
+        .createQueryBuilder()
+        .insert()
+        .into(Posts, Object.keys(post))
+        .values(post)
+        .orUpdate(Object.keys(post), ['id'], {
+          skipUpdateIfNoValuesChanged: true,
+        })
+        .execute();
+      console.log('//', data);
       await queryRunner.commitTransaction();
-      return updatedPost;
-    } catch (err) {
+      return data;
+    } catch (e) {
       await queryRunner.rollbackTransaction();
-      throw err;
+      throw e;
     } finally {
       await queryRunner.release();
     }
   }
   async fetchPosts(page: FetchPostsDto): Promise<PagePostResponseDto> {
-    const total = await this.postsRepository.count({
-      where: { isPublished: true },
-    });
-    const posts = await this.postsRepository.find({
-      select: FETCH_POST_OPTION,
-      relations: { user: true, postBackground: true, postCategory: true },
-      where: { isPublished: true },
-      order: { id: 'DESC' },
-      take: page.getLimit(),
-      skip: page.getOffset(),
-    });
-    return new Page<Posts>(total, page.pageSize, posts);
+    const postsAndCounts = await this.postsRepository
+      .createQueryBuilder('p')
+      .innerJoin('p.user', 'user')
+      .innerJoinAndSelect('p.postBackground', 'postBackground')
+      .innerJoinAndSelect('p.postCategory', 'postCategory')
+      .addSelect([
+        'user.kakaoId',
+        'user.description',
+        'user.profile_image',
+        'user.username',
+      ])
+      .where('p.isPublished = true')
+      .andWhere('p.scope IN (:...scopes)', { scopes: [OpenScope.PUBLIC] })
+      .orderBy('p.id', 'DESC')
+      .take(page.getLimit())
+      .skip(page.getOffset())
+      .getManyAndCount();
+
+    return new Page<Posts>(postsAndCounts[1], page.pageSize, postsAndCounts[0]);
   }
   async fetchFriendsPosts({
     kakaoId,
@@ -124,6 +166,9 @@ export class PostsService {
         'user.username',
       ])
       .where(`p.userKakaoId = any(${subQuery})`)
+      .andWhere('p.scope IN (:...scopes)', {
+        scopes: [OpenScope.PUBLIC, OpenScope.PROTECTED],
+      })
       .andWhere('p.isPublished = true')
       .orderBy('p.id', 'DESC')
       .take(page.getLimit())
@@ -134,11 +179,11 @@ export class PostsService {
   }
 
   async fetchTempPosts({ kakaoId }): Promise<Posts[]> {
-    return await this.postsRepository.find({
-      select: FETCH_POST_OPTION,
-      relations: { user: true, postBackground: true, postCategory: true },
-      where: { isPublished: false, user: { kakaoId } },
-    });
+    return await this.postsRepository
+      .createQueryBuilder('p')
+      .where(`p.userKakaoId = ${kakaoId}`)
+      .andWhere(`p.isPublished = false`)
+      .getMany();
   }
 
   async softDelete({ kakaoId, id }) {

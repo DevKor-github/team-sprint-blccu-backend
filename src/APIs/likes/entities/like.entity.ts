@@ -11,6 +11,7 @@ import {
 
 @Entity()
 export class Likes {
+  // refactoring => pk 예측가능 값이어도 상관 없는 경우 A_I_로 하기
   @ApiProperty({ description: 'PK: uuid', type: String })
   @PrimaryGeneratedColumn('uuid')
   id: string;

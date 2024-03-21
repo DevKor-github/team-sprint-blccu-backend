@@ -1,6 +1,15 @@
 import { PageRequest } from '../../../utils/page-request';
 
-export class FetchPostsDto extends PageRequest {}
+export class FetchPostsDto extends PageRequest {
+  // @ApiProperty({
+  //   description:
+  //     '[공개 설정] PUBLIC: 전체공개, PROTECTED: 친구공개, PRIVATE: 비공개 // 상위 공개 범위는 함께 fetch 됨',
+  //   type: 'enum',
+  //   enum: OpenScope,
+  // })
+  // @IsEnum(OpenScope)
+  // scope: OpenScope;
+}
 
 export const FETCH_POST_OPTION = {
   id: true,

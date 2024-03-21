@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { OpenScope } from 'src/commons/enums/open-scope.enum';
 
 export class PublishPostInput {
@@ -43,6 +49,7 @@ export class PublishPostInput {
     type: 'enum',
     enum: OpenScope,
   })
+  @IsEnum(OpenScope)
   scope?: OpenScope;
 
   @ApiProperty({ description: '게시글 내용', type: String })

@@ -16,7 +16,7 @@ export class PostCategory {
   id: string;
 
   @ApiProperty({ type: String, description: '카테고리 이름' })
-  @Column()
+  @Column({ nullable: false, default: '제목 없음' })
   name: string;
 
   @JoinColumn()

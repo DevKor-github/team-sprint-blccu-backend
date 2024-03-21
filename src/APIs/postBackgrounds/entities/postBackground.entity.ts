@@ -8,6 +8,6 @@ export class PostBackground {
   id: string;
 
   @ApiProperty({ type: String, description: '이미지가 저장된 url' })
-  @Column()
+  @Column({ nullable: false, default: process.env.DEFAULT_BG_URL })
   image_url: string;
 }

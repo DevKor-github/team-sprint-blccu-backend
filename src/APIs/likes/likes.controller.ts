@@ -30,8 +30,7 @@ export class LikesController {
 
   @ApiOperation({
     summary: '좋아요 토글하기',
-    description:
-      '[Posts 테이블에 pessimistic_lock 적용] 로그인 된 유저가 {id}인 게시글에 좋아요를 토글한다.',
+    description: '로그인 된 유저가 {id}인 게시글에 좋아요를 토글한다.',
   })
   @ApiCookieAuth('refreshToken')
   @ApiOkResponse({ description: '토글 성공', type: ToggleLikeResponseDto })

@@ -8,10 +8,18 @@ import { UtilsModule } from 'src/utils/utils.module';
 import { AwsModule } from 'src/aws/aws.module';
 import { PostsService } from './posts.service';
 import { Neighbor } from '../neighbors/entities/neighbor.entity';
+import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
+import { PostCategory } from '../postCategories/entities/postCategory.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Posts, User, Neighbor]),
+    TypeOrmModule.forFeature([
+      Posts,
+      User,
+      Neighbor,
+      PostBackground,
+      PostCategory,
+    ]),
     UtilsModule,
     AwsModule,
   ],

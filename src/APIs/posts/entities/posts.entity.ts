@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 import { PostBackground } from 'src/APIs/postBackgrounds/entities/postBackground.entity';
 import { PostCategory } from 'src/APIs/postCategories/entities/postCategory.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
@@ -34,20 +35,25 @@ export class Posts {
 
   @ApiProperty({ description: '작성자', type: User })
   @JoinColumn()
-  @ManyToOne(() => User, { onDelete: 'SET NULL' })
+  @ManyToOne(() => User, { onDelete: 'CASCADE', nullable: false })
   user: User;
 
+  @IsString()
   @ApiProperty({ description: '연결된 카테고리 fk', type: String })
+  @Column({ nullable: true })
   @RelationId((posts: Posts) => posts.postCategory)
   postCategoryId: string;
 
+  @IsString()
   @ApiProperty({ description: '연결된 내지 fk', type: String })
+  @Column({ nullable: true })
   @RelationId((posts: Posts) => posts.postBackground)
   postBackgroundId: string;
 
   @ApiProperty({ description: '작성한 유저 fk', type: Number })
+  @Column({ nullable: false })
   @RelationId((posts: Posts) => posts.user)
-  userKakaoId: number;
+  userKakaoId!: number;
 
   @ApiProperty({ description: '제목(최대 100자)', type: String })
   @Column({ length: 100, default: '' })

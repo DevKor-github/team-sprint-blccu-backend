@@ -41,10 +41,7 @@ export class PostsController {
   @ApiCreatedResponse({ description: '임시등록 성공', type: PublishPostDto })
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(201)
-  async updatePost(
-    @Req() req: Request,
-    @Body() body: CreatePostInput,
-  ): Promise<PublishPostDto> {
+  async updatePost(@Req() req: Request, @Body() body: CreatePostInput) {
     const kakaoId = req.user.userId;
     const dto = { ...body, userKakaoId: kakaoId, isPublished: false };
     return await this.postsService.save(dto);
@@ -60,10 +57,7 @@ export class PostsController {
   @ApiCreatedResponse({ description: '등록 성공', type: PublishPostDto })
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(201)
-  async publishPost(
-    @Req() req: Request,
-    @Body() body: PublishPostInput,
-  ): Promise<PublishPostDto> {
+  async publishPost(@Req() req: Request, @Body() body: PublishPostInput) {
     const kakaoId = req.user.userId;
     const dto = { ...body, userKakaoId: kakaoId, isPublished: true };
     return await this.postsService.save(dto);

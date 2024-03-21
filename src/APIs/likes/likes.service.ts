@@ -31,24 +31,30 @@ export class LikesService {
       });
       if (alreadyLiked) {
         await queryRunner.manager.delete(Likes, { id: alreadyLiked.id });
-
-        // 좋아요 카운트 락걸고 쿼리!!!
-        const result = await queryRunner.manager.save(Posts, {
-          lock: { mode: 'pessimistic_write' },
-          ...postData,
-          like_count: postData.like_count - 1,
+        await queryRunner.manager.update(Posts, postData.id, {
+          like_count: () => 'like_count +1',
         });
-        await queryRunner.commitTransaction();
-        return result;
+        postData.like_count -= 1;
+        //   // 좋아요 카운트 락걸고 쿼리!!! xx
+        //   const result = await queryRunner.manager.save(Posts, {
+        //     lock: { mode: 'pessimistic_write' },
+        //     ...postData,
+        //     like_count: postData.like_count - 1,
+        //   });
+        //   await queryRunner.commitTransaction();
+        // return result;
+      } else {
+        await queryRunner.manager.save(Likes, {
+          user: kakaoId,
+          posts: postData,
+        });
+        await queryRunner.manager.update(Posts, postData.id, {
+          like_count: () => 'like_count +1',
+        });
+        postData.like_count += 1;
       }
-      await queryRunner.manager.save(Likes, { user: kakaoId, posts: postData });
-      const result = await queryRunner.manager.save(Posts, {
-        lock: { mode: 'pessimistic_write' },
-        ...postData,
-        like_count: postData.like_count + 1,
-      });
       await queryRunner.commitTransaction();
-      return result;
+      return postData;
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw e;
