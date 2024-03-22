@@ -12,11 +12,13 @@ import { PostBackgroundsModule } from './APIs/postBackgrounds/postBackgrounds.mo
 import { PostCategoriesModule } from './APIs/postCategories/PostCategories.module';
 import { LikesModule } from './APIs/likes/likes.module';
 import { StickersModule } from './APIs/stickers/stickers.module';
+import { StickerCategoriesModule } from './APIs/stickerCategories/stickerCategories.module';
 
 @Module({
   imports: [
     CommentsModule,
     StickersModule,
+    StickerCategoriesModule,
     PostsModule,
     LikesModule,
     UsersModule,

@@ -1,20 +1,16 @@
 import { Sticker } from 'src/APIs/stickers/entities/sticker.entity';
 import {
-  Column,
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   RelationId,
 } from 'typeorm';
 import { StickerCategory } from './stickerCategory.entity';
 
 @Entity()
 export class StickerCategoryMapper {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
+  @PrimaryColumn()
   @RelationId(
     (stickerCategoryMapper: StickerCategoryMapper) =>
       stickerCategoryMapper.sticker,
@@ -24,11 +20,10 @@ export class StickerCategoryMapper {
   @JoinColumn()
   @ManyToOne(() => Sticker, (stickers) => stickers.id, {
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
   })
   sticker: Sticker;
 
-  @Column()
+  @PrimaryColumn()
   @RelationId(
     (stickerCategoryMapper: StickerCategoryMapper) =>
       stickerCategoryMapper.stickerCategory,
@@ -41,7 +36,6 @@ export class StickerCategoryMapper {
     (stickerCategories) => stickerCategories.id,
     {
       onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
     },
   )
   stickerCategory: StickerCategory;

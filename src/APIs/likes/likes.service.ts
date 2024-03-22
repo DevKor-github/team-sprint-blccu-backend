@@ -24,7 +24,6 @@ export class LikesService {
         where: { id },
       });
       if (!postData) throw new NotFoundException('게시글이 존재하지 않습니다.');
-      console.log(id, kakaoId);
       // 좋아요 눌렀는지 확인하기
       const alreadyLiked = await this.likesRepository.findOne({
         where: { posts: { id } },

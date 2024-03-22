@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Sticker } from './entities/sticker.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -19,6 +23,14 @@ export class StickersService {
   ) {}
   async saveImage(file: Express.Multer.File): Promise<ImageUploadResponseDto> {
     return await this.imageUpload(file);
+  }
+  async findStickerById({ id }) {
+    return await this.stickersRepository.findOne({ where: { id } });
+  }
+
+  async existCheck({ id }) {
+    const data = await this.findStickerById({ id });
+    if (!data) throw new NotFoundException('스티커를 찾을 수 없습니다.');
   }
 
   async imageUpload(
@@ -62,14 +74,35 @@ export class StickersService {
     const insertData = await this.stickersRepository
       .createQueryBuilder()
       .insert()
-      .into(Sticker, ['userKakaoId', 'image_url', 'isDefault'])
-      .values({ userKakaoId, image_url, isDefault: true })
-      .orUpdate(['image_url', 'isDefault'], ['id'], {
+      .into(Sticker, ['userKakaoId', 'image_url', 'isDefault', 'isReusable'])
+      .values({ userKakaoId, image_url, isDefault: true, isReusable: true })
+      .orUpdate(['image_url', 'isDefault', 'isReusable'], ['id'], {
         skipUpdateIfNoValuesChanged: true,
       })
       .execute();
     const id = insertData.identifiers[0].id;
     const data = await this.stickersRepository.findOne({ where: { id } });
     return data;
+  }
+
+  async toggleReusable({ userKakaoId, id }) {
+    const sticker = await this.stickersRepository.findOne({ where: { id } });
+    if (!sticker) throw new NotFoundException('스티커가 존재하지 않습니다.');
+    if (sticker.userKakaoId != userKakaoId)
+      throw new UnauthorizedException('스티커 제작자가 아닙니다.');
+    return await this.stickersRepository.update(id, {
+      isReusable: () => '!isReusable',
+    });
+  }
+  async fetchUserStickers({ userKakaoId }): Promise<Sticker[]> {
+    return await this.stickersRepository.find({
+      where: { userKakaoId, isReusable: true, isDefault: false },
+    });
+  }
+
+  async fetchPublicStickers() {
+    return await this.stickersRepository.find({
+      where: { isDefault: true },
+    });
   }
 }

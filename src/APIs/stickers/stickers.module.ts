@@ -12,5 +12,6 @@ import { UsersModule } from '../users/users.module';
   imports: [TypeOrmModule.forFeature([Sticker]), UsersModule],
   providers: [JwtStrategy, StickersService, AwsService, UtilsService],
   controllers: [StickersController],
+  exports: [StickersService],
 })
 export class StickersModule {}

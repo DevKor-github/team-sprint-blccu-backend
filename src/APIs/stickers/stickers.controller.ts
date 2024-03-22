@@ -1,6 +1,8 @@
 import {
   Controller,
+  Get,
   HttpCode,
+  Param,
   Post,
   Req,
   UploadedFile,
@@ -13,6 +15,7 @@ import {
   ApiConsumes,
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -86,5 +89,43 @@ export class StickersController {
       userKakaoId,
       file,
     });
+  }
+  @ApiOperation({
+    summary: '스티커 재사용 여부를 토글한다.',
+    description:
+      '본인이 만든 스티커의 재사용 여부를 토글한다. 보관함 저장 혹은 삭제 용도로 사용할 것',
+  })
+  @Post(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiCookieAuth('refreshToken')
+  @HttpCode(200)
+  async toggleReusable(@Req() req: Request, @Param('id') id: number) {
+    const userKakaoId = req.user.userId;
+    return await this.stickersService.toggleReusable({ userKakaoId, id });
+  }
+
+  @ApiOperation({
+    summary: 'private 스티커를 fetch한다.',
+    description: '본인이 만든 재사용 가능한 스티커들을 fetch한다.',
+  })
+  @ApiOkResponse({ description: '조회 성공', type: [Sticker] })
+  @Get('private')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiCookieAuth('refreshToken')
+  @HttpCode(200)
+  async fetchPrivateStickers(@Req() req: Request): Promise<Sticker[]> {
+    const userKakaoId = req.user.userId;
+    return await this.stickersService.fetchUserStickers({ userKakaoId });
+  }
+
+  @ApiOperation({
+    summary: 'public 스티커를 fetch한다.',
+    description: '블꾸가 만든 스티커들을 fetch한다.',
+  })
+  @ApiOkResponse({ description: '조회 성공', type: [Sticker] })
+  @Get('public')
+  @HttpCode(200)
+  async fetchPublicStickers(): Promise<Sticker[]> {
+    return await this.stickersService.fetchPublicStickers();
   }
 }

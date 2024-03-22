@@ -39,4 +39,11 @@ export class Sticker {
   })
   @Column({ nullable: false, default: false })
   isDefault: boolean;
+
+  @ApiProperty({
+    description: '재사용 가능 유무',
+    type: Boolean,
+  })
+  @Column({ nullable: false, default: false })
+  isReusable: boolean;
 }
