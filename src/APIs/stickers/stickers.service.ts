@@ -21,9 +21,7 @@ export class StickersService {
     private readonly stickersRepository: Repository<Sticker>,
     private readonly usersService: UsersService,
   ) {}
-  async saveImage(file: Express.Multer.File): Promise<ImageUploadResponseDto> {
-    return await this.imageUpload(file);
-  }
+
   async findStickerById({ id }) {
     return await this.stickersRepository.findOne({ where: { id } });
   }
@@ -32,7 +30,9 @@ export class StickersService {
     const data = await this.findStickerById({ id });
     if (!data) throw new NotFoundException('스티커를 찾을 수 없습니다.');
   }
-
+  async saveImage(file: Express.Multer.File): Promise<ImageUploadResponseDto> {
+    return await this.imageUpload(file);
+  }
   async imageUpload(
     file: Express.Multer.File,
   ): Promise<ImageUploadResponseDto> {

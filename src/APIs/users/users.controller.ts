@@ -5,12 +5,18 @@ import {
   HttpCode,
   Param,
   Patch,
+  Post,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
+  ApiBody,
+  ApiConsumes,
   ApiCookieAuth,
+  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -19,6 +25,9 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { UserResponseDto } from './dto/user-response.dto';
 import { PatchUserInput } from './dto/patch-user.input';
+import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
+import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('유저 API')
 @Controller('users')
@@ -70,6 +79,64 @@ export class UsersController {
       kakaoId,
       description,
       username,
+    });
+  }
+
+  @ApiOperation({
+    summary: '로그인된 유저의 프로필 이미지를 변경',
+    description: '스토리지에 프로필 사진을 업로드하고 변경한다.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: '업로드 할 파일',
+    type: ImageUploadDto,
+  })
+  @ApiCreatedResponse({
+    description: '업로드 성공',
+    type: ImageUploadResponseDto,
+  })
+  @UseGuards(AuthGuard('jwt'))
+  @ApiCookieAuth('refreshToken')
+  @UseInterceptors(FileInterceptor('file'))
+  @HttpCode(201)
+  @Post('profile')
+  async uploadProfileImage(
+    @Req() req: Request,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<ImageUploadResponseDto> {
+    const userKakaoId = req.user.userId;
+    return await this.usersService.uploadProfileImage({
+      userKakaoId,
+      file,
+    });
+  }
+
+  @ApiOperation({
+    summary: '로그인된 유저의 배경 이미지를 변경',
+    description: '스토리지에 배경 사진을 업로드하고 변경한다.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: '업로드 할 파일',
+    type: ImageUploadDto,
+  })
+  @ApiCreatedResponse({
+    description: '업로드 성공',
+    type: ImageUploadResponseDto,
+  })
+  @UseGuards(AuthGuard('jwt'))
+  @ApiCookieAuth('refreshToken')
+  @UseInterceptors(FileInterceptor('file'))
+  @HttpCode(201)
+  @Post('background')
+  async uploadBackgroundImage(
+    @Req() req: Request,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<ImageUploadResponseDto> {
+    const userKakaoId = req.user.userId;
+    return await this.usersService.uploadBackgroundImage({
+      userKakaoId,
+      file,
     });
   }
 

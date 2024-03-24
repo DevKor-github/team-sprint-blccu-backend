@@ -14,7 +14,7 @@ export class AuthService {
   ) {}
   async getJWT(kakaoUserDto: KakaoUserDto) {
     const user = await this.kakaoValidateUser(kakaoUserDto); // 카카오 정보 검증 및 회원가입 로직
-    console.log('[AUTHSERVICE] user:', user);
+    // console.log('[AUTHSERVICE] user:', user);
     const accessToken = this.generateAccessToken(user); // AccessToken 생성
     const refreshToken = await this.generateRefreshToken(user); // refreshToken 생성
     return { accessToken, refreshToken };

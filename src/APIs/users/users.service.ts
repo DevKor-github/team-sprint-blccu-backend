@@ -7,12 +7,18 @@ import {
   IUsersServiceFindUserByKakaoId,
 } from './interfaces/users.service.interface';
 import { USER_SELECT_OPTION, UserResponseDto } from './dto/user-response.dto';
+import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
+import { AwsService } from 'src/aws/aws.service';
+import { UtilsService } from 'src/utils/utils.service';
+import { UploadImageDto } from './dto/upload-image.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly awsService: AwsService,
+    private readonly utilsService: UtilsService,
   ) {}
 
   // 배포 때 삭제 !!!!
@@ -42,7 +48,6 @@ export class UsersService {
       select: USER_SELECT_OPTION,
       where: { kakaoId: kakaoId },
     });
-    console.log(result);
     return result;
   }
   async findUserByKakaoIdWithToken({
@@ -51,7 +56,6 @@ export class UsersService {
     const result = await this.usersRepository.findOne({
       where: { kakaoId: kakaoId },
     });
-    console.log(result);
     return result;
   }
 
@@ -77,6 +81,7 @@ export class UsersService {
     }
     return await this.usersRepository.save(user);
   }
+
   async findUsersByName({ username }): Promise<UserResponseDto[]> {
     const users = await this.usersRepository.find({
       select: USER_SELECT_OPTION,
@@ -85,5 +90,46 @@ export class UsersService {
       },
     });
     return users;
+  }
+
+  async uploadProfileImage({
+    userKakaoId,
+    file,
+  }: UploadImageDto): Promise<ImageUploadResponseDto> {
+    const user = await this.findUserByKakaoIdWithToken({
+      kakaoId: userKakaoId,
+    });
+    const { image_url } = await this.saveImage(file);
+    await this.usersRepository.save({ ...user, profile_image: image_url });
+    return { image_url };
+  }
+  async saveImage(file: Express.Multer.File): Promise<ImageUploadResponseDto> {
+    return await this.imageUpload(file);
+  }
+
+  async uploadBackgroundImage({
+    userKakaoId,
+    file,
+  }: UploadImageDto): Promise<ImageUploadResponseDto> {
+    const user = await this.findUserByKakaoIdWithToken({
+      kakaoId: userKakaoId,
+    });
+    const { image_url } = await this.saveImage(file);
+    await this.usersRepository.save({ ...user, background_image: image_url });
+    return { image_url };
+  }
+
+  async imageUpload(
+    file: Express.Multer.File,
+  ): Promise<ImageUploadResponseDto> {
+    const imageName = this.utilsService.getUUID();
+    const ext = file.originalname.split('.').pop();
+
+    const image_url = await this.awsService.imageUploadToS3(
+      `${imageName}.${ext}`,
+      file,
+      ext,
+    );
+    return { image_url };
   }
 }
