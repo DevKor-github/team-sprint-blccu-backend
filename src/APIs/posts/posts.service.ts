@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { AwsService } from 'src/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { DataSource, Repository } from 'typeorm';
@@ -45,6 +49,15 @@ export class PostsService {
 
     return { image_url };
   }
+  async findPostsById({ id }) {
+    return await this.postsRepository.findOne({ where: { id } });
+  }
+
+  async existCheck({ id }) {
+    const data = await this.findPostsById({ id });
+    if (!data) throw new NotFoundException('게시글을 찾을 수 없습니다.');
+  }
+
   async fkValidCheck(posts) {
     try {
       if (posts.postCategoryId || posts.isPublished) {

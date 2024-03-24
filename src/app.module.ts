@@ -13,12 +13,14 @@ import { PostCategoriesModule } from './APIs/postCategories/PostCategories.modul
 import { LikesModule } from './APIs/likes/likes.module';
 import { StickersModule } from './APIs/stickers/stickers.module';
 import { StickerCategoriesModule } from './APIs/stickerCategories/stickerCategories.module';
+import { StickerBlocksModule } from './APIs/stickerBlocks/stickerBlocks.module';
 
 @Module({
   imports: [
     CommentsModule,
     StickersModule,
     StickerCategoriesModule,
+    StickerBlocksModule,
     PostsModule,
     LikesModule,
     UsersModule,

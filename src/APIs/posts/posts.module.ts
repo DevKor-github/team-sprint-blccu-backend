@@ -25,5 +25,6 @@ import { PostCategory } from '../postCategories/entities/postCategory.entity';
   ],
   providers: [JwtStrategy, PostsService],
   controllers: [PostsController],
+  exports: [PostsService],
 })
 export class PostsModule {}
