@@ -4,18 +4,13 @@ import { JwtStrategy } from '../auth/strategies/jwt.strategy';
 
 import { StickerBlock } from './entities/stickerblock.entity';
 import { StickerBlocksController } from './stickerBlocks.controller';
-import { StickerBlocksService } from './stickerBLocks.service';
-import { StickersService } from '../stickers/stickers.service';
-import { PostsModule } from '../posts/posts.module';
+import { StickerBlocksService } from './stickerBlocks.service';
 import { StickersModule } from '../stickers/stickers.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([StickerBlock]),
-    PostsModule,
-    StickersModule,
-  ],
+  imports: [TypeOrmModule.forFeature([StickerBlock]), StickersModule],
   providers: [JwtStrategy, StickerBlocksService],
   controllers: [StickerBlocksController],
+  exports: [StickerBlocksService],
 })
 export class StickerBlocksModule {}

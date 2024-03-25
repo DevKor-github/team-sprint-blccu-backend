@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { StickerBlocksService } from './stickerBLocks.service';
+import { StickerBlocksService } from './stickerBlocks.service';
 import { CreateStickerBlockDto } from './dto/create-stickerBlock.dto';
 
 @ApiTags('스티커 블록 API')

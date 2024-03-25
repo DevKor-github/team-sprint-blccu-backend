@@ -22,7 +22,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { PostsService } from './posts.service';
+import { PostsService } from './PostsService';
 import { FetchPostsDto } from './dto/fetch-posts.dto';
 import { PublishPostDto } from './dto/publish-post.dto';
 import { Posts } from './entities/posts.entity';
@@ -79,6 +79,17 @@ export class PostsController {
   @Get()
   async fetchPosts(@Query() post: FetchPostsDto): Promise<PagePostResponseDto> {
     return await this.postsService.fetchPosts(post);
+  }
+
+  @ApiOperation({
+    summary: '[수정용] 게시글 및 스티커 상세 데이터 fetch',
+    description:
+      '본인 게시글 수정용으로 id에 해당하는 게시글에 조인된 스티커 블록들의 값과 게시글 세부 데이터를 모두 가져온다.',
+  })
+  @HttpCode(200)
+  @Get(':id')
+  async fetchPost(@Param('id') id: number) {
+    return await this.postsService.fetchPostForUpdate({ id });
   }
 
   @ApiOperation({

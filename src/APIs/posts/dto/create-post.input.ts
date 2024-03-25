@@ -29,7 +29,6 @@ export class CreatePostInput {
 
   @ApiProperty({ description: '연결된 내지 fk', type: String, required: false })
   @IsString()
-  @IsOptional()
   postBackgroundId?: string;
 
   @ApiProperty({

@@ -71,7 +71,7 @@ export class PostsService {
         if (!pc)
           throw new BadRequestException('존재하지 않는 post_category입니다.');
       }
-      if (posts.postBackgroundId) {
+      if (posts.postBackgroundId || posts.isPublished) {
         const pg = await this.dataSource
           .getRepository(PostBackground)
           .createQueryBuilder('pg')
@@ -165,7 +165,7 @@ export class PostsService {
     const post = await this.postsRepository
       .createQueryBuilder('p')
       .innerJoin('p.user', 'user')
-      .innerJoinAndSelect('p.postBackground', 'postBackground')
+      // .innerJoinAndSelect('p.postBackground', 'postBackground')
       // .innerJoinAndSelect('p.postCategory', 'postCategory')
       .addSelect([
         'user.kakaoId',
