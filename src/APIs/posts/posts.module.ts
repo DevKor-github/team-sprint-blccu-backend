@@ -6,7 +6,7 @@ import { JwtStrategy } from '../auth/strategies/jwt.strategy';
 import { PostsController } from './posts.controller';
 import { UtilsModule } from 'src/utils/utils.module';
 import { AwsModule } from 'src/aws/aws.module';
-import { PostsService } from './PostsService';
+import { PostsService } from './posts.service';
 import { Neighbor } from '../neighbors/entities/neighbor.entity';
 import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
 import { PostCategory } from '../postCategories/entities/postCategory.entity';

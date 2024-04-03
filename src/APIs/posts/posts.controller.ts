@@ -22,7 +22,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { PostsService } from './PostsService';
+import { PostsService } from './posts.service';
 import { FetchPostsDto } from './dto/fetch-posts.dto';
 import { PublishPostDto } from './dto/publish-post.dto';
 import { Posts } from './entities/posts.entity';
