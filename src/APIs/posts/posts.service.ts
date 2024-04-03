@@ -3,12 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { AwsService } from 'src/aws/aws.service';
+import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { DataSource, Repository } from 'typeorm';
 import { Posts } from './entities/posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Page } from '../../utils/page';
+import { Page } from '../../utils/pages/page';
 import { FetchPostsDto } from './dto/fetch-posts.dto';
 import { PagePostResponseDto } from './dto/page-post-response.dto';
 import { Neighbor } from '../neighbors/entities/neighbor.entity';

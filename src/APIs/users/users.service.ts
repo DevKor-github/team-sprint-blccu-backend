@@ -8,7 +8,7 @@ import {
 } from './interfaces/users.service.interface';
 import { USER_SELECT_OPTION, UserResponseDto } from './dto/user-response.dto';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
-import { AwsService } from 'src/aws/aws.service';
+import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { UploadImageDto } from './dto/upload-image.dto';
 

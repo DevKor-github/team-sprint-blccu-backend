@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AwsService } from 'src/aws/aws.service';
+import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { PostBackground } from './entities/postBackground.entity';
 import { Repository } from 'typeorm';

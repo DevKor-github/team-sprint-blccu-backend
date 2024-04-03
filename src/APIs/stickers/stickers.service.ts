@@ -7,7 +7,7 @@ import { Repository } from 'typeorm';
 import { Sticker } from './entities/sticker.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateStickerDto } from './dto/create-sticker.dto';
-import { AwsService } from 'src/aws/aws.service';
+import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 import { UsersService } from '../users/users.service';
