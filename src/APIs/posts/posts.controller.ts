@@ -88,7 +88,7 @@ export class PostsController {
   @ApiCookieAuth('refeshToken')
   @UseGuards(AuthGuard('jwt'))
   @Get('temp')
-  async fetchTempPosts(@Req() req: Request) {
+  async fetchTempPosts(@Req() req: Request): Promise<Posts[]> {
     const kakaoId = req.user.userId;
     console.log(kakaoId);
     return await this.postsService.fetchTempPosts({ kakaoId });
