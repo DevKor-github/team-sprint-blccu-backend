@@ -34,7 +34,7 @@ export class User {
   @ApiProperty({ description: '프로필 이미지 url' })
   profile_image: string;
 
-  @Column()
+  @Column({ default: '' })
   @ApiProperty({ description: '프로필 배경 이미지 url' })
   background_image: string;
 

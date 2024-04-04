@@ -1,4 +1,4 @@
-import { PageRequest } from '../../../utils/page-request';
+import { PageRequest } from '../../../utils/pages/page-request';
 
 export class FetchPostsDto extends PageRequest {
   // @ApiProperty({

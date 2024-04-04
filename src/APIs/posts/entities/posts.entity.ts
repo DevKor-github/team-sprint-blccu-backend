@@ -53,7 +53,7 @@ export class Posts {
   @ApiProperty({ description: '작성한 유저 fk', type: Number })
   @Column({ nullable: false })
   @RelationId((posts: Posts) => posts.user)
-  userKakaoId!: number;
+  userKakaoId: number;
 
   @ApiProperty({ description: '제목(최대 100자)', type: String })
   @Column({ length: 100, default: '' })

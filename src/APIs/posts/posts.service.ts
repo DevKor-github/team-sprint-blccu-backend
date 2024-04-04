@@ -17,9 +17,9 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { PostCategory } from '../postCategories/entities/postCategory.entity';
 import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
 import { User } from '../users/entities/user.entity';
-import { OpenScope } from 'src/commons/enums/open-scope.enum';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 import { StickerBlocksService } from '../stickerBlocks/stickerBlocks.service';
+import { PostsRepository } from './posts.repository';
 
 @Injectable()
 export class PostsService {
@@ -28,8 +28,7 @@ export class PostsService {
     private readonly utilsService: UtilsService,
     private readonly dataSource: DataSource,
     private readonly stickerBlocksService: StickerBlocksService,
-    @InjectRepository(Posts)
-    private readonly postsRepository: Repository<Posts>,
+    private readonly postsRepository: PostsRepository,
     @InjectRepository(Neighbor)
     private readonly neighborsRepository: Repository<Neighbor>,
   ) {}
@@ -100,6 +99,7 @@ export class PostsService {
     let post = {};
     try {
       if (createPostDto.id) {
+        // 이때 락 걸어야 되나?
         post = await queryRunner.manager.findOne(Posts, {
           where: {
             id: createPostDto.id,
@@ -109,7 +109,6 @@ export class PostsService {
           await delete createPostDto.id;
           post = {};
         }
-        // if (!post) await delete createPostDto.id;
       }
       Object.keys(createPostDto).map((el) => {
         const value = createPostDto[el];
@@ -118,6 +117,7 @@ export class PostsService {
         }
       });
       await this.fkValidCheck(post);
+      // queryRunner 안에서는 커스텀 레포 메서드 사용 불가능. 직접 짤 것.
       const data = await queryRunner.manager
         .createQueryBuilder()
         .insert()
@@ -125,8 +125,7 @@ export class PostsService {
         .values(post)
         .orUpdate(Object.keys(post), ['id'], {
           skipUpdateIfNoValuesChanged: true,
-        })
-        .execute();
+        });
       await queryRunner.commitTransaction();
       return data;
     } catch (e) {
@@ -137,23 +136,7 @@ export class PostsService {
     }
   }
   async fetchPosts(page: FetchPostsDto): Promise<PagePostResponseDto> {
-    const postsAndCounts = await this.postsRepository
-      .createQueryBuilder('p')
-      .innerJoin('p.user', 'user')
-      .innerJoinAndSelect('p.postBackground', 'postBackground')
-      .innerJoinAndSelect('p.postCategory', 'postCategory')
-      .addSelect([
-        'user.kakaoId',
-        'user.description',
-        'user.profile_image',
-        'user.username',
-      ])
-      .where('p.isPublished = true')
-      .andWhere('p.scope IN (:...scopes)', { scopes: [OpenScope.PUBLIC] })
-      .orderBy('p.id', 'DESC')
-      .take(page.getLimit())
-      .skip(page.getOffset())
-      .getManyAndCount();
+    const postsAndCounts = await this.postsRepository.fetchPosts(page);
 
     return new Page<Posts>(postsAndCounts[1], page.pageSize, postsAndCounts[0]);
   }
@@ -162,19 +145,8 @@ export class PostsService {
     // 카카오 아이디로 valid check? 공개설정 안된 게시글 fetch 못하게 하자!!
     await this.existCheck({ id });
     await this.fkValidCheck({ id });
-    const post = await this.postsRepository
-      .createQueryBuilder('p')
-      .innerJoin('p.user', 'user')
-      .innerJoinAndSelect('p.postBackground', 'postBackground')
-      // .innerJoinAndSelect('p.postCategory', 'postCategory')
-      .addSelect([
-        'user.kakaoId',
-        'user.description',
-        'user.profile_image',
-        'user.username',
-      ])
-      .where('p.id = :id', { id })
-      .getOne();
+    const post = await this.postsRepository.fetchPostForUpdate(id);
+
     const stickerBlocks = await this.stickerBlocksService.fetchBlocks({
       postsId: id,
     });
@@ -189,36 +161,17 @@ export class PostsService {
       .select('n.toUserKakaoId')
       .where(`n.fromUserKakaoId = ${kakaoId}`)
       .getQuery();
-    const postsAndCounts = await this.postsRepository
-      .createQueryBuilder('p')
-      .innerJoin('p.user', 'user')
-      .innerJoinAndSelect('p.postBackground', 'postBackground')
-      .innerJoinAndSelect('p.postCategory', 'postCategory')
-      .addSelect([
-        'user.kakaoId',
-        'user.description',
-        'user.profile_image',
-        'user.username',
-      ])
-      .where(`p.userKakaoId = any(${subQuery})`)
-      .andWhere('p.scope IN (:...scopes)', {
-        scopes: [OpenScope.PUBLIC, OpenScope.PROTECTED],
-      })
-      .andWhere('p.isPublished = true')
-      .orderBy('p.id', 'DESC')
-      .take(page.getLimit())
-      .skip(page.getOffset())
-      .getManyAndCount();
+    const postsAndCounts = await this.postsRepository.fetchFriendsPosts(
+      subQuery,
+      page,
+    );
+
     console.log(postsAndCounts);
     return new Page<Posts>(postsAndCounts[1], page.pageSize, postsAndCounts[0]);
   }
 
   async fetchTempPosts({ kakaoId }): Promise<Posts[]> {
-    return await this.postsRepository
-      .createQueryBuilder('p')
-      .where(`p.userKakaoId = ${kakaoId}`)
-      .andWhere(`p.isPublished = false`)
-      .getMany();
+    return await this.postsRepository.fetchTempPosts(kakaoId);
   }
 
   async softDelete({ kakaoId, id }) {

@@ -69,6 +69,7 @@ export class PostsController {
     const dto = { ...body, userKakaoId: kakaoId, isPublished: true };
     return await this.postsService.save(dto);
   }
+
   @ApiOperation({
     summary: '전체 게시글 조회 API',
     description:
@@ -80,16 +81,17 @@ export class PostsController {
   async fetchPosts(@Query() post: FetchPostsDto): Promise<PagePostResponseDto> {
     return await this.postsService.fetchPosts(post);
   }
-
   @ApiOperation({
-    summary: '[수정용] 게시글 및 스티커 상세 데이터 fetch',
-    description:
-      '본인 게시글 수정용으로 id에 해당하는 게시글에 조인된 스티커 블록들의 값과 게시글 세부 데이터를 모두 가져온다.',
+    summary: '임시작성 게시글 조회',
+    description: '로그인된 유저의 임시작성 게시글을 조회한다.',
   })
-  @HttpCode(200)
-  @Get(':id')
-  async fetchPost(@Param('id') id: number) {
-    return await this.postsService.fetchPostForUpdate({ id });
+  @ApiCookieAuth('refeshToken')
+  @UseGuards(AuthGuard('jwt'))
+  @Get('temp')
+  async fetchTempPosts(@Req() req: Request) {
+    const kakaoId = req.user.userId;
+    console.log(kakaoId);
+    return await this.postsService.fetchTempPosts({ kakaoId });
   }
 
   @ApiOperation({
@@ -116,6 +118,7 @@ export class PostsController {
   ): Promise<ImageUploadResponseDto> {
     return await this.postsService.saveImage(file);
   }
+
   @ApiOperation({
     summary: '친구 게시글 조회',
     description:
@@ -132,18 +135,6 @@ export class PostsController {
   ): Promise<PagePostResponseDto> {
     const kakaoId = req.user.userId;
     return await this.postsService.fetchFriendsPosts({ kakaoId, page });
-  }
-
-  @ApiOperation({
-    summary: '임시작성 게시글 조회',
-    description: '로그인된 유저의 임시작성 게시글을 조회한다.',
-  })
-  @ApiCookieAuth('refeshToken')
-  @UseGuards(AuthGuard('jwt'))
-  @Get('temp')
-  async fetchTempPosts(@Req() req: Request): Promise<Posts[]> {
-    const kakaoId = req.user.userId;
-    return await this.postsService.fetchTempPosts({ kakaoId });
   }
 
   @ApiOperation({
@@ -170,5 +161,16 @@ export class PostsController {
   async hardDelete(@Req() req: Request, @Param('id') id: number) {
     const kakaoId = req.user.userId;
     return await this.postsService.hardDelete({ kakaoId, id });
+  }
+
+  @ApiOperation({
+    summary: '[수정용] 게시글 및 스티커 상세 데이터 fetch',
+    description:
+      '본인 게시글 수정용으로 id에 해당하는 게시글에 조인된 스티커 블록들의 값과 게시글 세부 데이터를 모두 가져온다.',
+  })
+  @HttpCode(200)
+  @Get(':id')
+  async fetchPost(@Param('id') id: number) {
+    return await this.postsService.fetchPostForUpdate({ id });
   }
 }

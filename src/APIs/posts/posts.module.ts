@@ -11,6 +11,7 @@ import { Neighbor } from '../neighbors/entities/neighbor.entity';
 import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
 import { PostCategory } from '../postCategories/entities/postCategory.entity';
 import { StickerBlocksModule } from '../stickerBlocks/stickerBlocks.module';
+import { PostsRepository } from './posts.repository';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { StickerBlocksModule } from '../stickerBlocks/stickerBlocks.module';
     AwsModule,
     StickerBlocksModule,
   ],
-  providers: [JwtStrategy, PostsService],
+  providers: [JwtStrategy, PostsService, PostsRepository],
   controllers: [PostsController],
   exports: [PostsService],
 })
