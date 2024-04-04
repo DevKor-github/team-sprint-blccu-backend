@@ -22,6 +22,7 @@ export class StickerBlocksService {
       await this.stickersService.existCheck({
         id: createStickerBlockDto.stickerId,
       });
+
       const data = await this.stickerBlocksRepository.save(
         createStickerBlockDto,
       );
