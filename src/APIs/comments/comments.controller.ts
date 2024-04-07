@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { CommentsService } from './comments.service';
 import { CreateCommentInput } from './dtos/create-comment.dto';
 import { Request } from 'express';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DeleteCommentDto } from './dtos/delete-comment.dto';
 
 @ApiTags('댓글 API')
@@ -15,6 +15,7 @@ export class CommentsController {
     summary: '댓글을 작성하거나 수정한다.',
     description: '댓글을 작성하거나 (optional)id에 해당하는 댓글을 수정한다.',
   })
+  @ApiCookieAuth()
   @Post()
   @UseGuards(AuthGuard('jwt'))
   async upsertComment(@Req() req: Request, @Body() body: CreateCommentInput) {
@@ -26,6 +27,7 @@ export class CommentsController {
     summary: '댓글을 삭제한다.',
     description: '댓글을 논리삭제한다. date_deleted 칼럼에 값이 생긴다.',
   })
+  @ApiCookieAuth()
   @Delete()
   @UseGuards(AuthGuard('jwt'))
   async deleteComment(@Req() req: Request, @Body() body: DeleteCommentDto) {

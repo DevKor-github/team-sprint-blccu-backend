@@ -59,7 +59,7 @@ export class AuthController {
     description:
       'refresh 토큰이 만료되었거나 없을 경우 cookie를 모두 clear한다.',
   })
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @Get('refresh')
   @HttpCode(201)
   async refresh(@Req() req: Request, @Res() res: Response) {

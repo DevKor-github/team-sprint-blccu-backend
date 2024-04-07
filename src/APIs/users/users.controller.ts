@@ -49,7 +49,7 @@ export class UsersController {
     summary: '로그인된 유저의 정보 불러오기',
     description: '로그인된 유저의 정보를 불러온다.',
   })
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @ApiOkResponse({ description: '불러오기 완료', type: UserResponseDto })
   @Get()
   @UseGuards(AuthGuard('jwt'))
@@ -64,7 +64,7 @@ export class UsersController {
     description: '로그인된 유저의 이름이나 설명, 혹은 둘 다를 변경한다.',
   })
   @ApiOkResponse({ description: '변경 성공', type: PatchUserInput })
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @Patch()
   @HttpCode(200)
   @UseGuards(AuthGuard('jwt'))
@@ -96,7 +96,7 @@ export class UsersController {
     type: ImageUploadResponseDto,
   })
   @UseGuards(AuthGuard('jwt'))
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
   @Post('profile')
@@ -125,7 +125,7 @@ export class UsersController {
     type: ImageUploadResponseDto,
   })
   @UseGuards(AuthGuard('jwt'))
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
   @Post('background')

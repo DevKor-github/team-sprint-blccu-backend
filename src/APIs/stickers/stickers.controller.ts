@@ -45,7 +45,7 @@ export class StickersController {
     type: Sticker,
   })
   @UseGuards(AuthGuard('jwt'))
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @Post('private')
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
@@ -76,7 +76,7 @@ export class StickersController {
   })
   @ApiUnauthorizedResponse({ description: '어드민이 아님' })
   @UseGuards(AuthGuard('jwt'))
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @Post('public')
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
@@ -97,7 +97,7 @@ export class StickersController {
   })
   @Post(':id')
   @UseGuards(AuthGuard('jwt'))
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @HttpCode(200)
   async toggleReusable(@Req() req: Request, @Param('id') id: number) {
     const userKakaoId = req.user.userId;
@@ -111,7 +111,7 @@ export class StickersController {
   @ApiOkResponse({ description: '조회 성공', type: [Sticker] })
   @Get('private')
   @UseGuards(AuthGuard('jwt'))
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @HttpCode(200)
   async fetchPrivateStickers(@Req() req: Request): Promise<Sticker[]> {
     const userKakaoId = req.user.userId;

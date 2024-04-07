@@ -32,7 +32,7 @@ export class PostCategoriesController {
     summary: '카테고리 생성',
     description: '로그인된 유저와 연결된 카테고리를 생성한다.',
   })
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @ApiCreatedResponse({
     description: '카테고리 생성 완료',
     type: CreatePostCategoryResponseDto,
@@ -53,7 +53,7 @@ export class PostCategoriesController {
     summary: '유저의 모든 카테고리 불러오기',
     description: '로그인된 유저가 생성한 카테고리를 모두 불러온다',
   })
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @ApiOkResponse({
     description: '',
     type: [PostCategory],
@@ -71,7 +71,7 @@ export class PostCategoriesController {
     description:
       '로그인된 유저의 카테고리 중 param:id와 일치하는 카테고리를 삭제한다',
   })
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
   async deletePostCategory(@Req() req: Request, @Param('id') id: string) {

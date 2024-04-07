@@ -31,7 +31,7 @@ export class StickerCategoriesController {
     description: '[어드민 전용] 스티커 카테고리를 만든다.',
   })
   @ApiOkResponse({ description: '생성 완료', type: StickerCategory })
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @UseGuards(AuthGuard('jwt'))
   @Post(':name')
   async createCategory(@Req() req: Request, @Param('name') name: string) {
@@ -46,7 +46,7 @@ export class StickerCategoriesController {
     summary: '스티커와 카테고리 매핑',
     description: '[어드민 전용] 스티커에 카테고리를 매핑한다.',
   })
-  @ApiCookieAuth('ref reshToken')
+  @ApiCookieAuth()
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async mapCategory(

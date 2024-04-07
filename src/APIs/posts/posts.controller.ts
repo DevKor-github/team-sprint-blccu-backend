@@ -45,6 +45,7 @@ export class PostsController {
     바로 게시글 생성에 사용해도 되고, 수정용으로 사용해도 된다.`,
   })
   @Post('temp')
+  @ApiCookieAuth()
   @ApiCreatedResponse({ description: '임시등록 성공', type: PublishPostDto })
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(201)
@@ -61,6 +62,7 @@ export class PostsController {
     바로 게시글 생성에 사용해도 되고, 수정용으로 사용해도 된다.`,
   })
   @Post()
+  @ApiCookieAuth()
   @ApiCreatedResponse({ description: '등록 성공', type: PublishPostDto })
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(201)
@@ -86,7 +88,7 @@ export class PostsController {
     summary: '임시작성 게시글 조회',
     description: '로그인된 유저의 임시작성 게시글을 조회한다.',
   })
-  @ApiCookieAuth('refeshToken')
+  @ApiCookieAuth()
   @UseGuards(AuthGuard('jwt'))
   @Get('temp')
   async fetchTempPosts(@Req() req: Request): Promise<Posts[]> {
@@ -109,7 +111,7 @@ export class PostsController {
     type: ImageUploadResponseDto,
   })
   @UseGuards(AuthGuard('jwt'))
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @Post('image')
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
@@ -128,7 +130,7 @@ export class PostsController {
   @ApiCreatedResponse({ description: '조회 성공', type: PagePostResponseDto })
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(200)
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @Get('friends')
   async fetchFriendsPosts(
     @Query() page: FetchPostsDto,
@@ -143,7 +145,7 @@ export class PostsController {
     description:
       '로그인 된 유저의 {id}에 해당하는 게시글을 논리삭제한다. 발행된 게시글에 사용을 권장',
   })
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @UseGuards(AuthGuard('jwt'))
   @Delete('soft/:id')
   async softDelete(@Req() req: Request, @Param('id') id: number) {
@@ -156,7 +158,7 @@ export class PostsController {
     description:
       '로그인 된 유저의 {id}에 해당하는 게시글을 물리삭제한다. 임시 저장된 게시글에 사용을 권장',
   })
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @UseGuards(AuthGuard('jwt'))
   @Delete('hard/:id')
   async hardDelete(@Req() req: Request, @Param('id') id: number) {

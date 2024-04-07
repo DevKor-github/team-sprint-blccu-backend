@@ -32,7 +32,7 @@ export class LikesController {
     summary: '좋아요 토글하기',
     description: '로그인 된 유저가 {id}인 게시글에 좋아요를 토글한다.',
   })
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @ApiOkResponse({ description: '토글 성공', type: ToggleLikeResponseDto })
   @ApiNotFoundResponse({ description: '게시글을 찾을 수 없는 경우' })
   @UseGuards(AuthGuard('jwt'))

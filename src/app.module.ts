@@ -40,7 +40,7 @@ import { StickerBlocksModule } from './APIs/stickerBlocks/stickerBlocks.module';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_DATABASE,
       entities: [__dirname + '/APIs/**/*.entity.*'],
-      synchronize: true,
+      synchronize: false,
       logging: true,
     }),
   ],

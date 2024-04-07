@@ -34,7 +34,7 @@ export class NeighborsController {
     summary: '이웃 추가하기',
     description: '로그인된 유저가 follow_id를 팔로우한다.',
   })
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @ApiCreatedResponse({ description: '이웃 추가 성공', type: FollowUserDto })
   @ApiConflictResponse({ description: '이미 팔로우한 상태이다.' })
   @UseGuards(AuthGuard('jwt'))
@@ -56,7 +56,7 @@ export class NeighborsController {
     summary: '이웃 삭제하기',
     description: '로그인된 유저가 follow_id를 언팔로우 한다.',
   })
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth()
   @ApiOkResponse({ description: '언팔로우 성공' })
   @ApiNotFoundResponse({ description: '존재하지 않는 이웃 정보이다.' })
   @UseGuards(AuthGuard('jwt'))
