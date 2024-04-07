@@ -5,7 +5,7 @@ import { OpenScope } from 'src/commons/enums/open-scope.enum';
 @Injectable()
 export class PostsRepository extends Repository<Posts> {
   constructor(private dataSource: DataSource) {
-    super(Posts, dataSource.manager);
+    super(Posts, dataSource.createEntityManager());
   }
   async upsertPost(post) {
     return await this.createQueryBuilder()
@@ -37,21 +37,36 @@ export class PostsRepository extends Repository<Posts> {
       .getManyAndCount();
   }
 
+  async fetchPostDetail(id) {
+    await this.update(id, {
+      view_count: () => 'view_count +1',
+    });
+    return await this.createQueryBuilder('p')
+      .innerJoin('p.user', 'user')
+      .innerJoinAndSelect('p.postBackground', 'postBackground')
+      .innerJoinAndSelect('p.postCategory', 'postCategory')
+      .addSelect([
+        'user.kakaoId',
+        'user.description',
+        'user.profile_image',
+        'user.username',
+      ])
+      .where('p.id = :id', { id })
+      .getOne();
+  }
   async fetchPostForUpdate(id) {
-    return (
-      this.createQueryBuilder('p')
-        .innerJoin('p.user', 'user')
-        .innerJoinAndSelect('p.postBackground', 'postBackground')
-        // .innerJoinAndSelect('p.postCategory', 'postCategory')
-        .addSelect([
-          'user.kakaoId',
-          'user.description',
-          'user.profile_image',
-          'user.username',
-        ])
-        .where('p.id = :id', { id })
-        .getOne()
-    );
+    return await this.createQueryBuilder('p')
+      .innerJoin('p.user', 'user')
+      .innerJoinAndSelect('p.postBackground', 'postBackground')
+      // .innerJoinAndSelect('p.postCategory', 'postCategory')
+      .addSelect([
+        'user.kakaoId',
+        'user.description',
+        'user.profile_image',
+        'user.username',
+      ])
+      .where('p.id = :id', { id })
+      .getOne();
   }
 
   async fetchFriendsPosts(subQuery, page) {

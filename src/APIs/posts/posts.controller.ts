@@ -66,6 +66,7 @@ export class PostsController {
   @HttpCode(201)
   async publishPost(@Req() req: Request, @Body() body: PublishPostInput) {
     const kakaoId = req.user.userId;
+    console.log(body);
     const dto = { ...body, userKakaoId: kakaoId, isPublished: true };
     return await this.postsService.save(dto);
   }
@@ -169,8 +170,17 @@ export class PostsController {
       '본인 게시글 수정용으로 id에 해당하는 게시글에 조인된 스티커 블록들의 값과 게시글 세부 데이터를 모두 가져온다.',
   })
   @HttpCode(200)
-  @Get(':id')
+  @Get('update/:id')
   async fetchPost(@Param('id') id: number) {
     return await this.postsService.fetchPostForUpdate({ id });
+  }
+
+  @ApiOperation({
+    summary: '게시글 디테일 뷰 fetch',
+    description: 'id에 해당하는 게시글과 댓글을 가져온다. 조회수를 올린다.',
+  })
+  @Get('detail/:id')
+  async fetchPostDetail(@Param('id') id: number) {
+    return await this.postsService.fetchDetail({ id });
   }
 }

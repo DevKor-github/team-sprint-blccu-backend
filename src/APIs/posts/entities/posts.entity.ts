@@ -72,6 +72,7 @@ export class Posts {
   view_count: number;
 
   @ApiProperty({ description: '댓글수 카운트', type: Number })
+  @Column({ default: 0 })
   comment_count: number;
 
   @ApiProperty({ description: '댓글 허용 여부(boolean)', type: Boolean })

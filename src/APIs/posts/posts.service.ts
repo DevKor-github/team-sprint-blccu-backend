@@ -20,6 +20,7 @@ import { User } from '../users/entities/user.entity';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 import { StickerBlocksService } from '../stickerBlocks/stickerBlocks.service';
 import { PostsRepository } from './posts.repository';
+import { CommentsService } from '../comments/comments.service';
 
 @Injectable()
 export class PostsService {
@@ -28,6 +29,7 @@ export class PostsService {
     private readonly utilsService: UtilsService,
     private readonly dataSource: DataSource,
     private readonly stickerBlocksService: StickerBlocksService,
+    private readonly commentsService: CommentsService,
     private readonly postsRepository: PostsRepository,
     @InjectRepository(Neighbor)
     private readonly neighborsRepository: Repository<Neighbor>,
@@ -57,39 +59,31 @@ export class PostsService {
   async existCheck({ id }) {
     const data = await this.findPostsById({ id });
     if (!data) throw new NotFoundException('게시글을 찾을 수 없습니다.');
+    return data;
   }
 
-  async fkValidCheck(posts) {
-    try {
-      if (posts.postCategoryId || posts.isPublished) {
-        const pc = await this.dataSource
-          .getRepository(PostCategory)
-          .createQueryBuilder('pc')
-          .where('pc.id = :id', { id: posts.postCategoryId })
-          .getOne();
-        if (!pc)
-          throw new BadRequestException('존재하지 않는 post_category입니다.');
-      }
-      if (posts.postBackgroundId) {
-        const pg = await this.dataSource
-          .getRepository(PostBackground)
-          .createQueryBuilder('pg')
-          .where('pg.id = :id', { id: posts.postBackgroundId })
-          .getOne();
-        if (!pg)
-          throw new BadRequestException('존재하지 않는 post_background입니다.');
-      }
-      if (posts.userKakaoId || posts.isPublished) {
-        const us = await this.dataSource
-          .getRepository(User)
-          .createQueryBuilder('us')
-          .where('us.kakaoId = :id', { id: posts.userKakaoId })
-          .getOne();
-        if (!us) throw new BadRequestException('존재하지 않는 user입니다.');
-      }
-    } catch (e) {
-      throw e;
-    }
+  async fkValidCheck({ posts, passNonEssentail }) {
+    console.log(posts);
+    const pc = await this.dataSource
+      .getRepository(PostCategory)
+      .createQueryBuilder('pc')
+      .where('pc.id = :id', { id: posts.postCategoryId })
+      .getOne();
+    if (!pc && !passNonEssentail)
+      throw new BadRequestException('존재하지 않는 post_category입니다.');
+    const pg = await this.dataSource
+      .getRepository(PostBackground)
+      .createQueryBuilder('pg')
+      .where('pg.id = :id', { id: posts.postBackgroundId })
+      .getOne();
+    if (!pg)
+      throw new BadRequestException('존재하지 않는 post_background입니다.');
+    const us = await this.dataSource
+      .getRepository(User)
+      .createQueryBuilder('us')
+      .where('us.kakaoId = :id', { id: posts.userKakaoId })
+      .getOne();
+    if (!us) throw new BadRequestException('존재하지 않는 user입니다.');
   }
 
   async save(createPostDto: CreatePostDto) {
@@ -116,7 +110,11 @@ export class PostsService {
           post[el] = value;
         }
       });
-      await this.fkValidCheck(post);
+      await this.fkValidCheck({
+        posts: post,
+        passNonEssentail: !createPostDto.isPublished,
+      });
+      console.log(post);
       // queryRunner 안에서는 커스텀 레포 메서드 사용 불가능. 직접 짤 것.
       const data = await queryRunner.manager
         .createQueryBuilder()
@@ -125,7 +123,8 @@ export class PostsService {
         .values(post)
         .orUpdate(Object.keys(post), ['id'], {
           skipUpdateIfNoValuesChanged: true,
-        });
+        })
+        .execute();
       await queryRunner.commitTransaction();
       return data;
     } catch (e) {
@@ -143,8 +142,8 @@ export class PostsService {
 
   async fetchPostForUpdate({ id }) {
     // 카카오 아이디로 valid check? 공개설정 안된 게시글 fetch 못하게 하자!!
-    await this.existCheck({ id });
-    await this.fkValidCheck({ id });
+    const data = await this.existCheck({ id });
+    await this.fkValidCheck({ posts: data, passNonEssentail: true });
     const post = await this.postsRepository.fetchPostForUpdate(id);
 
     const stickerBlocks = await this.stickerBlocksService.fetchBlocks({
@@ -172,6 +171,14 @@ export class PostsService {
 
   async fetchTempPosts({ kakaoId }): Promise<Posts[]> {
     return await this.postsRepository.fetchTempPosts(kakaoId);
+  }
+
+  async fetchDetail({ id }) {
+    const data = await this.existCheck({ id });
+    await this.fkValidCheck({ posts: data, passNonEssentail: false });
+    const comments = await this.commentsService.fetchComments({ postsId: id });
+    const post = await this.postsRepository.fetchPostDetail(id);
+    return { comments, post };
   }
 
   async softDelete({ kakaoId, id }) {

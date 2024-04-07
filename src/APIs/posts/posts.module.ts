@@ -12,6 +12,7 @@ import { PostBackground } from '../postBackgrounds/entities/postBackground.entit
 import { PostCategory } from '../postCategories/entities/postCategory.entity';
 import { StickerBlocksModule } from '../stickerBlocks/stickerBlocks.module';
 import { PostsRepository } from './posts.repository';
+import { CommentsModule } from '../comments/comments.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { PostsRepository } from './posts.repository';
     UtilsModule,
     AwsModule,
     StickerBlocksModule,
+    CommentsModule,
   ],
   providers: [JwtStrategy, PostsService, PostsRepository],
   controllers: [PostsController],

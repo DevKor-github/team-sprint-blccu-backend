@@ -15,9 +15,10 @@ import {
 
 @Entity()
 export class Comment {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
+  @Column()
   @RelationId((comment: Comment) => comment.user)
   userKakaoId: number;
 
@@ -25,6 +26,7 @@ export class Comment {
   @JoinColumn()
   user: User;
 
+  @Column()
   @RelationId((comment: Comment) => comment.posts)
   postsId: number;
 
@@ -32,19 +34,20 @@ export class Comment {
   @JoinColumn()
   posts: Posts;
 
-  @Column({ length: 15 })
-  username: string;
-
   @Column({ length: 1500 })
   content: string;
 
-  @Column()
+  @Column({ default: 0 })
   blame_count: number;
 
-  @ManyToOne(() => Comment, (comment) => comment.children)
+  @ManyToOne(() => Comment, (comment) => comment.children, {
+    nullable: true,
+    onDelete: 'NO ACTION',
+  })
   @JoinColumn()
   parent: Comment;
 
+  @Column()
   @RelationId((comment: Comment) => comment.parent)
   parentId: Comment;
 
