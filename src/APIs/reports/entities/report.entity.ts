@@ -1,4 +1,5 @@
 import { User } from 'src/APIs/users/entities/user.entity';
+import { ReportType } from 'src/commons/enums/report-type.enum';
 import {
   Column,
   CreateDateColumn,
@@ -31,5 +32,8 @@ export class Report {
   user: User;
 
   @Column()
-  report_url: string;
+  type: ReportType;
+
+  @Column()
+  url: string;
 }

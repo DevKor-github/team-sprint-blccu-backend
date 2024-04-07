@@ -16,6 +16,7 @@ import { StickerCategoriesModule } from './APIs/stickerCategories/stickerCategor
 import { StickerBlocksModule } from './APIs/stickerBlocks/stickerBlocks.module';
 import { NotificationsModule } from './APIs/notifications/notifications.module';
 import { AnnouncementsModule } from './APIs/announcements/announcements.module';
+import { ReportsModule } from './APIs/reports/reports.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AnnouncementsModule } from './APIs/announcements/announcements.module';
     NotificationsModule,
     PostBackgroundsModule,
     PostCategoriesModule,
+    ReportsModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
