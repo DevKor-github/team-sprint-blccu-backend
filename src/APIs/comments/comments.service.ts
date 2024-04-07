@@ -27,7 +27,9 @@ export class CommentsService {
   async existCheck({ id }) {
     const comment = await this.commentsRepository.findOne({ where: { id } });
     if (!comment) {
-      throw new NotFoundException('댓글의 아이디를 찾을 수 없습니다.');
+      throw new NotFoundException(
+        '댓글의 아이디를 찾을 수 없습니다. 존재하지 않거나 이미 삭제되었습니다.',
+      );
     }
     return comment;
   }
@@ -51,6 +53,10 @@ export class CommentsService {
   }
 
   async delete({ id, userKakaoId }) {
+    const data = await this.existCheck({ id });
+    await this.dataSource.manager.update(Posts, data.postsId, {
+      comment_count: () => 'comment_count -1',
+    });
     await this.commentsRepository.softDelete({
       user: { kakaoId: userKakaoId },
       id,

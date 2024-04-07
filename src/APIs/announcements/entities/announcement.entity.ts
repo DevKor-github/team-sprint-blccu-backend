@@ -9,8 +9,8 @@ import {
 
 @Entity()
 export class Announcement {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column()
   title: string;

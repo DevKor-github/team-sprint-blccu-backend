@@ -14,9 +14,12 @@ import { LikesModule } from './APIs/likes/likes.module';
 import { StickersModule } from './APIs/stickers/stickers.module';
 import { StickerCategoriesModule } from './APIs/stickerCategories/stickerCategories.module';
 import { StickerBlocksModule } from './APIs/stickerBlocks/stickerBlocks.module';
+import { NotificationsModule } from './APIs/notifications/notifications.module';
+import { AnnouncementsModule } from './APIs/announcements/announcements.module';
 
 @Module({
   imports: [
+    AnnouncementsModule,
     CommentsModule,
     StickersModule,
     StickerCategoriesModule,
@@ -26,6 +29,7 @@ import { StickerBlocksModule } from './APIs/stickerBlocks/stickerBlocks.module';
     UsersModule,
     AuthModule,
     NeighborsModule,
+    NotificationsModule,
     PostBackgroundsModule,
     PostCategoriesModule,
     ConfigModule.forRoot({
