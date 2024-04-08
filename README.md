@@ -1,9 +1,11 @@
-# Blccu Backend
+<div align="center">
+  <img src="readme-assets/logo.png" width="100" height="100" />
+  <h1>블꾸</h1>
+  <p>커스텀 극대화 블로그<p>
+  <a href="https://blccu.com">blccu.com</a>
+</div>
 
-[TEAM Sprint] blccu.com
-블꾸 프로젝트
-개인적으로 기능 테스트 하기 위해 만든 로컬용 레포입니다.
+## Tech Stack
 
-## ERD
-
-![Blccu V2](https://github.com/do-huni/Sprint-blccu-local/assets/119511836/fcaacea3-fbe6-4814-ab61-cb034d25ba9a)
+- Next.js (App Router)
+- TailwindCSS
