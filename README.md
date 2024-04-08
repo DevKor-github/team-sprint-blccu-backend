@@ -7,5 +7,5 @@
 
 ## Tech Stack
 
-- Next.js (App Router)
-- TailwindCSS
+- Nest.js
+- mysql/typeORM
