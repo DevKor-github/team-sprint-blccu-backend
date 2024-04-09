@@ -19,7 +19,7 @@ export class NotificationsController {
     summary: '[SSE] kakaoId로 오는 알림을 구독한다.',
     description: '[swagger 불가능, postman 권장]',
   })
-  @Sse(':kakaoId')
+  @Sse('sub/:kakaoId')
   sendClientAlarm(@Param('kakaoId') kakaoId: number, @Req() req: Request) {
     // this.notificationsService.addStream(this.users$, this.observer, userId);
     // req.on('close', () =>

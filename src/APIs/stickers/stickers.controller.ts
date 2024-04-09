@@ -95,7 +95,7 @@ export class StickersController {
     description:
       '본인이 만든 스티커의 재사용 여부를 토글한다. 보관함 저장 혹은 삭제 용도로 사용할 것',
   })
-  @Post(':id')
+  @Post('toggle/:id')
   @UseGuards(AuthGuard('jwt'))
   @ApiCookieAuth()
   @HttpCode(200)

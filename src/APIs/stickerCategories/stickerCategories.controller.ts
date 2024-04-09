@@ -33,7 +33,7 @@ export class StickerCategoriesController {
   @ApiOkResponse({ description: '생성 완료', type: StickerCategory })
   @ApiCookieAuth()
   @UseGuards(AuthGuard('jwt'))
-  @Post(':name')
+  @Post('create/:name')
   async createCategory(@Req() req: Request, @Param('name') name: string) {
     const kakaoId = req.user.userId;
     return await this.stickerCategoriesService.createCategory({
@@ -48,7 +48,7 @@ export class StickerCategoriesController {
   })
   @ApiCookieAuth()
   @UseGuards(AuthGuard('jwt'))
-  @Post()
+  @Post('map')
   async mapCategory(
     @Req() req: Request,
     @Body() mapCategoryDto: MapCategoryDto,
@@ -72,7 +72,7 @@ export class StickerCategoriesController {
     summary: '카테고리 이름에 해당하는 스티커를 fetchAll',
     description: '카테고리를 이름으로 찾고, 이에 매핑된 스티커들을 가져온다',
   })
-  @Get(':name')
+  @Get('fetch/:name')
   async fetchStickersByCategoryName(@Param('name') name: string) {
     return await this.stickerCategoriesService.fetchStickersByCategoryName({
       name,
