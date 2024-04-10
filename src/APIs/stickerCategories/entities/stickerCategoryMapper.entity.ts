@@ -19,7 +19,7 @@ export class StickerCategoryMapper {
 
   @JoinColumn()
   @ManyToOne(() => Sticker, (stickers) => stickers.id, {
-    onUpdate: 'CASCADE'
+    onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   sticker: Sticker;
