@@ -16,8 +16,8 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
+import { MapCategoryDto } from './dtos/map-category.dto';
 import { StickerCategory } from './entities/stickerCategory.entity';
-import { MapCategoryDto } from './dto/map-category.dto';
 
 @ApiTags('스티커 카테고리 API')
 @Controller('stickercg')
