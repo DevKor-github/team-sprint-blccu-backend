@@ -47,7 +47,7 @@ export class Comment {
   @JoinColumn()
   parent: Comment;
 
-  @Column()
+  @Column({ nullable: true })
   @RelationId((comment: Comment) => comment.parent)
   parentId: Comment;
 
