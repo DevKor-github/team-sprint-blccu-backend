@@ -1,10 +1,12 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
   Param,
   Post,
   Req,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -25,6 +27,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { Sticker } from './entities/sticker.entity';
+import { RemoveBgDto } from './dto/remove-bg.dto';
 
 @ApiTags('스티커 API')
 @Controller('stickers')
@@ -95,7 +98,7 @@ export class StickersController {
     description:
       '본인이 만든 스티커의 재사용 여부를 토글한다. 보관함 저장 혹은 삭제 용도로 사용할 것',
   })
-  @Post(':id')
+  @Post('toggle/:id')
   @UseGuards(AuthGuard('jwt'))
   @ApiCookieAuth()
   @HttpCode(200)
@@ -127,5 +130,19 @@ export class StickersController {
   @HttpCode(200)
   async fetchPublicStickers(): Promise<Sticker[]> {
     return await this.stickersService.fetchPublicStickers();
+  }
+
+  @ApiOperation({
+    summary: '스티커 배경을 제거한다.',
+    description: '스티커 배경을 제거하고, png로 받는다.',
+  })
+  @Post('remove')
+  @HttpCode(201)
+  async removeBg(@Body() body: RemoveBgDto, @Res() res) {
+    const blobData = await this.stickersService.removeBg({ url: body.url });
+    const arrayBuffer = await blobData.arrayBuffer();
+    const bufferData = Buffer.from(arrayBuffer);
+    res.set('Content-Type', 'image/jpeg');
+    res.send(bufferData);
   }
 }
