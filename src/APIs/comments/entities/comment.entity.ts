@@ -47,7 +47,7 @@ export class Comment {
   @ManyToOne(() => Comment, (comment) => comment.children, {
     nullable: true,
     onUpdate: 'NO ACTION',
-    onDelete: 'NO ACTION',
+    onDelete: 'CASCADE',
   })
   @JoinColumn()
   parent: Comment;
