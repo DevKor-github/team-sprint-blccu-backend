@@ -40,7 +40,7 @@ export class CommentsService {
     if (createCommentDto.parentId)
       await this.postsIdValidCheck({
         parentId: createCommentDto.parentId,
-        postsId: createCommentDto.parentId,
+        postsId: createCommentDto.postsId,
       });
     await this.dataSource.manager.update(Posts, createCommentDto.postsId, {
       comment_count: () => 'comment_count +1',
