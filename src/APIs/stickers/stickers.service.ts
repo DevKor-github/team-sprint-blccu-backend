@@ -11,6 +11,7 @@ import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 import { UsersService } from '../users/users.service';
+import { removeBackground } from '@imgly/background-removal-node';
 
 @Injectable()
 export class StickersService {
@@ -104,5 +105,9 @@ export class StickersService {
     return await this.stickersRepository.find({
       where: { isDefault: true },
     });
+  }
+
+  async removeBg({ url }) {
+    return await removeBackground(url);
   }
 }
