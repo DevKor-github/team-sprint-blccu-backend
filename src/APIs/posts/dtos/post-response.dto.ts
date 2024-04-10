@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
 import { PostBackground } from 'src/APIs/postBackgrounds/entities/postBackground.entity';
 import { PostCategory } from 'src/APIs/postCategories/entities/postCategory.entity';
-import { UserResponseDto } from 'src/APIs/users/dto/user-response.dto';
+import { UserResponseDto } from 'src/APIs/users/dtos/user-response.dto';
 import { OpenScope } from 'src/commons/enums/open-scope.enum';
 
 export class PostResponseDto {

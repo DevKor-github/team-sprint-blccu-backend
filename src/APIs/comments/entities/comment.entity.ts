@@ -30,7 +30,11 @@ export class Comment {
   @RelationId((comment: Comment) => comment.posts)
   postsId: number;
 
-  @ManyToOne(() => Posts, (posts) => posts.id, { nullable: false })
+  @ManyToOne(() => Posts, (posts) => posts.id, {
+    nullable: false,
+    onUpdate: 'NO ACTION',
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   posts: Posts;
 
@@ -42,6 +46,7 @@ export class Comment {
 
   @ManyToOne(() => Comment, (comment) => comment.children, {
     nullable: true,
+    onUpdate: 'NO ACTION',
     onDelete: 'NO ACTION',
   })
   @JoinColumn()

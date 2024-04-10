@@ -22,7 +22,11 @@ export class Sticker {
 
   // @ApiProperty({ description: '제작한 유저', type: User })
   @JoinColumn()
-  @ManyToOne(() => User, { onDelete: 'CASCADE', nullable: false })
+  @ManyToOne(() => User, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
   user: User;
 
   @ApiProperty({

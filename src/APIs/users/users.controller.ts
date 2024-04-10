@@ -23,8 +23,8 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { UserResponseDto } from './dto/user-response.dto';
-import { PatchUserInput } from './dto/patch-user.input';
+import { UserResponseDto } from './dtos/user-response.dto';
+import { PatchUserInput } from './dtos/patch-user.input';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';

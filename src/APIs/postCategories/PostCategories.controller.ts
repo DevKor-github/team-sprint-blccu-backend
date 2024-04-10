@@ -19,8 +19,8 @@ import {
 import { PostCategoriesService } from './PostCategories.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { CreatePostCategoryDto } from './dto/create-post-category.dto';
-import { CreatePostCategoryResponseDto } from './dto/create-post-category-response.dto';
+import { CreatePostCategoryDto } from './dtos/create-post-category.dto';
+import { CreatePostCategoryResponseDto } from './dtos/create-post-category-response.dto';
 import { PostCategory } from './entities/postCategory.entity';
 
 @ApiTags('카테고리 API')

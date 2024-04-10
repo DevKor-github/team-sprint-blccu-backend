@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { StickerBlock } from './entities/stickerblock.entity';
 import { Repository } from 'typeorm';
-import { CreateStickerBlockDto } from './dto/create-stickerBlock.dto';
+import { CreateStickerBlockDto } from './dtos/create-stickerBlock.dto';
 import { StickersService } from '../stickers/stickers.service';
 
 @Injectable()

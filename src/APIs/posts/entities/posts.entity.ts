@@ -24,18 +24,30 @@ export class Posts {
   id: number;
 
   @ApiProperty({ description: '연결된 카테고리', type: PostCategory })
-  @ManyToOne(() => PostCategory, { nullable: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => PostCategory, {
+    nullable: true,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   postCategory: PostCategory;
 
   @ApiProperty({ description: '연결된 내지', type: PostBackground })
   @JoinColumn()
-  @ManyToOne(() => PostBackground, { nullable: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => PostBackground, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   postBackground: PostBackground;
 
   @ApiProperty({ description: '작성자', type: User })
   @JoinColumn()
-  @ManyToOne(() => User, { onDelete: 'CASCADE', nullable: false })
+  @ManyToOne(() => User, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   user: User;
 
   @IsString()
@@ -46,7 +58,7 @@ export class Posts {
 
   @IsString()
   @ApiProperty({ description: '연결된 내지 fk', type: String })
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   @RelationId((posts: Posts) => posts.postBackground)
   postBackgroundId: string;
 

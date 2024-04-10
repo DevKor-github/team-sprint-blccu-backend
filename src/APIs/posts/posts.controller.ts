@@ -23,12 +23,12 @@ import {
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { PostsService } from './posts.service';
-import { FetchPostsDto } from './dto/fetch-posts.dto';
-import { PublishPostDto } from './dto/publish-post.dto';
+import { FetchPostsDto } from './dtos/fetch-posts.dto';
+import { PublishPostDto } from './dtos/publish-post.dto';
 import { Posts } from './entities/posts.entity';
-import { PagePostResponseDto } from './dto/page-post-response.dto';
-import { CreatePostInput } from './dto/create-post.input';
-import { PublishPostInput } from './dto/publish-post.input';
+import { PagePostResponseDto } from './dtos/page-post-response.dto';
+import { CreatePostInput } from './dtos/create-post.input';
+import { PublishPostInput } from './dtos/publish-post.input';
 import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';

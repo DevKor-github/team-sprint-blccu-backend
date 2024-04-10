@@ -27,7 +27,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { Sticker } from './entities/sticker.entity';
-import { RemoveBgDto } from './dto/remove-bg.dto';
+import { RemoveBgDto } from './dtos/remove-bg.dto';
 
 @ApiTags('스티커 API')
 @Controller('stickers')

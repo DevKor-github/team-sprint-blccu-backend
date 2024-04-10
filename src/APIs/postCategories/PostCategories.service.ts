@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostCategory } from './entities/postCategory.entity';
 import { Repository } from 'typeorm';
-import { CreatePostCategoryResponseDto } from './dto/create-post-category-response.dto';
+import { CreatePostCategoryResponseDto } from './dtos/create-post-category-response.dto';
 
 @Injectable()
 export class PostCategoriesService {

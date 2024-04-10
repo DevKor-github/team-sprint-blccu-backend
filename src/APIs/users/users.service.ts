@@ -6,11 +6,11 @@ import {
   IUsersServiceCreate,
   IUsersServiceFindUserByKakaoId,
 } from './interfaces/users.service.interface';
-import { USER_SELECT_OPTION, UserResponseDto } from './dto/user-response.dto';
+import { USER_SELECT_OPTION, UserResponseDto } from './dtos/user-response.dto';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
-import { UploadImageDto } from './dto/upload-image.dto';
+import { UploadImageDto } from './dtos/upload-image.dto';
 
 @Injectable()
 export class UsersService {

@@ -16,12 +16,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ToggleLikeDto } from './dto/toggle-like.dto';
+import { ToggleLikeDto } from './dtos/toggle-like.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { ToggleLikeResponseDto } from './dto/toggle-like-response.dto';
+import { ToggleLikeResponseDto } from './dtos/toggle-like-response.dto';
 import { Likes } from './entities/like.entity';
-import { FetchLikesResponseDto } from './dto/fetch-likes-response.dto';
+import { FetchLikesResponseDto } from './dtos/fetch-likes-response.dto';
 
 @ApiTags('좋아요 API')
 @Controller('likes')

@@ -18,7 +18,7 @@ export class Likes {
 
   @ApiProperty({ description: '좋아요를 누른 유저', type: User })
   @JoinColumn()
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, { onUpdate: 'NO ACTION', onDelete: 'CASCADE' })
   user: User;
 
   @RelationId((like: Likes) => like.user)
@@ -29,7 +29,11 @@ export class Likes {
     type: Posts,
   })
   @JoinColumn()
-  @ManyToOne(() => Posts, { nullable: false, onDelete: 'CASCADE' })
+  @ManyToOne(() => Posts, {
+    nullable: false,
+    onUpdate: 'NO ACTION',
+    onDelete: 'CASCADE',
+  })
   posts: Posts;
 
   @RelationId((like: Likes) => like.posts)

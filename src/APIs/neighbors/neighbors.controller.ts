@@ -20,10 +20,10 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { FollowDto } from './dto/follow.dto';
-import { FromUserResponseDto } from './dto/from-user-response.dto';
-import { ToUserResponseDto } from './dto/to-user-response.dto';
-import { FollowUserDto } from './dto/follow-user.dto';
+import { FollowDto } from './dtos/follow.dto';
+import { FromUserResponseDto } from './dtos/from-user-response.dto';
+import { ToUserResponseDto } from './dtos/to-user-response.dto';
+import { FollowUserDto } from './dtos/follow-user.dto';
 
 @ApiTags('이웃 API')
 @Controller('neighbors')
