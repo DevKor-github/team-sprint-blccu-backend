@@ -18,7 +18,14 @@ async function bootstrap() {
       },
     }),
   );
-  app.enableCors();
+  app.enableCors({
+    origin: [
+      'http://localhost:3000/',
+      'https://blccu.com/',
+      'https://www.blccu.com/',
+    ],
+    credentials: true,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
