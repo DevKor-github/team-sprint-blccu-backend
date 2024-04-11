@@ -18,6 +18,19 @@ export class AwsService {
     });
   }
 
+  async imageUploadToS3Buffer(fileName: string, file: Buffer, ext: string) {
+    const command = new PutObjectCommand({
+      Bucket: this.configService.get('AWS_S3_BUCKET_NAME'), // S3 버킷 이름
+      Key: fileName, // 업로드될 파일의 이름
+      Body: file, // 업로드할 파일
+      ACL: 'public-read', // 파일 접근 권한
+      ContentType: `image/${ext}`, // 파일 타입
+    });
+    const result = await this.s3Client.send(command);
+    console.log(result);
+    return `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET_NAME}/${fileName}`;
+  }
+
   async imageUploadToS3(
     fileName: string, // 업로드될 파일의 이름
     file: Express.Multer.File, // 업로드할 파일

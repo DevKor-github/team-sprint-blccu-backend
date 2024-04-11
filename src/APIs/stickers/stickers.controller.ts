@@ -28,6 +28,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { Sticker } from './entities/sticker.entity';
 import { RemoveBgDto } from './dtos/remove-bg.dto';
+import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 
 @ApiTags('스티커 API')
 @Controller('stickers')
@@ -138,11 +139,8 @@ export class StickersController {
   })
   @Post('remove')
   @HttpCode(201)
-  async removeBg(@Body() body: RemoveBgDto, @Res() res) {
-    const blobData = await this.stickersService.removeBg({ url: body.url });
-    const arrayBuffer = await blobData.arrayBuffer();
-    const bufferData = Buffer.from(arrayBuffer);
-    res.set('Content-Type', 'image/jpeg');
-    res.send(bufferData);
+  async removeBg(@Body() body: RemoveBgDto): Promise<ImageUploadResponseDto> {
+    const image_url = await this.stickersService.removeBg({ url: body.url });
+    return image_url;
   }
 }

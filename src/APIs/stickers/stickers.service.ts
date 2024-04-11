@@ -12,6 +12,7 @@ import { UtilsService } from 'src/utils/utils.service';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 import { UsersService } from '../users/users.service';
 import { removeBackground } from '@imgly/background-removal-node';
+import { buffer } from 'stream/consumers';
 
 @Injectable()
 export class StickersService {
@@ -107,7 +108,16 @@ export class StickersService {
     });
   }
 
-  async removeBg({ url }) {
-    return await removeBackground(url);
+  async removeBg({ url }): Promise<ImageUploadResponseDto> {
+    const blobData = await removeBackground(url);
+    const arrayBuffer = await blobData.arrayBuffer();
+    const bufferData = Buffer.from(arrayBuffer);
+    const imageName = this.utilsService.getUUID();
+    const image_url = await this.awsService.imageUploadToS3Buffer(
+      imageName,
+      bufferData,
+      'image/png',
+    );
+    return { image_url };
   }
 }
