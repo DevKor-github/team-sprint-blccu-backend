@@ -12,6 +12,8 @@ import { UtilsService } from 'src/utils/utils.service';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 import { UsersService } from '../users/users.service';
 import { removeBackground } from '@imgly/background-removal-node';
+import { FindStickerDto } from './dtos/find-sticker.dto';
+import { UpdateStickerDto } from './dtos/update-sticker.dto';
 
 @Injectable()
 export class StickersService {
@@ -65,7 +67,6 @@ export class StickersService {
     const data = await this.stickersRepository.findOne({ where: { id } });
     return data;
   }
-
   async createPublicSticker({
     userKakaoId,
     file,
@@ -107,7 +108,61 @@ export class StickersService {
     });
   }
 
-  async removeBg({ url }) {
-    return await removeBackground(url);
+  async removeBg({ url }): Promise<ImageUploadResponseDto> {
+    const blobData = await removeBackground(url);
+    const arrayBuffer = await blobData.arrayBuffer();
+    const bufferData = Buffer.from(arrayBuffer);
+
+    const imageName = this.utilsService.getUUID();
+
+    const image_url = await this.awsService.imageUploadToS3Buffer(
+      imageName,
+      bufferData,
+      'png',
+    );
+    return { image_url };
+  }
+
+  async updateSticker({
+    image_url,
+    kakaoId,
+    id,
+  }: UpdateStickerDto): Promise<Sticker> {
+    try {
+      const sticker = await this.stickersRepository.findOne({
+        where: { id, user: { kakaoId } },
+      });
+      if (!sticker)
+        throw new NotFoundException(
+          '스티커가 존재하지 않거나 제작자 본인이 아닙니다.',
+        );
+      await this.stickersRepository
+        .createQueryBuilder()
+        .update(Sticker)
+        .set({ image_url })
+        .where('id = :id', { id })
+        .execute();
+      const data = await this.stickersRepository.findOne({ where: { id } });
+      return data;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async removeFromS3({ id, kakaoId }: FindStickerDto) {
+    try {
+      const sticker = await this.stickersRepository.findOne({
+        where: { id, user: { kakaoId } },
+      });
+      if (!sticker)
+        throw new NotFoundException(
+          '스티커가 존재하지 않거나 제작자 본인이 아닙니다.',
+        );
+      return await this.awsService.deleteImageFromS3({
+        url: sticker.image_url,
+      });
+    } catch (e) {
+      throw e;
+    }
   }
 }
