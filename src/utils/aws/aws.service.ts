@@ -1,7 +1,12 @@
 // aws.service.ts
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
 
 @Injectable()
 export class AwsService {
@@ -24,11 +29,26 @@ export class AwsService {
       Key: fileName, // 업로드될 파일의 이름
       Body: file, // 업로드할 파일
       ACL: 'public-read', // 파일 접근 권한
-      ContentType: `image/${ext}`, // 파일 타입
+      ContentType: `image/${ext}`, // 파일 타입,
     });
-    const result = await this.s3Client.send(command);
-    console.log(result);
+    await this.s3Client.send(command);
     return `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET_NAME}/${fileName}`;
+  }
+
+  async deleteImageFromS3({ url }) {
+    try {
+      const fileNameRegex = /\/([^\/]+)\.[^.]+$/;
+      const matches = url.match(fileNameRegex);
+      const objectKey = matches && matches[1];
+      const deleteParams = {
+        Bucket: this.configService.get('AWS_S3_BUCKET_NAME'), // S3 버킷 이름
+        Key: objectKey,
+      };
+      const command = new DeleteObjectCommand(deleteParams);
+      return await this.s3Client.send(command);
+    } catch (e) {
+      throw new BadRequestException('존재하지 않거나 적합하지 않은 url입니다.');
+    }
   }
 
   async imageUploadToS3(
