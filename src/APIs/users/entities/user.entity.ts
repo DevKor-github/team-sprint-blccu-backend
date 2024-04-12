@@ -22,7 +22,7 @@ export class User {
   @ApiProperty({ description: '어드민 유저 여부', type: Boolean })
   isAdmin: boolean;
 
-  @Column()
+  @Column({ unique: true })
   @ApiProperty({ description: '유저 이름', type: String })
   username: string;
 
