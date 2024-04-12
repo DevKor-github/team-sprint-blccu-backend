@@ -11,38 +11,38 @@ import {
 @Entity()
 export class User {
   @Column({ type: 'bigint', primary: true })
-  @ApiProperty({ description: '카카오 id' })
+  @ApiProperty({ description: '카카오 id', type: Number })
   kakaoId: number;
 
   @Column({ default: '' })
-  @ApiProperty({ description: 'crypted refresh token' })
+  @ApiProperty({ description: 'crypted refresh token', type: String })
   current_refresh_token: string;
 
   @Column({ default: false })
-  @ApiProperty({ description: '어드민 유저 여부' })
+  @ApiProperty({ description: '어드민 유저 여부', type: Boolean })
   isAdmin: boolean;
 
   @Column()
-  @ApiProperty({ description: '유저 이름' })
+  @ApiProperty({ description: '유저 이름', type: String })
   username: string;
 
   @Column({ default: '' })
-  @ApiProperty({ description: '유저 설명' })
+  @ApiProperty({ description: '유저 설명', type: String })
   description: string;
 
-  @Column()
-  @ApiProperty({ description: '프로필 이미지 url' })
+  @Column({ default: '' })
+  @ApiProperty({ description: '프로필 이미지 url', type: String })
   profile_image: string;
 
   @Column({ default: '' })
-  @ApiProperty({ description: '프로필 배경 이미지 url' })
+  @ApiProperty({ description: '프로필 배경 이미지 url', type: String })
   background_image: string;
 
   @CreateDateColumn()
-  @ApiProperty({ description: '생성된 날짜' })
+  @ApiProperty({ description: '생성된 날짜', type: Date })
   date_created: Date;
 
   @DeleteDateColumn()
-  @ApiProperty({ description: '삭제된 날짜' })
+  @ApiProperty({ description: '삭제된 날짜', type: Date })
   date_deleted: Date;
 }

@@ -33,10 +33,10 @@ export class UsersService {
     if (!user.isAdmin) throw new UnauthorizedException('어드민이 아닙니다.');
   }
   async create({ kakaoId }: IUsersServiceCreate) {
-    const userTempName = "user" + this.utilsService.getUUID().substring(0, 8);
+    const userTempName = 'user' + this.utilsService.getUUID().substring(0, 8);
     const result = await this.usersRepository.save({
       kakaoId,
-      username: userTempName; 
+      username: userTempName,
     });
     return result;
   }

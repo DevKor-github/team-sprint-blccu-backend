@@ -39,8 +39,6 @@ export class AuthController {
     // console.log(req.user);
     const { accessToken, refreshToken } = await this.authService.getJWT({
       kakaoId: req.user.kakaoId,
-      username: req.user.username,
-      profile_image: req.user.profile_image,
     });
     res.cookie('accessToken', accessToken, { httpOnly: true });
     res.cookie('refreshToken', refreshToken, { httpOnly: true });
