@@ -32,11 +32,11 @@ export class UsersService {
     });
     if (!user.isAdmin) throw new UnauthorizedException('어드민이 아닙니다.');
   }
-  async create({ kakaoId, username, profile_image }: IUsersServiceCreate) {
+  async create({ kakaoId }: IUsersServiceCreate) {
+    const userTempName = 'user' + this.utilsService.getUUID().substring(0, 8);
     const result = await this.usersRepository.save({
-      kakaoId: kakaoId,
-      username,
-      profile_image,
+      kakaoId,
+      username: userTempName,
     });
     return result;
   }
