@@ -13,7 +13,7 @@ export class PostCategoriesService {
 
   async create({ kakaoId, name }): Promise<CreatePostCategoryResponseDto> {
     const result = await this.postCategoriesRepository.save({
-      user: kakaoId,
+      user: { kakaoId },
       name,
     });
     return result;

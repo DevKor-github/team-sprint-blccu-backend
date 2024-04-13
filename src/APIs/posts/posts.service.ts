@@ -21,6 +21,8 @@ import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dt
 import { StickerBlocksService } from '../stickerBlocks/stickerBlocks.service';
 import { PostsRepository } from './posts.repository';
 import { CommentsService } from '../comments/comments.service';
+import { FetchUserPostsDto } from './dtos/fetch-user-posts.dto';
+import { OpenScope } from 'src/commons/enums/open-scope.enum';
 
 @Injectable()
 export class PostsService {
@@ -36,6 +38,19 @@ export class PostsService {
   ) {}
   async saveImage(file: Express.Multer.File) {
     return await this.imageUpload(file);
+  }
+
+  async getScope({ from_user, to_user }) {
+    console.log(from_user, to_user);
+    if (from_user === to_user)
+      return [OpenScope.PUBLIC, OpenScope.PROTECTED, OpenScope.PRIVATE];
+    const neighbor = await this.neighborsRepository.findOne({
+      where: { from_user, to_user },
+    });
+    if (neighbor) {
+      return [OpenScope.PUBLIC, OpenScope.PROTECTED];
+    }
+    return [OpenScope.PUBLIC];
   }
 
   async imageUpload(
@@ -187,5 +202,21 @@ export class PostsService {
 
   async hardDelete({ kakaoId, id }) {
     return await this.postsRepository.delete({ user: { kakaoId }, id });
+  }
+
+  async fetchUserPosts({
+    kakaoId,
+    targetKakaoId,
+    postCategoryName,
+  }: FetchUserPostsDto) {
+    const scope = await this.getScope({
+      from_user: targetKakaoId,
+      to_user: kakaoId,
+    });
+    return await this.postsRepository.fetchUserPosts({
+      scope,
+      userKakaoId: targetKakaoId,
+      postCategoryName,
+    });
   }
 }

@@ -32,6 +32,7 @@ import { PublishPostInput } from './dtos/publish-post.input';
 import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
+import { FetchUserPostsInput } from './dtos/fetch-user-posts.input';
 
 @ApiTags('게시글 API')
 @Controller('posts')
@@ -184,5 +185,24 @@ export class PostsController {
   @Get('detail/:id')
   async fetchPostDetail(@Param('id') id: number) {
     return await this.postsService.fetchDetail({ id });
+  }
+
+  @Get('unauth/user/kakaoId')
+  async fetchUnauthUserPosts(@Param('kakaoId') targetKakaoId: number) {}
+
+  @ApiCookieAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Get('auth/user/:kakaoId')
+  async fetchAuthUserPosts(
+    @Param('kakaoId') targetKakaoId: number,
+    @Req() req: Request,
+    @Query() query: FetchUserPostsInput,
+  ) {
+    const kakaoId = req.user.userId;
+    return await this.postsService.fetchUserPosts({
+      kakaoId,
+      targetKakaoId,
+      ...query,
+    });
   }
 }
