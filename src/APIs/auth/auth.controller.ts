@@ -76,6 +76,19 @@ export class AuthController {
       throw new UnauthorizedException(e.message);
     }
   }
+
+  @ApiOperation({
+    summary: '로그아웃(clear cookie)',
+    description: '클라이언트의 로그인 관련 쿠키를 초기화한다.',
+  })
+  @Get('logout')
+  @HttpCode(204)
+  async logout(@Res() res: Response) {
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+    res.clearCookie('isLoggedIn');
+    return res.send();
+  }
 }
 
 //https://velog.io/@leemhoon00/Nestjs-JWT-%EC%9D%B8%EC%A6%9D-%EA%B5%AC%ED%98%84

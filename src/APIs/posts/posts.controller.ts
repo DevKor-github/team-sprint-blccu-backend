@@ -33,6 +33,7 @@ import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 import { FetchUserPostsInput } from './dtos/fetch-user-posts.input';
+import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 
 @ApiTags('게시글 API')
 @Controller('posts')
@@ -48,7 +49,7 @@ export class PostsController {
   @Post('temp')
   @ApiCookieAuth()
   @ApiCreatedResponse({ description: '임시등록 성공', type: PublishPostDto })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @HttpCode(201)
   async updatePost(@Req() req: Request, @Body() body: CreatePostInput) {
     const kakaoId = req.user.userId;
@@ -187,18 +188,16 @@ export class PostsController {
     return await this.postsService.fetchDetail({ id });
   }
 
-  @Get('unauth/user/kakaoId')
-  async fetchUnauthUserPosts(@Param('kakaoId') targetKakaoId: number) {}
-
   @ApiCookieAuth()
-  @UseGuards(AuthGuard('jwt'))
   @Get('auth/user/:kakaoId')
   async fetchAuthUserPosts(
     @Param('kakaoId') targetKakaoId: number,
     @Req() req: Request,
     @Query() query: FetchUserPostsInput,
   ) {
+    console.log(req.user);
     const kakaoId = req.user.userId;
+    console.log(kakaoId);
     return await this.postsService.fetchUserPosts({
       kakaoId,
       targetKakaoId,

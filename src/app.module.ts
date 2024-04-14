@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommentsModule } from './APIs/comments/comments.module';
 import { PostsModule } from './APIs/posts/posts.module';
 import { UsersModule } from './APIs/users/users.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './APIs/auth/auth.module';
 import { NeighborsModule } from './APIs/neighbors/neighbors.module';
 import { PostBackgroundsModule } from './APIs/postBackgrounds/postBackgrounds.module';
@@ -17,6 +17,8 @@ import { StickerBlocksModule } from './APIs/stickerBlocks/stickerBlocks.module';
 import { NotificationsModule } from './APIs/notifications/notifications.module';
 import { AnnouncementsModule } from './APIs/announcements/announcements.module';
 import { ReportsModule } from './APIs/reports/reports.module';
+import { AuthTokenMiddleware } from './commons/middlewares/auth-token.middleware';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -34,6 +36,14 @@ import { ReportsModule } from './APIs/reports/reports.module';
     PostBackgroundsModule,
     PostCategoriesModule,
     ReportsModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: configService.get<string>('JWT_EXPIRES_IN') },
+      }),
+      inject: [ConfigService],
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -53,4 +63,10 @@ import { ReportsModule } from './APIs/reports/reports.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuthTokenMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}

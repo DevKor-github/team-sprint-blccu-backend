@@ -13,6 +13,7 @@ import { PostCategory } from '../postCategories/entities/postCategory.entity';
 import { StickerBlocksModule } from '../stickerBlocks/stickerBlocks.module';
 import { PostsRepository } from './posts.repository';
 import { CommentsModule } from '../comments/comments.module';
+import { JwtCheckStrategy } from '../auth/strategies/jwt-check.stategy';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { CommentsModule } from '../comments/comments.module';
     StickerBlocksModule,
     CommentsModule,
   ],
-  providers: [JwtStrategy, PostsService, PostsRepository],
+  providers: [JwtStrategy, JwtCheckStrategy, PostsService, PostsRepository],
   controllers: [PostsController],
   exports: [PostsService],
 })

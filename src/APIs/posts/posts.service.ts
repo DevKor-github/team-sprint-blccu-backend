@@ -41,7 +41,6 @@ export class PostsService {
   }
 
   async getScope({ from_user, to_user }) {
-    console.log(from_user, to_user);
     if (from_user === to_user)
       return [OpenScope.PUBLIC, OpenScope.PROTECTED, OpenScope.PRIVATE];
     const neighbor = await this.neighborsRepository.findOne({
@@ -78,7 +77,6 @@ export class PostsService {
   }
 
   async fkValidCheck({ posts, passNonEssentail }) {
-    console.log(posts);
     const pc = await this.dataSource
       .getRepository(PostCategory)
       .createQueryBuilder('pc')
@@ -129,7 +127,6 @@ export class PostsService {
         posts: post,
         passNonEssentail: !createPostDto.isPublished,
       });
-      console.log(post);
       // queryRunner 안에서는 커스텀 레포 메서드 사용 불가능. 직접 짤 것.
       const data = await queryRunner.manager
         .createQueryBuilder()
@@ -180,7 +177,6 @@ export class PostsService {
       page,
     );
 
-    console.log(postsAndCounts);
     return new Page<Posts>(postsAndCounts[1], page.pageSize, postsAndCounts[0]);
   }
 

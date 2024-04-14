@@ -2,7 +2,6 @@ import { DataSource, Repository } from 'typeorm';
 import { Posts } from './entities/posts.entity';
 import { Injectable } from '@nestjs/common';
 import { OpenScope } from 'src/commons/enums/open-scope.enum';
-import { FetchUserPostsDto } from './dtos/fetch-user-posts.dto';
 @Injectable()
 export class PostsRepository extends Repository<Posts> {
   constructor(private dataSource: DataSource) {
@@ -100,7 +99,6 @@ export class PostsRepository extends Repository<Posts> {
   }
 
   async fetchUserPosts({ scope, userKakaoId, postCategoryName }) {
-    console.log(postCategoryName);
     const query = this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')
       .innerJoinAndSelect('p.postBackground', 'postBackground')
