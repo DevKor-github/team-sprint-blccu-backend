@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
@@ -24,6 +25,11 @@ import { CommentsService } from '../comments/comments.service';
 import { FetchUserPostsDto } from './dtos/fetch-user-posts.dto';
 import { OpenScope } from 'src/commons/enums/open-scope.enum';
 import { PostResponseDto } from './dtos/post-response.dto';
+import { fetchPostDetailDto } from './dtos/fetch-post-detail.dto';
+import {
+  FetchPostForUpdateDto,
+  PostResponseDtoExceptCategory,
+} from './dtos/fetch-post-for-update.dto';
 
 @Injectable()
 export class PostsService {
@@ -107,10 +113,10 @@ export class PostsService {
     let post = {};
     try {
       if (createPostDto.id) {
-        // 이때 락 걸어야 되나?
         post = await queryRunner.manager.findOne(Posts, {
           where: {
             id: createPostDto.id,
+            user: { kakaoId: createPostDto.userKakaoId },
           },
         });
         if (!post) {
@@ -128,7 +134,6 @@ export class PostsService {
         posts: post,
         passNonEssentail: !createPostDto.isPublished,
       });
-      // queryRunner 안에서는 커스텀 레포 메서드 사용 불가능. 직접 짤 것.
       const data = await queryRunner.manager
         .createQueryBuilder()
         .insert()
@@ -147,23 +152,24 @@ export class PostsService {
       await queryRunner.release();
     }
   }
+
   async fetchPosts(page: FetchPostsDto): Promise<PagePostResponseDto> {
     const postsAndCounts = await this.postsRepository.fetchPosts(page);
-
     return new Page<Posts>(postsAndCounts[1], page.pageSize, postsAndCounts[0]);
   }
 
-  async fetchPostForUpdate({ id }) {
-    // 카카오 아이디로 valid check? 공개설정 안된 게시글 fetch 못하게 하자!!
+  async fetchPostForUpdate({ id, kakaoId }): Promise<FetchPostForUpdateDto> {
     const data = await this.existCheck({ id });
     await this.fkValidCheck({ posts: data, passNonEssentail: true });
+    if (data.userKakaoId !== kakaoId)
+      throw new UnauthorizedException('본인이 아닙니다.');
     const post = await this.postsRepository.fetchPostForUpdate(id);
-
     const stickerBlocks = await this.stickerBlocksService.fetchBlocks({
       postsId: id,
     });
     return { post, stickerBlocks };
   }
+
   async fetchFriendsPosts({
     kakaoId,
     page,
@@ -181,15 +187,19 @@ export class PostsService {
     return new Page<Posts>(postsAndCounts[1], page.pageSize, postsAndCounts[0]);
   }
 
-  async fetchTempPosts({ kakaoId }): Promise<Posts[]> {
+  async fetchTempPosts({ kakaoId }): Promise<PostResponseDtoExceptCategory[]> {
     return await this.postsRepository.fetchTempPosts(kakaoId);
   }
 
-  async fetchDetail({ id }) {
+  async fetchDetail({ kakaoId, id }): Promise<fetchPostDetailDto> {
     const data = await this.existCheck({ id });
     await this.fkValidCheck({ posts: data, passNonEssentail: false });
+    const scope = await this.getScope({
+      from_user: data.userKakaoId,
+      to_user: kakaoId,
+    });
     const comments = await this.commentsService.fetchComments({ postsId: id });
-    const post = await this.postsRepository.fetchPostDetail(id);
+    const post = await this.postsRepository.fetchPostDetail({ id, scope });
     return { comments, post };
   }
 

@@ -36,6 +36,10 @@ import { FetchUserPostsInput } from './dtos/fetch-user-posts.input';
 import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 import { PostResponseDto } from './dtos/post-response.dto';
 import { fetchPostDetailDto } from './dtos/fetch-post-detail.dto';
+import {
+  FetchPostForUpdateDto,
+  PostResponseDtoExceptCategory,
+} from './dtos/fetch-post-for-update.dto';
 
 @ApiTags('게시글 API')
 @Controller('posts')
@@ -93,9 +97,12 @@ export class PostsController {
     description: '로그인된 유저의 임시작성 게시글을 조회한다.',
   })
   @ApiCookieAuth()
+  @ApiOkResponse({ type: [PostResponseDtoExceptCategory] })
   @UseGuards(AuthGuardV2)
   @Get('temp')
-  async fetchTempPosts(@Req() req: Request): Promise<Posts[]> {
+  async fetchTempPosts(
+    @Req() req: Request,
+  ): Promise<PostResponseDtoExceptCategory[]> {
     const kakaoId = req.user.userId;
     console.log(kakaoId);
     return await this.postsService.fetchTempPosts({ kakaoId });
@@ -175,20 +182,32 @@ export class PostsController {
     description:
       '본인 게시글 수정용으로 id에 해당하는 게시글에 조인된 스티커 블록들의 값과 게시글 세부 데이터를 모두 가져온다.',
   })
+  @ApiCookieAuth()
+  @ApiOkResponse({ type: FetchPostForUpdateDto })
+  @UseGuards(AuthGuardV2)
   @HttpCode(200)
   @Get('update/:id')
-  async fetchPost(@Param('id') id: number) {
-    return await this.postsService.fetchPostForUpdate({ id });
+  async fetchPost(
+    @Req() req: Request,
+    @Param('id') id: number,
+  ): Promise<FetchPostForUpdateDto> {
+    const kakaoId = req.user.userId;
+    return await this.postsService.fetchPostForUpdate({ id, kakaoId });
   }
 
   @ApiOperation({
     summary: '게시글 디테일 뷰 fetch',
-    description: 'id에 해당하는 게시글과 댓글을 가져온다. 조회수를 올린다.',
+    description:
+      'id에 해당하는 게시글과 댓글을 가져온다. 조회수를 올린다. 보호된 게시글은 권한이 있는 사용자만 접근 가능하다.',
   })
   @Get('detail/:id')
   @ApiOkResponse({ type: fetchPostDetailDto })
-  async fetchPostDetail(@Param('id') id: number) {
-    return await this.postsService.fetchDetail({ id });
+  async fetchPostDetail(
+    @Param('id') id: number,
+    @Req() req: Request,
+  ): Promise<fetchPostDetailDto> {
+    const kakaoId = req.user.userId;
+    return await this.postsService.fetchDetail({ kakaoId, id });
   }
 
   @ApiOperation({
