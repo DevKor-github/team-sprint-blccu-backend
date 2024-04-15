@@ -28,7 +28,7 @@ import { CommentsModule } from '../comments/comments.module';
     StickerBlocksModule,
     CommentsModule,
   ],
-  providers: [JwtStrategy, PostsService, PostsRepository],
+  providers: [PostsService, PostsRepository],
   controllers: [PostsController],
   exports: [PostsService],
 })

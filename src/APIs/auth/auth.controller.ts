@@ -39,8 +39,6 @@ export class AuthController {
     // console.log(req.user);
     const { accessToken, refreshToken } = await this.authService.getJWT({
       kakaoId: req.user.kakaoId,
-      username: req.user.username,
-      profile_image: req.user.profile_image,
     });
     res.cookie('accessToken', accessToken, { httpOnly: true });
     res.cookie('refreshToken', refreshToken, { httpOnly: true });
@@ -77,6 +75,19 @@ export class AuthController {
       res.clearCookie('isLoggedIn');
       throw new UnauthorizedException(e.message);
     }
+  }
+
+  @ApiOperation({
+    summary: '로그아웃(clear cookie)',
+    description: '클라이언트의 로그인 관련 쿠키를 초기화한다.',
+  })
+  @Get('logout')
+  @HttpCode(204)
+  async logout(@Res() res: Response) {
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+    res.clearCookie('isLoggedIn');
+    return res.send();
   }
 }
 

@@ -24,11 +24,12 @@ export class Report {
   @CreateDateColumn()
   date_created: string;
 
+  @Column()
   @RelationId((report: Report) => report.user)
   userKakaoId: number;
 
   @JoinColumn()
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
   user: User;
 
   @Column()

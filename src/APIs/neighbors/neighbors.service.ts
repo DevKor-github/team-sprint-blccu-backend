@@ -2,10 +2,10 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Neighbor } from './entities/neighbor.entity';
 import { DataSource, Repository } from 'typeorm';
-import { FromUserResponseDto } from './dto/from-user-response.dto';
-import { ToUserResponseDto } from './dto/to-user-response.dto';
-import { FollowUserDto } from './dto/follow-user.dto';
-import { USER_SELECT_OPTION } from '../users/dto/user-response.dto';
+import { FromUserResponseDto } from './dtos/from-user-response.dto';
+import { ToUserResponseDto } from './dtos/to-user-response.dto';
+import { FollowUserDto } from './dtos/follow-user.dto';
+import { USER_SELECT_OPTION } from '../users/dtos/user-response.dto';
 
 @Injectable()
 export class NeighborsService {

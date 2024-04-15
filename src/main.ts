@@ -4,11 +4,28 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { HttpExceptionFilter } from './commons/filter/http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
+import * as expressBasicAuth from 'express-basic-auth';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
-  app.enableCors();
+  app.use(
+    ['/api-docs'],
+    expressBasicAuth({
+      challenge: true,
+      users: {
+        [process.env.SWAGGER_USER]: process.env.SWAGGER_PASSWORD, // 지정된 ID/비밀번호
+      },
+    }),
+  );
+  app.enableCors({
+    origin: [
+      'http://localhost:3000/',
+      'https://blccu.com/',
+      'https://www.blccu.com/',
+    ],
+    credentials: true,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

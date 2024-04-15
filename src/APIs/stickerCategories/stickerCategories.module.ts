@@ -14,7 +14,7 @@ import { StickersModule } from '../stickers/stickers.module';
     UsersModule,
     StickersModule,
   ],
-  providers: [JwtStrategy, StickerCategoriesService],
+  providers: [StickerCategoriesService],
   controllers: [StickerCategoriesController],
 })
 export class StickerCategoriesModule {}

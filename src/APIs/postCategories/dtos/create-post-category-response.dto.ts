@@ -1,4 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
+import { User } from 'src/APIs/users/entities/user.entity';
 
 export class CreatePostCategoryResponseDto {
   @ApiProperty({
@@ -17,5 +18,11 @@ export class CreatePostCategoryResponseDto {
     type: Number,
     description: '유저 kakaoId',
   })
-  user: number;
+  userKakaoId: number;
+
+  @ApiProperty({
+    type: PickType(User, ['kakaoId']),
+    description: '유저의 picktype',
+  })
+  user: User;
 }

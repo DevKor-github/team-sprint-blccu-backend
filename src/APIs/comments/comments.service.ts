@@ -8,6 +8,7 @@ import { UsersService } from '../users/users.service';
 import { CommentsRepository } from './comments.repository';
 import { DataSource } from 'typeorm';
 import { Posts } from '../posts/entities/posts.entity';
+import { FetchCommentsDto } from './dtos/fetch-comments.dto';
 
 @Injectable()
 export class CommentsService {
@@ -40,7 +41,7 @@ export class CommentsService {
     if (createCommentDto.parentId)
       await this.postsIdValidCheck({
         parentId: createCommentDto.parentId,
-        postsId: createCommentDto.parentId,
+        postsId: createCommentDto.postsId,
       });
     await this.dataSource.manager.update(Posts, createCommentDto.postsId, {
       comment_count: () => 'comment_count +1',
@@ -48,7 +49,7 @@ export class CommentsService {
     return await this.commentsRepository.upsertComment({ createCommentDto });
   }
 
-  async fetchComments({ postsId }) {
+  async fetchComments({ postsId }): Promise<FetchCommentsDto[]> {
     return await this.commentsRepository.fetchComments({ postsId });
   }
 

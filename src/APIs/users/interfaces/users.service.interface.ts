@@ -1,7 +1,5 @@
 export interface IUsersServiceCreate {
   kakaoId: number;
-  profile_image: string;
-  username: string;
 }
 
 export interface IUsersServiceFindUserByKakaoId {

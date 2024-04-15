@@ -12,26 +12,34 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBody,
   ApiConsumes,
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { PostsService } from './posts.service';
-import { FetchPostsDto } from './dto/fetch-posts.dto';
-import { PublishPostDto } from './dto/publish-post.dto';
+import { FetchPostsDto } from './dtos/fetch-posts.dto';
+import { PublishPostDto } from './dtos/publish-post.dto';
 import { Posts } from './entities/posts.entity';
-import { PagePostResponseDto } from './dto/page-post-response.dto';
-import { CreatePostInput } from './dto/create-post.input';
-import { PublishPostInput } from './dto/publish-post.input';
+import { PagePostResponseDto } from './dtos/page-post-response.dto';
+import { CreatePostInput } from './dtos/create-post.input';
+import { PublishPostInput } from './dtos/publish-post.input';
 import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
+import { FetchUserPostsInput } from './dtos/fetch-user-posts.input';
+import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
+import { PostResponseDto } from './dtos/post-response.dto';
+import { fetchPostDetailDto } from './dtos/fetch-post-detail.dto';
+import {
+  FetchPostForUpdateDto,
+  PostResponseDtoExceptCategory,
+} from './dtos/fetch-post-for-update.dto';
 
 @ApiTags('게시글 API')
 @Controller('posts')
@@ -47,7 +55,7 @@ export class PostsController {
   @Post('temp')
   @ApiCookieAuth()
   @ApiCreatedResponse({ description: '임시등록 성공', type: PublishPostDto })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @HttpCode(201)
   async updatePost(@Req() req: Request, @Body() body: CreatePostInput) {
     const kakaoId = req.user.userId;
@@ -64,7 +72,7 @@ export class PostsController {
   @Post()
   @ApiCookieAuth()
   @ApiCreatedResponse({ description: '등록 성공', type: PublishPostDto })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @HttpCode(201)
   async publishPost(@Req() req: Request, @Body() body: PublishPostInput) {
     const kakaoId = req.user.userId;
@@ -89,9 +97,12 @@ export class PostsController {
     description: '로그인된 유저의 임시작성 게시글을 조회한다.',
   })
   @ApiCookieAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @ApiOkResponse({ type: [PostResponseDtoExceptCategory] })
+  @UseGuards(AuthGuardV2)
   @Get('temp')
-  async fetchTempPosts(@Req() req: Request): Promise<Posts[]> {
+  async fetchTempPosts(
+    @Req() req: Request,
+  ): Promise<PostResponseDtoExceptCategory[]> {
     const kakaoId = req.user.userId;
     console.log(kakaoId);
     return await this.postsService.fetchTempPosts({ kakaoId });
@@ -110,7 +121,7 @@ export class PostsController {
     description: '이미지 서버에 파일 업로드 완료',
     type: ImageUploadResponseDto,
   })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
   @Post('image')
   @UseInterceptors(FileInterceptor('file'))
@@ -128,7 +139,7 @@ export class PostsController {
       '친구의 게시글을 조회한다. Query를 통해 페이지네이션 가능. default) pageNo: 1, pageSize: 10',
   })
   @ApiCreatedResponse({ description: '조회 성공', type: PagePostResponseDto })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @HttpCode(200)
   @ApiCookieAuth()
   @Get('friends')
@@ -146,7 +157,7 @@ export class PostsController {
       '로그인 된 유저의 {id}에 해당하는 게시글을 논리삭제한다. 발행된 게시글에 사용을 권장',
   })
   @ApiCookieAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @Delete('soft/:id')
   async softDelete(@Req() req: Request, @Param('id') id: number) {
     const kakaoId = req.user.userId;
@@ -159,7 +170,7 @@ export class PostsController {
       '로그인 된 유저의 {id}에 해당하는 게시글을 물리삭제한다. 임시 저장된 게시글에 사용을 권장',
   })
   @ApiCookieAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @Delete('hard/:id')
   async hardDelete(@Req() req: Request, @Param('id') id: number) {
     const kakaoId = req.user.userId;
@@ -171,18 +182,52 @@ export class PostsController {
     description:
       '본인 게시글 수정용으로 id에 해당하는 게시글에 조인된 스티커 블록들의 값과 게시글 세부 데이터를 모두 가져온다.',
   })
+  @ApiCookieAuth()
+  @ApiOkResponse({ type: FetchPostForUpdateDto })
+  @UseGuards(AuthGuardV2)
   @HttpCode(200)
   @Get('update/:id')
-  async fetchPost(@Param('id') id: number) {
-    return await this.postsService.fetchPostForUpdate({ id });
+  async fetchPost(
+    @Req() req: Request,
+    @Param('id') id: number,
+  ): Promise<FetchPostForUpdateDto> {
+    const kakaoId = req.user.userId;
+    return await this.postsService.fetchPostForUpdate({ id, kakaoId });
   }
 
   @ApiOperation({
     summary: '게시글 디테일 뷰 fetch',
-    description: 'id에 해당하는 게시글과 댓글을 가져온다. 조회수를 올린다.',
+    description:
+      'id에 해당하는 게시글과 댓글을 가져온다. 조회수를 올린다. 보호된 게시글은 권한이 있는 사용자만 접근 가능하다.',
   })
   @Get('detail/:id')
-  async fetchPostDetail(@Param('id') id: number) {
-    return await this.postsService.fetchDetail({ id });
+  @ApiOkResponse({ type: fetchPostDetailDto })
+  async fetchPostDetail(
+    @Param('id') id: number,
+    @Req() req: Request,
+  ): Promise<fetchPostDetailDto> {
+    const kakaoId = req.user.userId;
+    return await this.postsService.fetchDetail({ kakaoId, id });
+  }
+
+  @ApiOperation({
+    summary: '특정 유저의 게시글 조회',
+    description:
+      '로그인 된 유저의 경우 private/protected 게시글 조회 권한 체크 후 조회. 카테고리 이름으로 필터링 가능',
+  })
+  @Get('/user/:kakaoId')
+  @ApiOkResponse({ type: [PostResponseDto] })
+  async fetchUserPosts(
+    @Param('kakaoId') targetKakaoId: number,
+    @Req() req: Request,
+    @Query() query: FetchUserPostsInput,
+  ): Promise<PostResponseDto[]> {
+    console.log(req.user);
+    const kakaoId = req.user.userId;
+    return await this.postsService.fetchUserPosts({
+      kakaoId,
+      targetKakaoId,
+      ...query,
+    });
   }
 }

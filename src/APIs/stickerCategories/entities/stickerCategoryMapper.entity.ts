@@ -19,6 +19,7 @@ export class StickerCategoryMapper {
 
   @JoinColumn()
   @ManyToOne(() => Sticker, (stickers) => stickers.id, {
+    onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   sticker: Sticker;
@@ -35,6 +36,7 @@ export class StickerCategoryMapper {
     () => StickerCategory,
     (stickerCategories) => stickerCategories.id,
     {
+      onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
   )

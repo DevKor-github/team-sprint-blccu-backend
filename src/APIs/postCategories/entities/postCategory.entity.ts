@@ -20,9 +20,10 @@ export class PostCategory {
   name: string;
 
   @JoinColumn()
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onUpdate: 'NO ACTION', onDelete: 'CASCADE' })
   user: User;
 
+  @Column()
   @RelationId((postCategory: PostCategory) => postCategory.user)
   userKakaoId: number;
 }

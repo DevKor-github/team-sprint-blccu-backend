@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Post, Req, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { CommentsService } from './comments.service';
 import { CreateCommentInput } from './dtos/create-comment.dto';
 import { Request } from 'express';
 import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DeleteCommentDto } from './dtos/delete-comment.dto';
+import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 
 @ApiTags('댓글 API')
 @Controller('comments')
@@ -17,7 +17,7 @@ export class CommentsController {
   })
   @ApiCookieAuth()
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   async upsertComment(@Req() req: Request, @Body() body: CreateCommentInput) {
     const userKakaoId = req.user.userId;
     return await this.commentsService.upsert({ ...body, userKakaoId });
@@ -29,7 +29,7 @@ export class CommentsController {
   })
   @ApiCookieAuth()
   @Delete()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   async deleteComment(@Req() req: Request, @Body() body: DeleteCommentDto) {
     const userKakaoId = req.user.userId;
     return await this.commentsService.delete({ ...body, userKakaoId });

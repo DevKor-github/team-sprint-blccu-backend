@@ -21,13 +21,13 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { UserResponseDto } from './dto/user-response.dto';
-import { PatchUserInput } from './dto/patch-user.input';
+import { UserResponseDto } from './dtos/user-response.dto';
+import { PatchUserInput } from './dtos/patch-user.input';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 
 @ApiTags('유저 API')
 @Controller('users')
@@ -52,7 +52,7 @@ export class UsersController {
   @ApiCookieAuth()
   @ApiOkResponse({ description: '불러오기 완료', type: UserResponseDto })
   @Get()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @HttpCode(200)
   async fetchUser(@Req() req: Request): Promise<UserResponseDto> {
     const kakaoId = req.user.userId;
@@ -67,7 +67,7 @@ export class UsersController {
   @ApiCookieAuth()
   @Patch()
   @HttpCode(200)
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   async patchUser(
     @Req() req: Request,
     @Body() body: PatchUserInput,
@@ -95,7 +95,7 @@ export class UsersController {
     description: '업로드 성공',
     type: ImageUploadResponseDto,
   })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
@@ -124,7 +124,7 @@ export class UsersController {
     description: '업로드 성공',
     type: ImageUploadResponseDto,
   })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)

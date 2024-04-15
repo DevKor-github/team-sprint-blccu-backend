@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserResponseDto } from 'src/APIs/users/dto/user-response.dto';
+import { UserResponseDto } from 'src/APIs/users/dtos/user-response.dto';
 import { User } from 'src/APIs/users/entities/user.entity';
 import {
   Entity,
@@ -17,12 +17,20 @@ export class Neighbor {
 
   @ApiProperty({ type: UserResponseDto, description: '이웃 추가를 받은 유저' })
   @JoinColumn()
-  @ManyToOne(() => User, (users) => users.kakaoId, { nullable: false })
+  @ManyToOne(() => User, (users) => users.kakaoId, {
+    nullable: false,
+    onUpdate: 'NO ACTION',
+    onDelete: 'CASCADE',
+  })
   to_user: User;
 
   @ApiProperty({ type: UserResponseDto, description: '이웃 추가를 한 유저' })
   @JoinColumn()
-  @ManyToOne(() => User, (users) => users.kakaoId, { nullable: false })
+  @ManyToOne(() => User, (users) => users.kakaoId, {
+    nullable: false,
+    onUpdate: 'NO ACTION',
+    onDelete: 'CASCADE',
+  })
   from_user: User;
 
   @RelationId((neighbor: Neighbor) => neighbor.to_user) // you need to specify target relation

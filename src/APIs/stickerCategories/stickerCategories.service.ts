@@ -57,7 +57,7 @@ export class StickerCategoriesService {
 
   async fetchStickersByCategoryName({ name }) {
     await this.existCheckByName({ name });
-    return this.stickerCategoryMappersRepository.find({
+    return await this.stickerCategoryMappersRepository.find({
       relations: { sticker: true, stickerCategory: true },
       where: { stickerCategory: { name }, sticker: { isDefault: true } },
     });

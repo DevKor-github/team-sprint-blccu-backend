@@ -17,11 +17,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { PostCategoriesService } from './PostCategories.service';
-import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { CreatePostCategoryDto } from './dto/create-post-category.dto';
-import { CreatePostCategoryResponseDto } from './dto/create-post-category-response.dto';
+import { CreatePostCategoryDto } from './dtos/create-post-category.dto';
+import { CreatePostCategoryResponseDto } from './dtos/create-post-category-response.dto';
 import { PostCategory } from './entities/postCategory.entity';
+import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 
 @ApiTags('카테고리 API')
 @Controller('postcg')
@@ -37,7 +37,7 @@ export class PostCategoriesController {
     description: '카테고리 생성 완료',
     type: CreatePostCategoryResponseDto,
   })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @Post()
   @HttpCode(201)
   async createPostCategory(
@@ -58,7 +58,7 @@ export class PostCategoriesController {
     description: '',
     type: [PostCategory],
   })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @Get()
   @HttpCode(200)
   async fetchPostCategories(@Req() req: Request): Promise<PostCategory[]> {
@@ -73,7 +73,7 @@ export class PostCategoriesController {
   })
   @ApiCookieAuth()
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   async deletePostCategory(@Req() req: Request, @Param('id') id: string) {
     const kakaoId = req.user.userId;
     return await this.postCategoriesService.delete({ kakaoId, id });

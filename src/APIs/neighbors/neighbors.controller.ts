@@ -8,7 +8,6 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { NeighborsService } from './neighbors.service';
 import {
@@ -20,10 +19,11 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { FollowDto } from './dto/follow.dto';
-import { FromUserResponseDto } from './dto/from-user-response.dto';
-import { ToUserResponseDto } from './dto/to-user-response.dto';
-import { FollowUserDto } from './dto/follow-user.dto';
+import { FollowDto } from './dtos/follow.dto';
+import { FromUserResponseDto } from './dtos/from-user-response.dto';
+import { ToUserResponseDto } from './dtos/to-user-response.dto';
+import { FollowUserDto } from './dtos/follow-user.dto';
+import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 
 @ApiTags('이웃 API')
 @Controller('neighbors')
@@ -37,7 +37,7 @@ export class NeighborsController {
   @ApiCookieAuth()
   @ApiCreatedResponse({ description: '이웃 추가 성공', type: FollowUserDto })
   @ApiConflictResponse({ description: '이미 팔로우한 상태이다.' })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @Post('follow')
   @HttpCode(201)
   async followUser(
@@ -59,7 +59,7 @@ export class NeighborsController {
   @ApiCookieAuth()
   @ApiOkResponse({ description: '언팔로우 성공' })
   @ApiNotFoundResponse({ description: '존재하지 않는 이웃 정보이다.' })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @Post('unfollow')
   @HttpCode(200)
   unfollowUser(@Body() body: FollowDto, @Req() req: Request) {

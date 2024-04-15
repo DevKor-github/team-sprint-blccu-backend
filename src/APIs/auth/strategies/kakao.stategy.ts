@@ -20,16 +20,9 @@ export class KakaoStategy extends PassportStrategy(Strategy, 'kakao') {
   ) {
     try {
       const { _json } = profile;
-      const userData = _json.properties;
       const user = {
         kakaoId: _json.id,
-        username: userData.nickname,
-        profile_image: userData.profile_image,
       };
-      // 프로필 이미지 비동의 시 기본값 설정해주기!
-      if (!userData.profile_image) {
-        user.profile_image = '';
-      }
       done(null, user);
     } catch (error) {
       done(error);
