@@ -2,6 +2,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Posts } from './entities/posts.entity';
 import { Injectable } from '@nestjs/common';
 import { OpenScope } from 'src/commons/enums/open-scope.enum';
+import { PostResponseDto } from './dtos/post-response.dto';
 @Injectable()
 export class PostsRepository extends Repository<Posts> {
   constructor(private dataSource: DataSource) {
@@ -37,7 +38,7 @@ export class PostsRepository extends Repository<Posts> {
       .getManyAndCount();
   }
 
-  async fetchPostDetail(id) {
+  async fetchPostDetail(id): Promise<PostResponseDto> {
     await this.update(id, {
       view_count: () => 'view_count +1',
     });
@@ -98,7 +99,11 @@ export class PostsRepository extends Repository<Posts> {
       .getMany();
   }
 
-  async fetchUserPosts({ scope, userKakaoId, postCategoryName }) {
+  async fetchUserPosts({
+    scope,
+    userKakaoId,
+    postCategoryName,
+  }): Promise<PostResponseDto[]> {
     const query = this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')
       .innerJoinAndSelect('p.postBackground', 'postBackground')

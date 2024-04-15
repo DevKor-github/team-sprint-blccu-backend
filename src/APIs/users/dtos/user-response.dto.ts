@@ -1,4 +1,4 @@
-import { OmitType } from '@nestjs/swagger';
+import { OmitType, PickType } from '@nestjs/swagger';
 import { User } from '../entities/user.entity';
 
 export const USER_SELECT_OPTION = {
@@ -11,7 +11,12 @@ export const USER_SELECT_OPTION = {
   date_created: true,
   date_deleted: true,
 };
-
+export class UserPrimaryResponseDto extends PickType(User, [
+  'kakaoId',
+  'username',
+  'profile_image',
+  'description',
+]) {}
 export class UserResponseDto extends OmitType(User, ['current_refresh_token']) {
   // @ApiProperty({ description: '카카오 id', type: Number })
   // kakaoId: number;

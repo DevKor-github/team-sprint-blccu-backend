@@ -23,6 +23,7 @@ import { PostsRepository } from './posts.repository';
 import { CommentsService } from '../comments/comments.service';
 import { FetchUserPostsDto } from './dtos/fetch-user-posts.dto';
 import { OpenScope } from 'src/commons/enums/open-scope.enum';
+import { PostResponseDto } from './dtos/post-response.dto';
 
 @Injectable()
 export class PostsService {
@@ -204,7 +205,7 @@ export class PostsService {
     kakaoId,
     targetKakaoId,
     postCategoryName,
-  }: FetchUserPostsDto) {
+  }: FetchUserPostsDto): Promise<PostResponseDto[]> {
     const scope = await this.getScope({
       from_user: targetKakaoId,
       to_user: kakaoId,

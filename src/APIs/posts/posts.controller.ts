@@ -18,6 +18,7 @@ import {
   ApiConsumes,
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
@@ -34,6 +35,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 import { FetchUserPostsInput } from './dtos/fetch-user-posts.input';
 import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
+import { PostResponseDto } from './dtos/post-response.dto';
+import { fetchPostDetailDto } from './dtos/fetch-post-detail.dto';
 
 @ApiTags('게시글 API')
 @Controller('posts')
@@ -184,20 +187,25 @@ export class PostsController {
     description: 'id에 해당하는 게시글과 댓글을 가져온다. 조회수를 올린다.',
   })
   @Get('detail/:id')
+  @ApiOkResponse({ type: fetchPostDetailDto })
   async fetchPostDetail(@Param('id') id: number) {
     return await this.postsService.fetchDetail({ id });
   }
 
-  @ApiCookieAuth()
-  @Get('auth/user/:kakaoId')
-  async fetchAuthUserPosts(
+  @ApiOperation({
+    summary: '특정 유저의 게시글 조회',
+    description:
+      '로그인 된 유저의 경우 private/protected 게시글 조회 권한 체크 후 조회. 카테고리 이름으로 필터링 가능',
+  })
+  @Get('/user/:kakaoId')
+  @ApiOkResponse({ type: [PostResponseDto] })
+  async fetchUserPosts(
     @Param('kakaoId') targetKakaoId: number,
     @Req() req: Request,
     @Query() query: FetchUserPostsInput,
-  ) {
+  ): Promise<PostResponseDto[]> {
     console.log(req.user);
     const kakaoId = req.user.userId;
-    console.log(kakaoId);
     return await this.postsService.fetchUserPosts({
       kakaoId,
       targetKakaoId,
