@@ -25,13 +25,13 @@ import {
 } from '@nestjs/swagger';
 import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { Sticker } from './entities/sticker.entity';
 import { RemoveBgDto } from './dtos/remove-bg.dto';
 import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
 import { FindStickerInput } from './dtos/find-sticker.dto';
 import { UpdateStickerInput } from './dtos/update-sticker.dto';
+import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 
 @ApiTags('스티커 API')
 @Controller('stickers')
@@ -51,7 +51,7 @@ export class StickersController {
     description: '이미지 서버에 파일 업로드 완료',
     type: Sticker,
   })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
   @Post('private')
   @UseInterceptors(FileInterceptor('file'))
@@ -82,7 +82,7 @@ export class StickersController {
     type: Sticker,
   })
   @ApiUnauthorizedResponse({ description: '어드민이 아님' })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
   @Post('public')
   @UseInterceptors(FileInterceptor('file'))
@@ -105,7 +105,7 @@ export class StickersController {
       '본인이 만든 재사용 가능한 스티커들을 fetch한다. toggle이 우선적으로 이루어져야함.',
   })
   @ApiOkResponse({ description: '조회 성공', type: [Sticker] })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
   @HttpCode(200)
   async fetchPrivateStickers(@Req() req: Request): Promise<Sticker[]> {
@@ -119,7 +119,7 @@ export class StickersController {
       '본인이 만든 스티커의 재사용 여부를 토글한다. 보관함 저장 혹은 삭제 용도로 사용할 것',
   })
   @Post('toggle/:id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
   @HttpCode(200)
   async toggleReusable(@Req() req: Request, @Param('id') id: number) {
@@ -144,7 +144,7 @@ export class StickersController {
      workflow: post('background') => delete('s3') => patch('image') 
       `,
   })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
   @Post('background')
   async removeBg(@Body() body: RemoveBgDto): Promise<ImageUploadResponseDto> {
@@ -157,7 +157,7 @@ export class StickersController {
     description:
       '스티커 객체의 이미지 url을 변경한다. 호출 이전에 기존의 이미지 제거를 권장.',
   })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
   async updateSticker(
     @Req() req: Request,
@@ -177,7 +177,7 @@ export class StickersController {
       로직 순서: delete('s3') => patch('image')<br>
       **만약 사용중인 객체의 이미지만 제거 할 경우 이미지가 깨진다.**`,
   })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
   @Delete('s3')
   @HttpCode(200)

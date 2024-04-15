@@ -14,10 +14,10 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { MapCategoryDto } from './dtos/map-category.dto';
 import { StickerCategory } from './entities/stickerCategory.entity';
+import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 
 @ApiTags('스티커 카테고리 API')
 @Controller('stickercg')
@@ -32,7 +32,7 @@ export class StickerCategoriesController {
   })
   @ApiOkResponse({ description: '생성 완료', type: StickerCategory })
   @ApiCookieAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @Post('create/:name')
   async createCategory(@Req() req: Request, @Param('name') name: string) {
     const kakaoId = req.user.userId;
@@ -47,7 +47,7 @@ export class StickerCategoriesController {
     description: '[어드민 전용] 스티커에 카테고리를 매핑한다.',
   })
   @ApiCookieAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @Post('map')
   async mapCategory(
     @Req() req: Request,

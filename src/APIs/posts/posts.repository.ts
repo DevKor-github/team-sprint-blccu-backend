@@ -2,6 +2,8 @@ import { DataSource, Repository } from 'typeorm';
 import { Posts } from './entities/posts.entity';
 import { Injectable } from '@nestjs/common';
 import { OpenScope } from 'src/commons/enums/open-scope.enum';
+import { PostResponseDto } from './dtos/post-response.dto';
+import { PostResponseDtoExceptCategory } from './dtos/fetch-post-for-update.dto';
 @Injectable()
 export class PostsRepository extends Repository<Posts> {
   constructor(private dataSource: DataSource) {
@@ -37,7 +39,7 @@ export class PostsRepository extends Repository<Posts> {
       .getManyAndCount();
   }
 
-  async fetchPostDetail(id) {
+  async fetchPostDetail({ id, scope }): Promise<PostResponseDto> {
     await this.update(id, {
       view_count: () => 'view_count +1',
     });
@@ -52,6 +54,7 @@ export class PostsRepository extends Repository<Posts> {
         'user.username',
       ])
       .where('p.id = :id', { id })
+      .andWhere('p.scope IN (:scope)', { scope })
       .getOne();
   }
   async fetchPostForUpdate(id) {
@@ -91,10 +94,47 @@ export class PostsRepository extends Repository<Posts> {
       .getManyAndCount();
   }
 
-  async fetchTempPosts(kakaoId) {
-    return this.createQueryBuilder('p')
-      .where('p.userKakaoId = :kakaoId', { kakaoId })
-      .andWhere(`p.isPublished = false`)
-      .getMany();
+  async fetchTempPosts(kakaoId): Promise<PostResponseDtoExceptCategory[]> {
+    return (
+      this.createQueryBuilder('p')
+        .innerJoin('p.user', 'user')
+        .innerJoinAndSelect('p.postBackground', 'postBackground')
+        // .innerJoinAndSelect('p.postCategory', 'postCategory')
+        .addSelect([
+          'user.kakaoId',
+          'user.description',
+          'user.profile_image',
+          'user.username',
+        ])
+        .where('p.userKakaoId = :kakaoId', { kakaoId })
+        .andWhere(`p.isPublished = false`)
+        .getMany()
+    );
+  }
+
+  async fetchUserPosts({
+    scope,
+    userKakaoId,
+    postCategoryName,
+  }): Promise<PostResponseDto[]> {
+    const query = this.createQueryBuilder('p')
+      .innerJoin('p.user', 'user')
+      .innerJoinAndSelect('p.postBackground', 'postBackground')
+      .innerJoinAndSelect('p.postCategory', 'postCategory')
+      .addSelect([
+        'user.kakaoId',
+        'user.description',
+        'user.profile_image',
+        'user.username',
+      ])
+      .where('p.userKakaoId = :userKakaoId', { userKakaoId })
+      .andWhere('p.scope IN (:scope)', { scope })
+      .andWhere('p.isPublished = true');
+    if (postCategoryName) {
+      query.andWhere('postCategory.name = :postCategoryName', {
+        postCategoryName,
+      });
+    }
+    return await query.getMany();
   }
 }

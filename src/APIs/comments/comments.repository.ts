@@ -1,6 +1,7 @@
 import { DataSource, Repository } from 'typeorm';
 import { Comment } from './entities/comment.entity';
 import { Injectable } from '@nestjs/common';
+import { FetchCommentsDto } from './dtos/fetch-comments.dto';
 
 @Injectable()
 export class CommentsRepository extends Repository<Comment> {
@@ -17,7 +18,7 @@ export class CommentsRepository extends Repository<Comment> {
       .execute();
   }
 
-  async fetchComments({ postsId }) {
+  async fetchComments({ postsId }): Promise<FetchCommentsDto[]> {
     return await this.createQueryBuilder('c')
       .withDeleted()
       .innerJoin('c.user', 'u')
