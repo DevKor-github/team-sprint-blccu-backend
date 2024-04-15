@@ -17,11 +17,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ToggleLikeDto } from './dtos/toggle-like.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { ToggleLikeResponseDto } from './dtos/toggle-like-response.dto';
 import { Likes } from './entities/like.entity';
 import { FetchLikesResponseDto } from './dtos/fetch-likes-response.dto';
+import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 
 @ApiTags('좋아요 API')
 @Controller('likes')
@@ -35,7 +35,7 @@ export class LikesController {
   @ApiCookieAuth()
   @ApiOkResponse({ description: '토글 성공', type: ToggleLikeResponseDto })
   @ApiNotFoundResponse({ description: '게시글을 찾을 수 없는 경우' })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @HttpCode(200)
   @Post()
   async toggleLike(

@@ -12,7 +12,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBody,
   ApiConsumes,
@@ -69,7 +68,7 @@ export class PostsController {
   @Post()
   @ApiCookieAuth()
   @ApiCreatedResponse({ description: '등록 성공', type: PublishPostDto })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @HttpCode(201)
   async publishPost(@Req() req: Request, @Body() body: PublishPostInput) {
     const kakaoId = req.user.userId;
@@ -94,7 +93,7 @@ export class PostsController {
     description: '로그인된 유저의 임시작성 게시글을 조회한다.',
   })
   @ApiCookieAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @Get('temp')
   async fetchTempPosts(@Req() req: Request): Promise<Posts[]> {
     const kakaoId = req.user.userId;
@@ -115,7 +114,7 @@ export class PostsController {
     description: '이미지 서버에 파일 업로드 완료',
     type: ImageUploadResponseDto,
   })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
   @Post('image')
   @UseInterceptors(FileInterceptor('file'))
@@ -133,7 +132,7 @@ export class PostsController {
       '친구의 게시글을 조회한다. Query를 통해 페이지네이션 가능. default) pageNo: 1, pageSize: 10',
   })
   @ApiCreatedResponse({ description: '조회 성공', type: PagePostResponseDto })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @HttpCode(200)
   @ApiCookieAuth()
   @Get('friends')
@@ -151,7 +150,7 @@ export class PostsController {
       '로그인 된 유저의 {id}에 해당하는 게시글을 논리삭제한다. 발행된 게시글에 사용을 권장',
   })
   @ApiCookieAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @Delete('soft/:id')
   async softDelete(@Req() req: Request, @Param('id') id: number) {
     const kakaoId = req.user.userId;
@@ -164,7 +163,7 @@ export class PostsController {
       '로그인 된 유저의 {id}에 해당하는 게시글을 물리삭제한다. 임시 저장된 게시글에 사용을 권장',
   })
   @ApiCookieAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @Delete('hard/:id')
   async hardDelete(@Req() req: Request, @Param('id') id: number) {
     const kakaoId = req.user.userId;
