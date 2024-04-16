@@ -11,6 +11,12 @@ export const USER_SELECT_OPTION = {
   date_created: true,
   date_deleted: true,
 };
+export const USER_PRIMARY_SELECT_OPTION = {
+  kakaoId: true,
+  username: true,
+  description: true,
+  profile_image: true,
+};
 export class UserPrimaryResponseDto extends PickType(User, [
   'kakaoId',
   'username',

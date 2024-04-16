@@ -8,7 +8,8 @@ import { UsersService } from '../users/users.service';
 import { CommentsRepository } from './comments.repository';
 import { DataSource } from 'typeorm';
 import { Posts } from '../posts/entities/posts.entity';
-import { FetchCommentsDto } from './dtos/fetch-comments.dto';
+import { ChildrenComment, FetchCommentsDto } from './dtos/fetch-comments.dto';
+import { USER_PRIMARY_SELECT_OPTION } from '../users/dtos/user-response.dto';
 
 @Injectable()
 export class CommentsService {
@@ -36,33 +37,50 @@ export class CommentsService {
     }
     return comment;
   }
-  async upsert(createCommentDto: CreateCommentDto) {
-    if (createCommentDto.id) {
-      await this.existCheck({ id: createCommentDto.id });
-    }
+  async upsert(createCommentDto: CreateCommentDto): Promise<ChildrenComment> {
     if (createCommentDto.parentId)
       await this.postsIdValidCheck({
         parentId: createCommentDto.parentId,
         postsId: createCommentDto.postsId,
       });
-    await this.dataSource.manager.update(Posts, createCommentDto.postsId, {
-      comment_count: () => 'comment_count +1',
+    if (createCommentDto.id) {
+      await this.existCheck({ id: createCommentDto.id });
+    } else {
+      // id를 입력하지 않았을 경우(생성의 경우)에만 count 증가
+      await this.dataSource.manager.update(Posts, createCommentDto.postsId, {
+        comment_count: () => 'comment_count +1',
+      });
+    }
+    const upsertData = await this.commentsRepository.upsertComment({
+      createCommentDto,
     });
-    return await this.commentsRepository.upsertComment({ createCommentDto });
+    const id = upsertData.identifiers[0];
+    console.log(id);
+    return await this.commentsRepository.findOne({
+      select: {
+        user: USER_PRIMARY_SELECT_OPTION,
+      },
+      relations: { user: true },
+      where: { ...id },
+    });
   }
 
   async fetchComments({ postsId }): Promise<FetchCommentsDto[]> {
     return await this.commentsRepository.fetchComments({ postsId });
   }
 
-  async delete({ id, userKakaoId }) {
-    const data = await this.existCheck({ id });
-    await this.dataSource.manager.update(Posts, data.postsId, {
-      comment_count: () => 'comment_count -1',
-    });
-    await this.commentsRepository.softDelete({
-      user: { kakaoId: userKakaoId },
-      id,
-    });
+  async delete({ id, userKakaoId }): Promise<void> {
+    try {
+      const data = await this.existCheck({ id });
+      await this.commentsRepository.softDelete({
+        user: { kakaoId: userKakaoId },
+        id,
+      });
+      await this.dataSource.manager.update(Posts, data.postsId, {
+        comment_count: () => 'comment_count -1',
+      });
+    } catch (e) {
+      throw e;
+    }
   }
 }
