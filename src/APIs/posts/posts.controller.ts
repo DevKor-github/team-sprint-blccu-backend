@@ -25,7 +25,6 @@ import { Request } from 'express';
 import { PostsService } from './posts.service';
 import { FetchPostsDto } from './dtos/fetch-posts.dto';
 import { PublishPostDto } from './dtos/publish-post.dto';
-import { Posts } from './entities/posts.entity';
 import { PagePostResponseDto } from './dtos/page-post-response.dto';
 import { CreatePostInput } from './dtos/create-post.input';
 import { PublishPostInput } from './dtos/publish-post.input';
