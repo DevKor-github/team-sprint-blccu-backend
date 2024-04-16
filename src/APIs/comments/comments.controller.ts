@@ -19,7 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { DeleteCommentDto } from './dtos/delete-comment.dto';
 import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
-import { ChildrenComment, FetchCommentsDto } from './dtos/fetch-comments.dto';
+import { ChildrenComment } from './dtos/fetch-comments.dto';
 
 @ApiTags('댓글 API')
 @Controller('comments')
