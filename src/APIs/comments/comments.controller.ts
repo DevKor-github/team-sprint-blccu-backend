@@ -34,7 +34,7 @@ export class CommentsController {
   @ApiCookieAuth()
   @Post()
   @UseGuards(AuthGuardV2)
-  @HttpCode(201)
+  @HttpCode(200)
   async upsertComment(
     @Req() req: Request,
     @Body() body: CreateCommentInput,
