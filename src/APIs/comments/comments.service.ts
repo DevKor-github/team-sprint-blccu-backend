@@ -22,8 +22,10 @@ export class CommentsService {
     const parent = await this.existCheck({ id: parentId });
     if (parent.postsId != postsId)
       throw new BadRequestException(
-        '루트 댓글이 작성된 게시글 아이디와 일치하지 않습니다.',
+        '게시글 아이디가 루트 댓글이 작성된 게시글 아이디와 일치하지 않습니다.',
       );
+    if (parent.parentId)
+      throw new BadRequestException('부모 댓글이 루트 댓글이 아닙니다.');
   }
   async existCheck({ id }) {
     const comment = await this.commentsRepository.findOne({ where: { id } });
