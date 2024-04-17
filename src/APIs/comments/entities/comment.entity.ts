@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -70,8 +71,9 @@ export class Comment {
   @OneToMany(() => Comment, (comment) => comment.parent)
   children: Comment[];
 
+  @Index()
   @ApiProperty({ type: Date, description: '생성 날짜' })
-  @CreateDateColumn()
+  @CreateDateColumn({ default: () => 'CURRENT_TIMESTAMP(6)' })
   date_created: Date;
 
   @ApiProperty({ type: Date, description: '수정 날짜' })

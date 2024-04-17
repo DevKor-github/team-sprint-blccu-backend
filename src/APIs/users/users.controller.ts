@@ -63,7 +63,7 @@ export class UsersController {
     summary: '로그인된 유저의 이름이나 설명을 변경',
     description: '로그인된 유저의 이름이나 설명, 혹은 둘 다를 변경한다.',
   })
-  @ApiOkResponse({ description: '변경 성공', type: PatchUserInput })
+  @ApiOkResponse({ description: '변경 성공', type: UserResponseDto })
   @ApiCookieAuth()
   @Patch()
   @HttpCode(200)
