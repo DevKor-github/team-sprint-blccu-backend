@@ -39,6 +39,10 @@ import {
   FetchPostForUpdateDto,
   PostResponseDtoExceptCategory,
 } from './dtos/fetch-post-for-update.dto';
+import { CustomCursorPageOptionsDto } from 'src/utils/cursor-pages/dtos/cursor-page-option.dto';
+import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
+import { Posts } from './entities/posts.entity';
+import { SortOption } from 'src/commons/enums/sort-option';
 
 @ApiTags('게시글 API')
 @Controller('posts')
@@ -228,5 +232,26 @@ export class PostsController {
       targetKakaoId,
       ...query,
     });
+  }
+
+  @ApiOperation({ summary: '커서기반 페이지네이션' })
+  @Get('customCursorPaginate')
+  async paginateByCustomCursor(
+    @Query() customCursorPageOptionsDto: CustomCursorPageOptionsDto,
+  ): Promise<CustomCursorPageDto<Posts>> {
+    if (
+      !customCursorPageOptionsDto.customCursor &&
+      customCursorPageOptionsDto.sort === SortOption.ASC
+    ) {
+      customCursorPageOptionsDto.customCursor =
+        this.postsService.createDefaultCustomCursorValue(7, 7, '0');
+    } else if (
+      !customCursorPageOptionsDto.customCursor &&
+      customCursorPageOptionsDto.sort === SortOption.DESC
+    ) {
+      customCursorPageOptionsDto.customCursor =
+        this.postsService.createDefaultCustomCursorValue(7, 7, '9');
+    }
+    return this.postsService.paginateByCustomCursor(customCursorPageOptionsDto);
   }
 }

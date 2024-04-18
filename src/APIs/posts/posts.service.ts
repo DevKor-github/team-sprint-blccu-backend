@@ -30,6 +30,11 @@ import {
   FetchPostForUpdateDto,
   PostResponseDtoExceptCategory,
 } from './dtos/fetch-post-for-update.dto';
+import { CustomCursorPageMetaDto } from 'src/utils/cursor-pages/dtos/cursor-page-meta.dto';
+import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
+import { CustomCursorPageOptionsDto } from 'src/utils/cursor-pages/dtos/cursor-page-option.dto';
+import { PostsOrderOption } from 'src/commons/enums/posts-order-option';
+import { all } from 'axios';
 
 @Injectable()
 export class PostsService {
@@ -225,5 +230,73 @@ export class PostsService {
       userKakaoId: targetKakaoId,
       postCategoryName,
     });
+  }
+  //cursor
+
+  async paginateByCustomCursor(
+    customCursorPageOptionsDto: CustomCursorPageOptionsDto,
+  ): Promise<CustomCursorPageDto<Posts>> {
+    const { allPosts, posts, total } =
+      await this.postsRepository.paginateByCustomCursor(
+        customCursorPageOptionsDto,
+      );
+
+    const order = PostsOrderOption[customCursorPageOptionsDto.order];
+    let hasNextData: boolean = true;
+    let idByLastDataPerPage: number;
+    let customCursor: string;
+
+    const takePerPage = customCursorPageOptionsDto.take;
+    const isLastPage = total <= takePerPage;
+    const lastDataPerPage = posts[posts.length - 1];
+
+    if (isLastPage) {
+      hasNextData = false;
+      idByLastDataPerPage = null;
+      customCursor = null;
+    } else {
+      idByLastDataPerPage = lastDataPerPage.id;
+      const lastDataPerPageIndexOf = allPosts.findIndex(
+        (data) => data.id === idByLastDataPerPage,
+      );
+      customCursor = await this.createCustomCursor({
+        cursorIndex: lastDataPerPageIndexOf,
+        order,
+      });
+    }
+
+    const customCursorPageMetaDto = new CustomCursorPageMetaDto({
+      customCursorPageOptionsDto,
+      total,
+      hasNextData,
+      customCursor,
+    });
+
+    return new CustomCursorPageDto(posts, customCursorPageMetaDto);
+  }
+
+  async createCustomCursor({ cursorIndex, order }): Promise<string> {
+    const posts = await this.postsRepository.find();
+
+    const customCursor = posts.map((posts) => {
+      const id = posts.id;
+      const _order = posts[order];
+      const customCursor: string =
+        String(_order).padStart(7, '0') + String(id).padStart(7, '0');
+      return customCursor;
+    });
+
+    return customCursor[cursorIndex];
+  }
+
+  createDefaultCustomCursorValue(
+    digitById: number,
+    digitByTargetColumn: number,
+    initialValue: string,
+  ) {
+    const defaultCustomCursor: string =
+      String().padStart(digitByTargetColumn, `${initialValue}`) +
+      String().padStart(digitById, `${initialValue}`);
+    return defaultCustomCursor;
   }
 }

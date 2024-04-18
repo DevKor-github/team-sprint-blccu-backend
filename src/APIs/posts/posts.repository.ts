@@ -6,6 +6,9 @@ import { PostResponseDto } from './dtos/post-response.dto';
 import { PostResponseDtoExceptCategory } from './dtos/fetch-post-for-update.dto';
 import { PostsOrderOption } from 'src/commons/enums/posts-order-option';
 import { PostsFilterOption } from 'src/commons/enums/posts-filter-option';
+import { CustomCursorPageOptionsDto } from 'src/utils/cursor-pages/dtos/cursor-page-option.dto';
+import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
+import { SortOption } from 'src/commons/enums/sort-option';
 @Injectable()
 export class PostsRepository extends Repository<Posts> {
   constructor(private dataSource: DataSource) {
@@ -150,5 +153,33 @@ export class PostsRepository extends Repository<Posts> {
       });
     }
     return await query.orderBy('p.id', 'DESC').getMany();
+  }
+
+  // cursor
+  async paginateByCustomCursor(
+    customCursorPageOptionsDto: CustomCursorPageOptionsDto,
+  ) {
+    const queryBuilder = this.createQueryBuilder('p');
+    console.log(customCursorPageOptionsDto.order);
+    const ORDER = PostsOrderOption[customCursorPageOptionsDto.order];
+    console.log(ORDER);
+    const queryByPriceSort =
+      customCursorPageOptionsDto.sort === SortOption.ASC
+        ? `CONCAT(LPAD(p.${ORDER}, 7, '0'), LPAD(p.id, 7, '0')) > :customCursor`
+        : `CONCAT(LPAD(p.${ORDER}, 7, '0'), LPAD(p.id, 7, '0')) < :customCursor`;
+
+    queryBuilder
+      .take(customCursorPageOptionsDto.take)
+      .where(queryByPriceSort, {
+        customCursor: customCursorPageOptionsDto.customCursor,
+      })
+      .orderBy(`p.${ORDER}`, customCursorPageOptionsDto.sort as any)
+      .addOrderBy('p.id', customCursorPageOptionsDto.sort as any);
+
+    const allPosts: Posts[] = await this.find();
+    const posts: Posts[] = await queryBuilder.getMany();
+    const total: number = await queryBuilder.getCount();
+
+    return { allPosts, posts, total };
   }
 }
