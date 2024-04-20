@@ -1,6 +1,39 @@
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PageRequest } from '../../../utils/pages/page-request';
+import { ApiProperty } from '@nestjs/swagger';
+import { PostsOrderOptionWrap } from 'src/commons/enums/posts-order-option';
+import { PostsFilterOptionWrap } from 'src/commons/enums/posts-filter-option';
 
-export class FetchPostsDto extends PageRequest {}
+export class FetchPostsDto extends PageRequest {
+  @ApiProperty({
+    description: '페이지 정렬 옵션(default = TIME)',
+    type: 'enum',
+    enum: PostsOrderOptionWrap,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(PostsOrderOptionWrap)
+  order: PostsOrderOptionWrap = PostsOrderOptionWrap.DATE;
+
+  @ApiProperty({
+    description: '페이지 검색 옵션(default = TITLE)',
+    type: 'enum',
+    enum: PostsFilterOptionWrap,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(PostsFilterOptionWrap)
+  filter: PostsFilterOptionWrap = PostsFilterOptionWrap.TITLE;
+
+  @ApiProperty({
+    description: '검색할 내용',
+    type: String,
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  search: string = '%';
+}
 
 export const FETCH_POST_OPTION = {
   id: true,

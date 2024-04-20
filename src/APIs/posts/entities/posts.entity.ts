@@ -9,6 +9,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -73,8 +74,9 @@ export class Posts {
   @Column({ default: 'PUBLIC' })
   scope: OpenScope;
 
+  @Index()
   @ApiProperty({ description: '생성된 날짜', type: Date })
-  @CreateDateColumn()
+  @CreateDateColumn({ default: () => 'CURRENT_TIMESTAMP(6)' })
   date_created: Date;
 
   @ApiProperty({ description: '수정된 날짜', type: Date })
