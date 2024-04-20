@@ -299,4 +299,54 @@ export class PostsService {
       String().padStart(digitById, `${initialValue}`);
     return defaultCustomCursor;
   }
+
+  async fetchFriendsCursor({
+    cursorOption,
+    kakaoId,
+  }): Promise<CustomCursorPageDto<PostResponseDto>> {
+    console.log(kakaoId);
+    const subQuery = await this.neighborsRepository
+      .createQueryBuilder('n')
+      .select('n.toUserKakaoId')
+      .where(`n.fromUserKakaoId = ${kakaoId}`)
+      .getQuery();
+    const { allPosts, posts, total } =
+      await this.postsRepository.paginateByCustomCursorFriends({
+        cursorOption,
+        subQuery,
+      });
+
+    const order = PostsOrderOption[cursorOption.order];
+    let hasNextData: boolean = true;
+    let idByLastDataPerPage: number;
+    let customCursor: string;
+
+    const takePerPage = cursorOption.take;
+    const isLastPage = total <= takePerPage;
+    const lastDataPerPage = posts[posts.length - 1];
+
+    if (isLastPage) {
+      hasNextData = false;
+      idByLastDataPerPage = null;
+      customCursor = null;
+    } else {
+      idByLastDataPerPage = lastDataPerPage.id;
+      const lastDataPerPageIndexOf = allPosts.findIndex(
+        (data) => data.id === idByLastDataPerPage,
+      );
+      customCursor = await this.createCustomCursor({
+        cursorIndex: lastDataPerPageIndexOf,
+        order,
+      });
+    }
+
+    const customCursorPageMetaDto = new CustomCursorPageMetaDto({
+      customCursorPageOptionsDto: cursorOption,
+      total,
+      hasNextData,
+      customCursor,
+    });
+
+    return new CustomCursorPageDto(posts, customCursorPageMetaDto);
+  }
 }

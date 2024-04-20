@@ -105,7 +105,7 @@ export class PostsController {
   @UseGuards(AuthGuardV2)
   @HttpCode(200)
   @ApiCookieAuth()
-  @Get('friends')
+  @Get('offset/friends')
   async fetchFriendsPosts(
     @Query() page: FetchPostsDto,
     @Req() req: Request,
@@ -242,21 +242,52 @@ export class PostsController {
   })
   @Get('cursor')
   @ApiOkResponse({ type: CursorPagePostResponseDto })
-  async paginateByCustomCursor(
+  async fetchCursor(
     @Query() cursorOption: CursorFetchPosts,
     @Req() req: Request,
   ): Promise<CustomCursorPageDto<PostResponseDto>> {
     const kakaoId = req.user.userId;
-    if (!cursorOption.customCursor && cursorOption.sort === SortOption.ASC) {
-      cursorOption.customCursor =
-        this.postsService.createDefaultCustomCursorValue(7, 7, '0');
-    } else if (
-      !cursorOption.customCursor &&
-      cursorOption.sort === SortOption.DESC
-    ) {
-      cursorOption.customCursor =
-        this.postsService.createDefaultCustomCursorValue(7, 7, '9');
+    if (!cursorOption.cursor && cursorOption.sort === SortOption.ASC) {
+      cursorOption.cursor = this.postsService.createDefaultCustomCursorValue(
+        7,
+        7,
+        '0',
+      );
+    } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
+      cursorOption.cursor = this.postsService.createDefaultCustomCursorValue(
+        7,
+        7,
+        '9',
+      );
     }
     return this.postsService.paginateByCustomCursor({ cursorOption, kakaoId });
+  }
+
+  @ApiOperation({
+    summary: '[cursor]친구 게시글 조회 API',
+    description:
+      '커서 기반으로 게시글을 조회한다. 최초 조회 시 커서 값을 비워서 요청한다. 쿼리 옵션을 변경할 경우 기존의 커서 값을 쓸 수 없다.',
+  })
+  @Get('cursor/friends')
+  @ApiOkResponse({ type: CursorPagePostResponseDto })
+  async fetchFriendsCursor(
+    @Query() cursorOption: CursorFetchPosts,
+    @Req() req: Request,
+  ): Promise<CustomCursorPageDto<PostResponseDto>> {
+    const kakaoId = req.user.userId;
+    if (!cursorOption.cursor && cursorOption.sort === SortOption.ASC) {
+      cursorOption.cursor = this.postsService.createDefaultCustomCursorValue(
+        7,
+        7,
+        '0',
+      );
+    } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
+      cursorOption.cursor = this.postsService.createDefaultCustomCursorValue(
+        7,
+        7,
+        '9',
+      );
+    }
+    return this.postsService.fetchFriendsCursor({ cursorOption, kakaoId });
   }
 }

@@ -18,7 +18,8 @@ export class PostCategoriesService {
 
   async create({ kakaoId, name }): Promise<CreatePostCategoryResponseDto> {
     const data = await this.findWithName({ kakaoId, name });
-    if (data) {
+    console.log(data);
+    if (data.length > 0) {
       throw new BadRequestException('이미 동명의 카테고리가 존재합니다.');
     }
     const result = await this.postCategoriesRepository.save({

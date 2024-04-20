@@ -30,5 +30,5 @@ export class CustomCursorPageOptionsDto {
   @ApiProperty({ description: '커서', type: String, required: false })
   @Type(() => String)
   @IsOptional()
-  customCursor?: string;
+  cursor?: string;
 }
