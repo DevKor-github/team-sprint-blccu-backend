@@ -6,8 +6,6 @@ import { PostResponseDto } from './dtos/post-response.dto';
 import { PostResponseDtoExceptCategory } from './dtos/fetch-post-for-update.dto';
 import { PostsOrderOption } from 'src/commons/enums/posts-order-option';
 import { PostsFilterOption } from 'src/commons/enums/posts-filter-option';
-import { CustomCursorPageOptionsDto } from 'src/utils/cursor-pages/dtos/cursor-page-option.dto';
-import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
 import { SortOption } from 'src/commons/enums/sort-option';
 @Injectable()
 export class PostsRepository extends Repository<Posts> {
@@ -156,27 +154,36 @@ export class PostsRepository extends Repository<Posts> {
   }
 
   // cursor
-  async paginateByCustomCursor(
-    customCursorPageOptionsDto: CustomCursorPageOptionsDto,
-  ) {
+  async paginateByCustomCursor({ cursorOption }) {
     const queryBuilder = this.createQueryBuilder('p');
-    console.log(customCursorPageOptionsDto.order);
-    const ORDER = PostsOrderOption[customCursorPageOptionsDto.order];
-    console.log(ORDER);
+    const ORDER = PostsOrderOption[cursorOption.order];
     const queryByPriceSort =
-      customCursorPageOptionsDto.sort === SortOption.ASC
+      cursorOption.sort === SortOption.ASC
         ? `CONCAT(LPAD(p.${ORDER}, 7, '0'), LPAD(p.id, 7, '0')) > :customCursor`
         : `CONCAT(LPAD(p.${ORDER}, 7, '0'), LPAD(p.id, 7, '0')) < :customCursor`;
 
     queryBuilder
-      .take(customCursorPageOptionsDto.take)
+      .take(cursorOption.take)
       .where(queryByPriceSort, {
-        customCursor: customCursorPageOptionsDto.customCursor,
+        customCursor: cursorOption.customCursor,
       })
-      .orderBy(`p.${ORDER}`, customCursorPageOptionsDto.sort as any)
-      .addOrderBy('p.id', customCursorPageOptionsDto.sort as any);
+      .innerJoin('p.user', 'user')
+      .innerJoinAndSelect('p.postBackground', 'postBackground')
+      .innerJoinAndSelect('p.postCategory', 'postCategory')
+      .addSelect([
+        'user.kakaoId',
+        'user.description',
+        'user.profile_image',
+        'user.username',
+      ])
+      .where('p.isPublished = true')
+      .andWhere('p.scope IN (:...scopes)', { scopes: [OpenScope.PUBLIC] })
+      .orderBy(`p.${ORDER}`, cursorOption.sort as any)
+      .addOrderBy('p.id', cursorOption.sort as any);
 
-    const allPosts: Posts[] = await this.find();
+    const allPosts: Posts[] = await this.find({
+      where: { scope: OpenScope.PUBLIC },
+    });
     const posts: Posts[] = await queryBuilder.getMany();
     const total: number = await queryBuilder.getCount();
 

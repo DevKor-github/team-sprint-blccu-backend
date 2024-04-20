@@ -32,9 +32,7 @@ import {
 } from './dtos/fetch-post-for-update.dto';
 import { CustomCursorPageMetaDto } from 'src/utils/cursor-pages/dtos/cursor-page-meta.dto';
 import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
-import { CustomCursorPageOptionsDto } from 'src/utils/cursor-pages/dtos/cursor-page-option.dto';
 import { PostsOrderOption } from 'src/commons/enums/posts-order-option';
-import { all } from 'axios';
 
 @Injectable()
 export class PostsService {
@@ -233,20 +231,22 @@ export class PostsService {
   }
   //cursor
 
-  async paginateByCustomCursor(
-    customCursorPageOptionsDto: CustomCursorPageOptionsDto,
-  ): Promise<CustomCursorPageDto<Posts>> {
+  async paginateByCustomCursor({
+    cursorOption,
+    kakaoId,
+  }): Promise<CustomCursorPageDto<PostResponseDto>> {
+    console.log(kakaoId);
     const { allPosts, posts, total } =
-      await this.postsRepository.paginateByCustomCursor(
-        customCursorPageOptionsDto,
-      );
+      await this.postsRepository.paginateByCustomCursor({
+        cursorOption,
+      });
 
-    const order = PostsOrderOption[customCursorPageOptionsDto.order];
+    const order = PostsOrderOption[cursorOption.order];
     let hasNextData: boolean = true;
     let idByLastDataPerPage: number;
     let customCursor: string;
 
-    const takePerPage = customCursorPageOptionsDto.take;
+    const takePerPage = cursorOption.take;
     const isLastPage = total <= takePerPage;
     const lastDataPerPage = posts[posts.length - 1];
 
@@ -266,7 +266,7 @@ export class PostsService {
     }
 
     const customCursorPageMetaDto = new CustomCursorPageMetaDto({
-      customCursorPageOptionsDto,
+      customCursorPageOptionsDto: cursorOption,
       total,
       hasNextData,
       customCursor,

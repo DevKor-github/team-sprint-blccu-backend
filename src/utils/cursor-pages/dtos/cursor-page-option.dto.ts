@@ -3,7 +3,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsOptional } from 'class-validator';
-import { PostsOrderOptionWrap } from 'src/commons/enums/posts-order-option';
 import { SortOption } from 'src/commons/enums/sort-option';
 
 export class CustomCursorPageOptionsDto {
@@ -27,15 +26,6 @@ export class CustomCursorPageOptionsDto {
   @Type(() => Number)
   @IsOptional()
   readonly take?: number = 5;
-
-  @ApiProperty({
-    description: '정렬 옵션',
-    type: 'enum',
-    enum: PostsOrderOptionWrap,
-    required: false,
-    default: PostsOrderOptionWrap.DATE,
-  })
-  order?: PostsOrderOptionWrap = PostsOrderOptionWrap.DATE;
 
   @ApiProperty({ description: '커서', type: String, required: false })
   @Type(() => String)
