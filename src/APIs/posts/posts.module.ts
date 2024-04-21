@@ -12,18 +12,14 @@ import { PostCategory } from '../postCategories/entities/postCategory.entity';
 import { StickerBlocksModule } from '../stickerBlocks/stickerBlocks.module';
 import { PostsRepository } from './posts.repository';
 import { CommentsModule } from '../comments/comments.module';
+import { NeighborsModule } from '../neighbors/neighbors.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Posts,
-      User,
-      Neighbor,
-      PostBackground,
-      PostCategory,
-    ]),
+    TypeOrmModule.forFeature([Posts, User, PostBackground, PostCategory]),
     UtilsModule,
     AwsModule,
+    NeighborsModule,
     StickerBlocksModule,
     CommentsModule,
   ],

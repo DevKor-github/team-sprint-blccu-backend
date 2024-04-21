@@ -85,36 +85,6 @@ export class PostsController {
   }
 
   @ApiOperation({
-    summary: '[offset]전체 게시글 조회 API',
-    description:
-      'Query를 통해 오프셋 페이지네이션 가능. default) pageNo: 1, pageSize: 10',
-  })
-  @ApiCreatedResponse({ description: '조회 성공', type: PagePostResponseDto })
-  @HttpCode(200)
-  @Get('offset')
-  async fetchPosts(@Query() post: FetchPostsDto): Promise<PagePostResponseDto> {
-    return await this.postsService.fetchPosts(post);
-  }
-
-  @ApiOperation({
-    summary: '[offset]친구 게시글 조회',
-    description:
-      '친구의 게시글을 조회한다. Query를 통해 오프셋 페이지네이션 가능. default) pageNo: 1, pageSize: 10',
-  })
-  @ApiCreatedResponse({ description: '조회 성공', type: PagePostResponseDto })
-  @UseGuards(AuthGuardV2)
-  @HttpCode(200)
-  @ApiCookieAuth()
-  @Get('friends')
-  async fetchFriendsPosts(
-    @Query() page: FetchPostsDto,
-    @Req() req: Request,
-  ): Promise<PagePostResponseDto> {
-    const kakaoId = req.user.userId;
-    return await this.postsService.fetchFriendsPosts({ kakaoId, page });
-  }
-
-  @ApiOperation({
     summary: '임시작성 게시글 조회',
     description: '로그인된 유저의 임시작성 게시글을 조회한다.',
   })
@@ -215,24 +185,33 @@ export class PostsController {
   }
 
   @ApiOperation({
-    summary: '특정 유저의 게시글 조회',
+    summary: '[offset]전체 게시글 조회 API',
     description:
-      '로그인 된 유저의 경우 private/protected 게시글 조회 권한 체크 후 조회. 카테고리 이름으로 필터링 가능',
+      'Query를 통해 오프셋 페이지네이션 가능. default) pageNo: 1, pageSize: 10',
   })
-  @Get('/user/:kakaoId')
-  @ApiOkResponse({ type: [PostResponseDto] })
-  async fetchUserPosts(
-    @Param('kakaoId') targetKakaoId: number,
+  @ApiCreatedResponse({ description: '조회 성공', type: PagePostResponseDto })
+  @HttpCode(200)
+  @Get('offset')
+  async fetchPosts(@Query() post: FetchPostsDto): Promise<PagePostResponseDto> {
+    return await this.postsService.fetchPosts(post);
+  }
+
+  @ApiOperation({
+    summary: '[offset]친구 게시글 조회',
+    description:
+      '친구의 게시글을 조회한다. Query를 통해 오프셋 페이지네이션 가능. default) pageNo: 1, pageSize: 10',
+  })
+  @ApiCreatedResponse({ description: '조회 성공', type: PagePostResponseDto })
+  @UseGuards(AuthGuardV2)
+  @HttpCode(200)
+  @ApiCookieAuth()
+  @Get('offset/friends')
+  async fetchFriendsPosts(
+    @Query() page: FetchPostsDto,
     @Req() req: Request,
-    @Query() query: FetchUserPostsInput,
-  ): Promise<PostResponseDto[]> {
-    console.log(req.user);
+  ): Promise<PagePostResponseDto> {
     const kakaoId = req.user.userId;
-    return await this.postsService.fetchUserPosts({
-      kakaoId,
-      targetKakaoId,
-      ...query,
-    });
+    return await this.postsService.fetchFriendsPosts({ kakaoId, page });
   }
 
   @ApiOperation({
@@ -242,21 +221,61 @@ export class PostsController {
   })
   @Get('cursor')
   @ApiOkResponse({ type: CursorPagePostResponseDto })
-  async paginateByCustomCursor(
+  async fetchCursor(
     @Query() cursorOption: CursorFetchPosts,
     @Req() req: Request,
   ): Promise<CustomCursorPageDto<PostResponseDto>> {
     const kakaoId = req.user.userId;
-    if (!cursorOption.customCursor && cursorOption.sort === SortOption.ASC) {
-      cursorOption.customCursor =
-        this.postsService.createDefaultCustomCursorValue(7, 7, '0');
-    } else if (
-      !cursorOption.customCursor &&
-      cursorOption.sort === SortOption.DESC
-    ) {
-      cursorOption.customCursor =
-        this.postsService.createDefaultCustomCursorValue(7, 7, '9');
+    if (!cursorOption.cursor && cursorOption.sort === SortOption.ASC) {
+      cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '0');
+    } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
+      cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '9');
     }
     return this.postsService.paginateByCustomCursor({ cursorOption, kakaoId });
+  }
+
+  @ApiOperation({
+    summary: '[cursor]친구 게시글 조회 API',
+    description:
+      '커서 기반으로 게시글을 조회한다. 최초 조회 시 커서 값을 비워서 요청한다. 쿼리 옵션을 변경할 경우 기존의 커서 값을 쓸 수 없다.',
+  })
+  @Get('cursor/friends')
+  @ApiOkResponse({ type: CursorPagePostResponseDto })
+  async fetchFriendsCursor(
+    @Query() cursorOption: CursorFetchPosts,
+    @Req() req: Request,
+  ): Promise<CustomCursorPageDto<PostResponseDto>> {
+    const kakaoId = req.user.userId;
+    if (!cursorOption.cursor && cursorOption.sort === SortOption.ASC) {
+      cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '0');
+    } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
+      cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '9');
+    }
+    return this.postsService.fetchFriendsCursor({ cursorOption, kakaoId });
+  }
+
+  @ApiOperation({
+    summary: '[cursor]특정 유저의 게시글 조회',
+    description:
+      '로그인 된 유저의 경우 private/protected 게시글 조회 권한 체크 후 조회. 카테고리 이름으로 필터링 가능',
+  })
+  @Get('/cursor/user/:kakaoId')
+  @ApiOkResponse({ type: CursorPagePostResponseDto })
+  async fetchUserPosts(
+    @Param('kakaoId') targetKakaoId: number,
+    @Req() req: Request,
+    @Query() cursorOption: FetchUserPostsInput,
+  ): Promise<CursorPagePostResponseDto> {
+    const kakaoId = req.user.userId;
+    if (!cursorOption.cursor && cursorOption.sort === SortOption.ASC) {
+      cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '0');
+    } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
+      cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '9');
+    }
+    return await this.postsService.fetchUserPosts({
+      kakaoId,
+      targetKakaoId,
+      cursorOption,
+    });
   }
 }

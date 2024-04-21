@@ -1,14 +1,15 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { PostCategory } from './entities/postCategory.entity';
-import { Repository } from 'typeorm';
 import { CreatePostCategoryResponseDto } from './dtos/create-post-category-response.dto';
+import { PostCategoriesRepository } from './PostCategories.repository';
+
+import { FetchPostCategoryDto } from './dtos/fetch-post-category.dto';
+import { NeighborsService } from '../neighbors/neighbors.service';
 
 @Injectable()
 export class PostCategoriesService {
   constructor(
-    @InjectRepository(PostCategory)
-    private readonly postCategoriesRepository: Repository<PostCategory>,
+    private readonly neighborsService: NeighborsService,
+    private readonly postCategoriesRepository: PostCategoriesRepository,
   ) {}
   async findWithName({ kakaoId, name }) {
     return await this.postCategoriesRepository.find({
@@ -18,7 +19,7 @@ export class PostCategoriesService {
 
   async create({ kakaoId, name }): Promise<CreatePostCategoryResponseDto> {
     const data = await this.findWithName({ kakaoId, name });
-    if (data) {
+    if (data.length > 0) {
       throw new BadRequestException('이미 동명의 카테고리가 존재합니다.');
     }
     const result = await this.postCategoriesRepository.save({
@@ -28,9 +29,14 @@ export class PostCategoriesService {
     return result;
   }
 
-  async fetchAll({ kakaoId }): Promise<PostCategory[]> {
-    return await this.postCategoriesRepository.find({
-      where: { user: { kakaoId } },
+  async fetchAll({ kakaoId, targetKakaoId }): Promise<FetchPostCategoryDto[]> {
+    const scope = await this.neighborsService.getScope({
+      from_user: targetKakaoId,
+      to_user: kakaoId,
+    });
+    return await this.postCategoriesRepository.fetchUserCategory({
+      userKakaoId: targetKakaoId,
+      scope,
     });
   }
 

@@ -10,5 +10,6 @@ import { User } from '../users/entities/user.entity';
   imports: [UsersModule, TypeOrmModule.forFeature([Neighbor, User])],
   providers: [NeighborsService],
   controllers: [NeighborsController],
+  exports: [NeighborsService],
 })
 export class NeighborsModule {}

@@ -6,9 +6,8 @@ import {
 } from '@nestjs/common';
 import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { Posts } from './entities/posts.entity';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Page } from '../../utils/pages/page';
 import { FetchPostsDto } from './dtos/fetch-posts.dto';
 import { PagePostResponseDto } from './dtos/page-post-response.dto';
@@ -22,8 +21,6 @@ import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dt
 import { StickerBlocksService } from '../stickerBlocks/stickerBlocks.service';
 import { PostsRepository } from './posts.repository';
 import { CommentsService } from '../comments/comments.service';
-import { FetchUserPostsDto } from './dtos/fetch-user-posts.dto';
-import { OpenScope } from 'src/commons/enums/open-scope.enum';
 import { PostResponseDto } from './dtos/post-response.dto';
 import { fetchPostDetailDto } from './dtos/fetch-post-detail.dto';
 import {
@@ -33,6 +30,7 @@ import {
 import { CustomCursorPageMetaDto } from 'src/utils/cursor-pages/dtos/cursor-page-meta.dto';
 import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
 import { PostsOrderOption } from 'src/commons/enums/posts-order-option';
+import { NeighborsService } from '../neighbors/neighbors.service';
 
 @Injectable()
 export class PostsService {
@@ -43,23 +41,10 @@ export class PostsService {
     private readonly stickerBlocksService: StickerBlocksService,
     private readonly commentsService: CommentsService,
     private readonly postsRepository: PostsRepository,
-    @InjectRepository(Neighbor)
-    private readonly neighborsRepository: Repository<Neighbor>,
+    private readonly neighborsService: NeighborsService,
   ) {}
   async saveImage(file: Express.Multer.File) {
     return await this.imageUpload(file);
-  }
-
-  async getScope({ from_user, to_user }) {
-    if (from_user === to_user)
-      return [OpenScope.PUBLIC, OpenScope.PROTECTED, OpenScope.PRIVATE];
-    const neighbor = await this.neighborsRepository.findOne({
-      where: { from_user, to_user },
-    });
-    if (neighbor) {
-      return [OpenScope.PUBLIC, OpenScope.PROTECTED];
-    }
-    return [OpenScope.PUBLIC];
   }
 
   async imageUpload(
@@ -177,8 +162,8 @@ export class PostsService {
     kakaoId,
     page,
   }: FetchFriendsPostsDto): Promise<PagePostResponseDto> {
-    const subQuery = await this.neighborsRepository
-      .createQueryBuilder('n')
+    const subQuery = await this.dataSource
+      .createQueryBuilder(Neighbor, 'n')
       .select('n.toUserKakaoId')
       .where(`n.fromUserKakaoId = ${kakaoId}`)
       .getQuery();
@@ -197,7 +182,7 @@ export class PostsService {
   async fetchDetail({ kakaoId, id }): Promise<fetchPostDetailDto> {
     const data = await this.existCheck({ id });
     await this.fkValidCheck({ posts: data, passNonEssentail: false });
-    const scope = await this.getScope({
+    const scope = await this.neighborsService.getScope({
       from_user: data.userKakaoId,
       to_user: kakaoId,
     });
@@ -214,22 +199,56 @@ export class PostsService {
     return await this.postsRepository.delete({ user: { kakaoId }, id });
   }
 
+  //cursor
+
   async fetchUserPosts({
     kakaoId,
     targetKakaoId,
-    postCategoryName,
-  }: FetchUserPostsDto): Promise<PostResponseDto[]> {
-    const scope = await this.getScope({
+    cursorOption,
+  }): Promise<CustomCursorPageDto<PostResponseDto>> {
+    const scope = await this.neighborsService.getScope({
       from_user: targetKakaoId,
       to_user: kakaoId,
     });
-    return await this.postsRepository.fetchUserPosts({
-      scope,
-      userKakaoId: targetKakaoId,
-      postCategoryName,
+    const { allPosts, posts, total } =
+      await this.postsRepository.fetchUserPosts({
+        cursorOption,
+        scope,
+        userKakaoId: targetKakaoId,
+      });
+    const order = PostsOrderOption[cursorOption.order];
+    let hasNextData: boolean = true;
+    let idByLastDataPerPage: number;
+    let customCursor: string;
+
+    const takePerPage = cursorOption.take;
+    const isLastPage = total <= takePerPage;
+    const lastDataPerPage = posts[posts.length - 1];
+
+    if (isLastPage) {
+      hasNextData = false;
+      idByLastDataPerPage = null;
+      customCursor = null;
+    } else {
+      idByLastDataPerPage = lastDataPerPage.id;
+      const lastDataPerPageIndexOf = allPosts.findIndex(
+        (data) => data.id === idByLastDataPerPage,
+      );
+      customCursor = await this.createCustomCursor({
+        cursorIndex: lastDataPerPageIndexOf,
+        order,
+      });
+    }
+
+    const customCursorPageMetaDto = new CustomCursorPageMetaDto({
+      customCursorPageOptionsDto: cursorOption,
+      total,
+      hasNextData,
+      customCursor,
     });
+
+    return new CustomCursorPageDto(posts, customCursorPageMetaDto);
   }
-  //cursor
 
   async paginateByCustomCursor({
     cursorOption,
@@ -289,7 +308,7 @@ export class PostsService {
     return customCursor[cursorIndex];
   }
 
-  createDefaultCustomCursorValue(
+  createDefaultCursor(
     digitById: number,
     digitByTargetColumn: number,
     initialValue: string,
@@ -298,5 +317,55 @@ export class PostsService {
       String().padStart(digitByTargetColumn, `${initialValue}`) +
       String().padStart(digitById, `${initialValue}`);
     return defaultCustomCursor;
+  }
+
+  async fetchFriendsCursor({
+    cursorOption,
+    kakaoId,
+  }): Promise<CustomCursorPageDto<PostResponseDto>> {
+    console.log(kakaoId);
+    const subQuery = await this.dataSource
+      .createQueryBuilder(Neighbor, 'n')
+      .select('n.toUserKakaoId')
+      .where(`n.fromUserKakaoId = ${kakaoId}`)
+      .getQuery();
+    const { allPosts, posts, total } =
+      await this.postsRepository.paginateByCustomCursorFriends({
+        cursorOption,
+        subQuery,
+      });
+
+    const order = PostsOrderOption[cursorOption.order];
+    let hasNextData: boolean = true;
+    let idByLastDataPerPage: number;
+    let customCursor: string;
+
+    const takePerPage = cursorOption.take;
+    const isLastPage = total <= takePerPage;
+    const lastDataPerPage = posts[posts.length - 1];
+
+    if (isLastPage) {
+      hasNextData = false;
+      idByLastDataPerPage = null;
+      customCursor = null;
+    } else {
+      idByLastDataPerPage = lastDataPerPage.id;
+      const lastDataPerPageIndexOf = allPosts.findIndex(
+        (data) => data.id === idByLastDataPerPage,
+      );
+      customCursor = await this.createCustomCursor({
+        cursorIndex: lastDataPerPageIndexOf,
+        order,
+      });
+    }
+
+    const customCursorPageMetaDto = new CustomCursorPageMetaDto({
+      customCursorPageOptionsDto: cursorOption,
+      total,
+      hasNextData,
+      customCursor,
+    });
+
+    return new CustomCursorPageDto(posts, customCursorPageMetaDto);
   }
 }
