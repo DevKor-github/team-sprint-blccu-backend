@@ -125,13 +125,19 @@ export class PostsRepository extends Repository<Posts> {
         .getMany()
     );
   }
+  async fetchUserPosts({ cursorOption, scope, userKakaoId }) {
+    const queryBuilder = this.createQueryBuilder('p');
+    const ORDER = PostsOrderOption[cursorOption.order];
+    const queryByPriceSort =
+      cursorOption.sort === SortOption.ASC
+        ? `CONCAT(LPAD(p.${ORDER}, 7, '0'), LPAD(p.id, 7, '0')) > :customCursor`
+        : `CONCAT(LPAD(p.${ORDER}, 7, '0'), LPAD(p.id, 7, '0')) < :customCursor`;
 
-  async fetchUserPosts({
-    scope,
-    userKakaoId,
-    postCategoryName,
-  }): Promise<PostResponseDto[]> {
-    const query = this.createQueryBuilder('p')
+    queryBuilder
+      .take(cursorOption.take)
+      .where(queryByPriceSort, {
+        customCursor: cursorOption.customCursor,
+      })
       .innerJoin('p.user', 'user')
       .innerJoinAndSelect('p.postBackground', 'postBackground')
       .innerJoinAndSelect('p.postCategory', 'postCategory')
@@ -141,19 +147,27 @@ export class PostsRepository extends Repository<Posts> {
         'user.profile_image',
         'user.username',
       ])
-      .where('p.userKakaoId = :userKakaoId', { userKakaoId })
+      .where('p.userKakaoId = :userKakaoId', {
+        userKakaoId,
+      })
       .andWhere('p.scope IN (:scope)', { scope })
-      .andWhere('p.isPublished = true');
-
-    if (postCategoryName) {
-      query.andWhere('postCategory.name = :postCategoryName', {
-        postCategoryName,
+      .andWhere('p.isPublished = true')
+      .orderBy(`p.${ORDER}`, cursorOption.sort as any)
+      .addOrderBy('p.id', cursorOption.sort as any);
+    if (cursorOption.postCategoryName) {
+      queryBuilder.andWhere('postCategory.name = :postCategoryName', {
+        postCategoryName: cursorOption.postCategoryName,
       });
     }
-    return await query.orderBy('p.id', 'DESC').getMany();
-  }
 
-  // cursor
+    const allPosts: Posts[] = await this.find({
+      where: { scope: In([OpenScope.PUBLIC, OpenScope.PROTECTED]) },
+    });
+    const posts: Posts[] = await queryBuilder.getMany();
+    const total: number = await queryBuilder.getCount();
+
+    return { allPosts, posts, total };
+  }
 
   async paginateByCustomCursorFriends({ cursorOption, subQuery }) {
     const queryBuilder = this.createQueryBuilder('p');
@@ -185,7 +199,6 @@ export class PostsRepository extends Repository<Posts> {
       .orderBy(`p.${ORDER}`, cursorOption.sort as any)
       .addOrderBy('p.id', cursorOption.sort as any);
 
-    console.log('하이');
     const allPosts: Posts[] = await this.find({
       where: { scope: In([OpenScope.PUBLIC, OpenScope.PROTECTED]) },
     });

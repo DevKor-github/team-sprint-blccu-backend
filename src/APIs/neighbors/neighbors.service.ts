@@ -6,6 +6,8 @@ import { FromUserResponseDto } from './dtos/from-user-response.dto';
 import { ToUserResponseDto } from './dtos/to-user-response.dto';
 import { FollowUserDto } from './dtos/follow-user.dto';
 import { USER_SELECT_OPTION } from '../users/dtos/user-response.dto';
+import e from 'express';
+import { OpenScope } from 'src/commons/enums/open-scope.enum';
 
 @Injectable()
 export class NeighborsService {
@@ -21,6 +23,22 @@ export class NeighborsService {
     }
     return false;
   }
+
+  async getScope({ from_user, to_user }) {
+    if (from_user === to_user)
+      return [OpenScope.PUBLIC, OpenScope.PROTECTED, OpenScope.PRIVATE];
+    if (from_user !== null && to_user !== null) {
+      const neighbor = await this.neighborsRepository.findOne({
+        where: { from_user, to_user },
+      });
+      if (neighbor) {
+        return [OpenScope.PUBLIC, OpenScope.PROTECTED];
+      }
+    }
+
+    return [OpenScope.PUBLIC];
+  }
+
   async isExist({ from_user, to_user }): Promise<boolean> {
     console.log(from_user, to_user);
     const neighbor = await this.neighborsRepository.findOne({
