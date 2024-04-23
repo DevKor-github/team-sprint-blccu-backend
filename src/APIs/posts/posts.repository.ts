@@ -1,4 +1,4 @@
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Posts } from './entities/posts.entity';
 import { Injectable } from '@nestjs/common';
 import { OpenScope } from 'src/commons/enums/open-scope.enum';
@@ -157,7 +157,7 @@ export class PostsRepository extends Repository<Posts> {
   }
 
   async fetchUserPosts({ cursorOption, scope, userKakaoId }) {
-    const { order, cursor, take, sort, ...rest } = cursorOption;
+    const { order, cursor, take, sort } = cursorOption;
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
 
     if (cursorOption.postCategoryName) {
@@ -177,7 +177,7 @@ export class PostsRepository extends Repository<Posts> {
   }
 
   async paginateByCustomCursorFriends({ cursorOption, subQuery }) {
-    const { order, cursor, take, sort, ...rest } = cursorOption;
+    const { order, cursor, take, sort } = cursorOption;
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
 
     queryBuilder
@@ -192,7 +192,7 @@ export class PostsRepository extends Repository<Posts> {
   }
 
   async paginateByCustomCursor({ cursorOption }) {
-    const { order, cursor, take, sort, ...rest } = cursorOption;
+    const { order, cursor, take, sort } = cursorOption;
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
 
     queryBuilder.andWhere('p.scope IN (:...scopes)', {
