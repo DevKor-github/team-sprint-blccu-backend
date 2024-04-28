@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, MessageEvent } from '@nestjs/common';
 import { NotificationsRepository } from './notifications.repository';
 import { Subject, filter, map } from 'rxjs';
 import { Notification } from './entities/notification.entity';
-import { EmitNotDto } from './dtos/emit-not.dto';
+import { EmitNotiDto } from './dtos/emit-noti.dto';
 import { FetchNotiDto, FetchNotiResponse } from './dtos/fetch-noti.dto';
 import { DateOption } from 'src/commons/enums/date-option';
 
@@ -29,13 +29,20 @@ export class NotificationsService {
     return pipe;
   }
 
-  async emitAlarm(emitNotDto: EmitNotDto) {
-    const executeResult =
-      await this.notificationsRepository.createOne(emitNotDto);
-    const id = executeResult.identifiers[0].id;
-    const data = await this.notificationsRepository.findOne({ where: { id } });
-    // next를 통해 이벤트를 생성
-    this.notis$.next(data);
+  async emitAlarm(emitNotiDto: EmitNotiDto) {
+    try {
+      const executeResult =
+        await this.notificationsRepository.createOne(emitNotiDto);
+      const id = executeResult.identifiers[0].id;
+      const data = await this.notificationsRepository.findOne({
+        where: { id },
+      });
+      // next를 통해 이벤트를 생성
+      this.notis$.next(data);
+      return data;
+    } catch (e) {
+      throw new BadRequestException('대상을 찾을 수 없습니다.');
+    }
   }
 
   async fetch({ is_checked, kakaoId, date_created }: FetchNotiDto) {

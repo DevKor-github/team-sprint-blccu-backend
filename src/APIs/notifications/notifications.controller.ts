@@ -19,7 +19,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { EmitNotInput } from './dtos/emit-not.dto';
+import { EmitNotiInput } from './dtos/emit-noti.dto';
 
 import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 import { FetchNotiInput, FetchNotiResponse } from './dtos/fetch-noti.dto';
@@ -97,8 +97,8 @@ export class NotificationsController {
       'kakaoId에게 알림을 보낸다. sse로 연결되어 있을 경우 실시간으로 fetch된다.',
   })
   @Post('send/:kakaoId')
-  sendNoti(@Req() req: Request, @Body() body: EmitNotInput) {
+  async sendNoti(@Req() req: Request, @Body() body: EmitNotiInput) {
     const userKakaoId = req.user.userId;
-    this.notificationsService.emitAlarm({ userKakaoId, ...body });
+    return await this.notificationsService.emitAlarm({ userKakaoId, ...body });
   }
 }

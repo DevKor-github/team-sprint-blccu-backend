@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Notification } from './entities/notification.entity';
 import { DataSource, Repository } from 'typeorm';
-import { EmitNotDto } from './dtos/emit-not.dto';
+import { EmitNotiDto } from './dtos/emit-noti.dto';
 import { FetchNotiResponse } from './dtos/fetch-noti.dto';
 
 @Injectable()
@@ -10,11 +10,11 @@ export class NotificationsRepository extends Repository<Notification> {
     super(Notification, dataSource.createEntityManager());
   }
 
-  async createOne(emitNotDto: EmitNotDto) {
+  async createOne(emitNotiDto: EmitNotiDto) {
     return await this.createQueryBuilder()
       .insert()
-      .into(Notification, Object.keys(emitNotDto))
-      .values(emitNotDto)
+      .into(Notification, Object.keys(emitNotiDto))
+      .values(emitNotiDto)
       .execute();
   }
 
