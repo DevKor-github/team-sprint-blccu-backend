@@ -1,76 +1,78 @@
-import { Injectable, MessageEvent } from '@nestjs/common';
+import { BadRequestException, Injectable, MessageEvent } from '@nestjs/common';
 import { NotificationsRepository } from './notifications.repository';
-import { Observable, ReplaySubject, Subject, filter, map } from 'rxjs';
+import { Subject, filter, map } from 'rxjs';
+import { Notification } from './entities/notification.entity';
+import { EmitNotDto } from './dtos/emit-not.dto';
+import { FetchNotiDto, FetchNotiResponse } from './dtos/fetch-noti.dto';
+import { DateOption } from 'src/commons/enums/date-option';
 
 @Injectable()
 export class NotificationsService {
   constructor(
     private readonly notificationsRepository: NotificationsRepository,
   ) {}
+  private notis$: Subject<Notification> = new Subject();
+  private observer = this.notis$.asObservable();
 
-  // // [RxJS] Subject 선언 타입은 Users이다
-  // private users$: Subject<Notification> = new Subject();
+  async connectUser(targetUserKakaoId) {
+    console.log('connected: ' + targetUserKakaoId);
+    const pipe = this.observer.pipe(
+      filter((noti) => noti.targetUserKakaoId == targetUserKakaoId),
+      map((noti) => {
+        return {
+          data: noti,
+        } as MessageEvent;
+      }),
+    );
+    // const data = { id: 1, targetUserKakaoId: 3388766789, };
+    // this.users$.next(data);
+    return pipe;
+  }
 
-  // // 앞서 선언한 Subjcet를 Observable한 객체로 선언
-  // private observer = this.users$.asObservable();
+  async emitAlarm(emitNotDto: EmitNotDto) {
+    const executeResult =
+      await this.notificationsRepository.createOne(emitNotDto);
+    const id = executeResult.identifiers[0].id;
+    const data = await this.notificationsRepository.findOne({ where: { id } });
+    // next를 통해 이벤트를 생성
+    this.notis$.next(data);
+  }
 
-  // //접속한 브라우저의 커넥션을 담을 객체
-  // private stream: {
-  //   id: string;
-  //   subject: ReplaySubject<unknown>;
-  //   observer: Observable<unknown>;
-  // }[] = [];
+  async fetch({ is_checked, kakaoId, date_created }: FetchNotiDto) {
+    let currentDate = new Date();
 
-  // // 예시 데이터 ( DB 데이터라고 생각하자 )
-  // users = [
-  //   {
-  //     id: 1,
-  //     nickname: 'jewon',
-  //     level: 1,
-  //   },
-  //   { id: 2, nickname: 'je', level: 2 },
-  //   {
-  //     id: 3,
-  //     nickname: 'won',
-  //     level: 3,
-  //   },
-  // ];
+    switch (date_created) {
+      case DateOption.WEEK:
+        currentDate.setDate(currentDate.getDate() - 7);
+        break;
+      case DateOption.MONTH:
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        break;
+      case DateOption.YEAR:
+        currentDate.setFullYear(currentDate.getFullYear() - 1);
+        break;
+      default:
+        currentDate = null;
+    }
+    return await this.notificationsRepository.fetchAll({
+      is_checked,
+      kakaoId,
+      date_created: currentDate,
+    });
+  }
 
-  // // [RxJS] User의 레벨 변화를 감시할 함수, 레벨업이 진행되면 Observable한 Subject에 next로 push
-  // // onUserLevelChange(userId: number, nickname: string, level: number) {
-  // //   // this.users$.next({ id: userId, nickname, level });
-  // // }
-
-  // //브라우저가 접속할 때 해당 스트림을 담아 둡니다.
-  // addStream(
-  //   subject: ReplaySubject<unknown>,
-  //   observer: Observable<unknown>,
-  //   id: string,
-  // ): void {
-  //   this.stream.push({
-  //     id,
-  //     subject,
-  //     observer,
-  //   });
-  // }
-  // // emitAlarm(kakaoId: number) {
-  //   // next를 통해 이벤트를 생성
-  //   this.users$.next({ kakaoId });
-  // }
-
-  // sendClientAlarm(kakaoId: number): Observable<any> {
-  //   // 이벤트 발생시 처리 로직
-  //   return this.observer.pipe(
-  //     // 유저 필터링
-  //     filter((user) => user.kakaoId === kakaoId),
-  //     // 데이터 전송
-  //     map((user) => {
-  //       return {
-  //         data: {
-  //           message: '알람이 발생했습니다.',
-  //         },
-  //       } as MessageEvent;
-  //     }),
-  //   );
-  // }
+  async toggle({ id, targetUserKakaoId }): Promise<FetchNotiResponse> {
+    const updateResult = await this.notificationsRepository.update(
+      { id, targetUserKakaoId },
+      {
+        is_checked: () => '!is_checked',
+      },
+    );
+    if (updateResult.affected < 1) {
+      throw new BadRequestException('알림을 찾을 수 없거나 권한이 없습니다.');
+    }
+    return await this.notificationsRepository.findOne({
+      where: { id, targetUserKakaoId },
+    });
+  }
 }
