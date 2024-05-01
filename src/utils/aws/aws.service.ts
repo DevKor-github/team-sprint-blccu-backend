@@ -6,7 +6,7 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
+import sharp from 'sharp';
 
 @Injectable()
 export class AwsService {
@@ -24,10 +24,12 @@ export class AwsService {
   }
 
   async imageUploadToS3Buffer(fileName: string, file: Buffer, ext: string) {
+    const resizedImageBuffer = await this.resizeImage(file, 800);
+
     const command = new PutObjectCommand({
       Bucket: this.configService.get('AWS_S3_BUCKET_NAME'), // S3 버킷 이름
       Key: fileName, // 업로드될 파일의 이름
-      Body: file, // 업로드할 파일
+      Body: resizedImageBuffer, // 업로드할 파일
       ACL: 'public-read', // 파일 접근 권한
       ContentType: `image/${ext}`, // 파일 타입,
     });
@@ -56,11 +58,12 @@ export class AwsService {
     file: Express.Multer.File, // 업로드할 파일
     ext: string, // 파일 확장자
   ) {
+    const resizedImageBuffer = await this.resizeImage(file.buffer, 800);
     // AWS S3에 이미지 업로드 명령을 생성합니다. 파일 이름, 파일 버퍼, 파일 접근 권한, 파일 타입 등을 설정합니다.
     const command = new PutObjectCommand({
       Bucket: this.configService.get('AWS_S3_BUCKET_NAME'), // S3 버킷 이름
       Key: fileName, // 업로드될 파일의 이름
-      Body: file.buffer, // 업로드할 파일
+      Body: resizedImageBuffer, // 업로드할 파일
       ACL: 'public-read', // 파일 접근 권한
       ContentType: `image/${ext}`, // 파일 타입
     });
@@ -70,5 +73,12 @@ export class AwsService {
 
     // 업로드된 이미지의 URL을 반환합니다.
     return `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET_NAME}/${fileName}`;
+  }
+
+  async resizeImage(buffer: Buffer, width: number) {
+    const resizedImageBuffer = await sharp(buffer, { failOnError: false })
+      .resize({ width })
+      .toBuffer();
+    return resizedImageBuffer;
   }
 }
