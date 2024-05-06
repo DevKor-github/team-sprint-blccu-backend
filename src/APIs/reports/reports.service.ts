@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Report } from './entities/report.entity';
 import { DataSource, Repository } from 'typeorm';
@@ -33,6 +37,13 @@ export class ReportsService {
           });
           if (!postData)
             throw new BadRequestException('게시글이 존재하지 않습니다.');
+
+          const reportPost = await this.reportsRepository.findOne({
+            where: { userKakaoId: dto.userKakaoId, postId: targetId },
+          });
+          if (reportPost)
+            throw new ConflictException('이미 신고한 게시물입니다.');
+
           await queryRunner.manager.update(Posts, postData.id, {
             blame_count: () => 'blame_count +1',
           });
@@ -48,6 +59,13 @@ export class ReportsService {
           });
           if (!commentData)
             throw new BadRequestException('댓글이 존재하지 않습니다.');
+
+          const reportComment = await this.reportsRepository.findOne({
+            where: { userKakaoId: dto.userKakaoId, commentId: targetId },
+          });
+          if (reportComment)
+            throw new ConflictException('이미 신고한 게시물입니다.');
+
           await queryRunner.manager.update(Comment, commentData.id, {
             blame_count: () => 'blame_count +1',
           });
