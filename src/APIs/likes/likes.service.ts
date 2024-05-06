@@ -34,14 +34,6 @@ export class LikesService {
           like_count: () => 'like_count -1',
         });
         postData.like_count -= 1;
-        //   // 좋아요 카운트 락걸고 쿼리!!! xx
-        //   const result = await queryRunner.manager.save(Posts, {
-        //     lock: { mode: 'pessimistic_write' },
-        //     ...postData,
-        //     like_count: postData.like_count - 1,
-        //   });
-        //   await queryRunner.commitTransaction();
-        // return result;
       } else {
         await queryRunner.manager.save(Likes, {
           user: kakaoId,

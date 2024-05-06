@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -91,7 +92,12 @@ export class UsersService {
     if (username) {
       user.username = username;
     }
-    return await this.usersRepository.save(user);
+    try {
+      const data = await this.usersRepository.save(user);
+      return data;
+    } catch (e) {
+      throw new ConflictException('UK: username이 중복됩니다.');
+    }
   }
 
   async findUsersByName({ username }): Promise<UserResponseDto[]> {
