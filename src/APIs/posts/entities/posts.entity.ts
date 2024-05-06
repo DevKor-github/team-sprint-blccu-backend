@@ -61,6 +61,10 @@ export class Posts {
   @Column({ default: 0 })
   comment_count: number;
 
+  @ApiProperty({ description: '신고수 카운트', type: Number })
+  @Column({ default: 0 })
+  blame_count: number;
+
   @ApiProperty({ description: '댓글 허용 여부(boolean)', type: Boolean })
   @Column({ default: true })
   allow_comment: boolean;

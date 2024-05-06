@@ -18,7 +18,7 @@ import { NotificationsModule } from './APIs/notifications/notifications.module';
 import { AnnouncementsModule } from './APIs/announcements/announcements.module';
 import { ReportsModule } from './APIs/reports/reports.module';
 import { AuthTokenMiddleware } from './commons/middlewares/auth-token.middleware';
-import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
