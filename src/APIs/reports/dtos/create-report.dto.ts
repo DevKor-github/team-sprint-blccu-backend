@@ -11,8 +11,3 @@ export class CreateReportDto extends OmitType(Report, [
 export class CreateReportInput extends OmitType(CreateReportDto, [
   'userKakaoId',
 ]) {}
-
-export class CreateReportResponse extends OmitType(Report, [
-  'user',
-  'targetUser',
-]) {}
