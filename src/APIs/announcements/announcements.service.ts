@@ -1,8 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Announcement } from './entities/announcement.entity';
 import { Repository } from 'typeorm';
-import { IAnnouncementsSerciceCreate } from './interfaces/announcements.service.interface';
+import {
+  IAnnouncementsSerciceCreate,
+  IAnnouncementsSerciceRemove,
+} from './interfaces/announcements.service.interface';
 import { UsersService } from '../users/users.service';
 import { AnnouncementResponseDto } from './dtos/announcement-response.dto';
 
@@ -25,5 +28,15 @@ export class AnnouncementsService {
 
   async fetchAll(): Promise<AnnouncementResponseDto[]> {
     return await this.annoucementsRepository.find();
+  }
+
+  async remove({
+    kakaoId,
+    id,
+  }: IAnnouncementsSerciceRemove): Promise<AnnouncementResponseDto> {
+    await this.usersService.adminCheck({ kakaoId });
+    const anmt = await this.annoucementsRepository.findOne({ where: { id } });
+    if (!anmt) throw new NotFoundException('공지를 찾을 수 없습니다.');
+    return await this.annoucementsRepository.softRemove(anmt);
   }
 }

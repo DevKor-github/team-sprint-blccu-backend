@@ -7,3 +7,8 @@ export interface IAnnouncementsSerciceCreate
   > {
   kakaoId: number;
 }
+
+export interface IAnnouncementsSerciceRemove {
+  kakaoId: number;
+  id: number;
+}
