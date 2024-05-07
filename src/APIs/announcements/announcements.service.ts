@@ -4,6 +4,7 @@ import { Announcement } from './entities/announcement.entity';
 import { Repository } from 'typeorm';
 import {
   IAnnouncementsSerciceCreate,
+  IAnnouncementsSercicePatch,
   IAnnouncementsSerciceRemove,
 } from './interfaces/announcements.service.interface';
 import { UsersService } from '../users/users.service';
@@ -28,6 +29,15 @@ export class AnnouncementsService {
 
   async fetchAll(): Promise<AnnouncementResponseDto[]> {
     return await this.annoucementsRepository.find();
+  }
+
+  async patch({ kakaoId, id, title, content }: IAnnouncementsSercicePatch) {
+    await this.usersService.adminCheck({ kakaoId });
+    const anmt = await this.annoucementsRepository.findOne({ where: { id } });
+    if (!anmt) throw new NotFoundException('공지를 찾을 수 없습니다.');
+    if (title) anmt.title = title;
+    if (content) anmt.content = content;
+    return await this.annoucementsRepository.save(anmt);
   }
 
   async remove({

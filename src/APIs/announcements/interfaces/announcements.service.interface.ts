@@ -12,3 +12,10 @@ export interface IAnnouncementsSerciceRemove {
   kakaoId: number;
   id: number;
 }
+
+export interface IAnnouncementsSercicePatch {
+  kakaoId: number;
+  id: number;
+  title?: string;
+  content?: string;
+}

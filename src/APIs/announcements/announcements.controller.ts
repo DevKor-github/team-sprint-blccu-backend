@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -21,6 +22,7 @@ import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 import { Request } from 'express';
 import { CreateAnouncementInput } from './dtos/create-announcement.dto';
 import { AnnouncementResponseDto } from './dtos/announcement-response.dto';
+import { PatchAnnouncementInput } from './dtos/patch-announcment.dto';
 
 @ApiTags('공지 API')
 @Controller('anmt')
@@ -46,6 +48,16 @@ export class AnnouncementsController {
   @Get()
   async fetchAnmts(): Promise<AnnouncementResponseDto[]> {
     return await this.announcementsService.fetchAll();
+  }
+
+  @ApiOperation({ summary: '[어드민용] 공지사항 수정' })
+  @ApiCookieAuth()
+  @ApiOkResponse({ type: [AnnouncementResponseDto] })
+  @UseGuards(AuthGuardV2)
+  @Patch()
+  async patchAnmt(@Req() req: Request, @Body() body: PatchAnnouncementInput) {
+    const kakaoId = req.body.userId;
+    return await this.announcementsService.patch({ ...body, kakaoId });
   }
 
   @ApiOperation({
