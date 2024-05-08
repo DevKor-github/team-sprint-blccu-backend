@@ -22,7 +22,7 @@ import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dt
 import { PostBackground } from './entities/postBackground.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-@ApiTags('내지 API')
+@ApiTags('[잠정 사용X] 내지 API')
 @Controller('postbg')
 export class PostBackgroundsController {
   constructor(
