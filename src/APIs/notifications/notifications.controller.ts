@@ -25,7 +25,7 @@ import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 import { FetchNotiInput, FetchNotiResponse } from './dtos/fetch-noti.dto';
 
 @ApiTags('알림 API')
-@Controller('nots')
+@Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
@@ -44,7 +44,7 @@ export class NotificationsController {
   @ApiCookieAuth()
   @ApiProduces('text/event-stream')
   @UseGuards(AuthGuardV2)
-  @Sse('sub')
+  @Sse('subscribe')
   sendClientAlarm(
     @Req() req: Request,
     // @Param('kakaoId') userKakaoId,
@@ -60,7 +60,7 @@ export class NotificationsController {
       '로그인된 유저들에게 보내진 알림들을 조회한다. query를 통해 알림 조회 옵션 설정. sse 연결 이전 이니셜 데이터 fetch 시 사용',
   })
   @ApiOkResponse({ type: [FetchNotiResponse] })
-  @Get('init')
+  @Get()
   @ApiCookieAuth()
   @UseGuards(AuthGuardV2)
   async fetchNoti(
@@ -75,14 +75,14 @@ export class NotificationsController {
   }
 
   @ApiOperation({
-    summary: '알림 토글',
+    summary: '알림 읽기',
     description: '알림을 읽음 처리한다.',
   })
   @ApiCookieAuth()
   @UseGuards(AuthGuardV2)
   @ApiOkResponse({ type: FetchNotiResponse })
   @HttpCode(200)
-  @Post('toggle/:id')
+  @Post(':id/read')
   async toggleNoti(
     @Req() req: Request,
     @Param('id') id: number,
