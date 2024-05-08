@@ -46,12 +46,38 @@ export class UsersController {
   // ================================
 
   @ApiOperation({
-    summary: '로그인된 유저의 정보 불러오기',
-    description: '로그인된 유저의 정보를 불러온다.',
+    summary: '이름이 포함된 유저 검색',
+    description: '이름에 username이 포함된 유저를 검색한다.',
+  })
+  @ApiOkResponse({ description: '조회 성공', type: [UserResponseDto] })
+  @HttpCode(200)
+  @Get('username/:username')
+  async findUsersByName(
+    @Param('username') username: string,
+  ): Promise<UserResponseDto[]> {
+    return await this.usersService.findUsersByName({ username });
+  }
+
+  @ApiOperation({
+    summary: '특정 유저 프로필 조회',
+    description: 'id가 일치하는 유저 프로필을 조회한다.',
+  })
+  @ApiOkResponse({ description: '조회 성공', type: UserResponseDto })
+  @HttpCode(200)
+  @Get('profile/:userId')
+  async findUserByKakaoId(
+    @Param('userId') kakaoId: number,
+  ): Promise<UserResponseDto> {
+    return await this.usersService.findUserByKakaoId({ kakaoId });
+  }
+
+  @ApiOperation({
+    summary: '로그인된 유저의 프로필 불러오기',
+    description: '로그인된 유저의 프로필을 불러온다.',
   })
   @ApiCookieAuth()
   @ApiOkResponse({ description: '불러오기 완료', type: UserResponseDto })
-  @Get()
+  @Get('me')
   @UseGuards(AuthGuardV2)
   @HttpCode(200)
   async fetchUser(@Req() req: Request): Promise<UserResponseDto> {
@@ -65,7 +91,7 @@ export class UsersController {
   })
   @ApiOkResponse({ description: '변경 성공', type: UserResponseDto })
   @ApiCookieAuth()
-  @Patch()
+  @Patch('me')
   @HttpCode(200)
   @UseGuards(AuthGuardV2)
   async patchUser(
@@ -99,7 +125,7 @@ export class UsersController {
   @ApiCookieAuth()
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
-  @Post('profile')
+  @Post('me/profile-image')
   async uploadProfileImage(
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
@@ -128,7 +154,7 @@ export class UsersController {
   @ApiCookieAuth()
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
-  @Post('background')
+  @Post('me/background-image')
   async uploadBackgroundImage(
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
@@ -138,31 +164,5 @@ export class UsersController {
       userKakaoId,
       file,
     });
-  }
-
-  @ApiOperation({
-    summary: '이름이 포함된 유저 검색',
-    description: '이름에 username이 포함된 유저를 검색한다.',
-  })
-  @ApiOkResponse({ description: '조회 성공', type: [UserResponseDto] })
-  @HttpCode(200)
-  @Get('username/:username')
-  async findUsersByName(
-    @Param('username') username: string,
-  ): Promise<UserResponseDto[]> {
-    return await this.usersService.findUsersByName({ username });
-  }
-
-  @ApiOperation({
-    summary: 'kakaoId에 정확히 부합하는 유저 검색',
-    description: 'kakaoId가 param과 일치하는 유저를 검색한다.',
-  })
-  @ApiOkResponse({ description: '조회 성공', type: UserResponseDto })
-  @HttpCode(200)
-  @Get('kakaoId/:kakaoId')
-  async findUserByKakaoId(
-    @Param('kakaoId') kakaoId: number,
-  ): Promise<UserResponseDto> {
-    return await this.usersService.findUserByKakaoId({ kakaoId });
   }
 }
