@@ -69,10 +69,13 @@ export class CommentsService {
     return await this.commentsRepository.fetchComments({ postsId });
   }
 
-  async delete({ id, userKakaoId }): Promise<void> {
+  async delete({ id, userKakaoId, postsId }): Promise<void> {
     try {
       const data = await this.existCheck({ id });
-      await this.commentsRepository.softDelete({
+      if (!(data.postsId == postsId))
+        throw new NotFoundException('게시글을 찾을 수 없습니다.');
+      //transaction 거는 것 고려해볼 것
+      const deletedComment = await this.commentsRepository.softRemove({
         user: { kakaoId: userKakaoId },
         id,
       });
