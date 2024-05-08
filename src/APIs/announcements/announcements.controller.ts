@@ -25,7 +25,7 @@ import { AnnouncementResponseDto } from './dtos/announcement-response.dto';
 import { PatchAnnouncementInput } from './dtos/patch-announcment.dto';
 
 @ApiTags('공지 API')
-@Controller('anmt')
+@Controller('anmts')
 export class AnnouncementsController {
   constructor(private readonly announcementsService: AnnouncementsService) {}
 
@@ -54,10 +54,14 @@ export class AnnouncementsController {
   @ApiCookieAuth()
   @ApiOkResponse({ type: [AnnouncementResponseDto] })
   @UseGuards(AuthGuardV2)
-  @Patch()
-  async patchAnmt(@Req() req: Request, @Body() body: PatchAnnouncementInput) {
+  @Patch(':id')
+  async patchAnmt(
+    @Req() req: Request,
+    @Body() body: PatchAnnouncementInput,
+    @Param('id') id: number,
+  ) {
     const kakaoId = req.body.userId;
-    return await this.announcementsService.patch({ ...body, kakaoId });
+    return await this.announcementsService.patch({ ...body, id, kakaoId });
   }
 
   @ApiOperation({

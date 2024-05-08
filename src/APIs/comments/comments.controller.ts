@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   HttpCode,
+  Param,
   Post,
   Req,
   UseGuards,
@@ -17,12 +18,11 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { DeleteCommentDto } from './dtos/delete-comment.dto';
 import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 import { ChildrenComment } from './dtos/fetch-comments.dto';
 
-@ApiTags('댓글 API')
-@Controller('comments')
+@ApiTags('게시글 API')
+@Controller('posts/:postId/comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
@@ -37,10 +37,11 @@ export class CommentsController {
   @HttpCode(200)
   async upsertComment(
     @Req() req: Request,
+    @Param('postId') postsId: number,
     @Body() body: CreateCommentInput,
   ): Promise<ChildrenComment> {
     const userKakaoId = req.user.userId;
-    return await this.commentsService.upsert({ ...body, userKakaoId });
+    return await this.commentsService.upsert({ ...body, postsId, userKakaoId });
   }
 
   @ApiOperation({
@@ -54,9 +55,14 @@ export class CommentsController {
   @HttpCode(204)
   async deleteComment(
     @Req() req: Request,
-    @Body() body: DeleteCommentDto,
+    @Param('postId') postsId: number,
+    @Param('commentId') id: number,
   ): Promise<void> {
     const userKakaoId = req.user.userId;
-    return await this.commentsService.delete({ ...body, userKakaoId });
+    return await this.commentsService.delete({
+      postsId,
+      id,
+      userKakaoId,
+    });
   }
 }

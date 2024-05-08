@@ -25,7 +25,7 @@ import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 import { FetchNotiInput, FetchNotiResponse } from './dtos/fetch-noti.dto';
 
 @ApiTags('알림 API')
-@Controller('nots')
+@Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
@@ -37,14 +37,14 @@ export class NotificationsController {
   브라우저를 끄거나 refetching이 한동안 일어나지 않으면 sse를 끊는다.
   */
   @ApiOperation({
-    summary: '[SSE] kakaoId로 오는 알림을 구독한다.',
+    summary: '[SSE] 알림을 구독한다.',
     description:
       '[swagger 불가능, postman 권장] sse를 연결한다. 로그인된 유저를 타겟으로 하는 알림이 보내졌을경우 sse를 통해 전달받는다.',
   })
   @ApiCookieAuth()
   @ApiProduces('text/event-stream')
   @UseGuards(AuthGuardV2)
-  @Sse('sub')
+  @Sse('subscribe')
   sendClientAlarm(
     @Req() req: Request,
     // @Param('kakaoId') userKakaoId,
@@ -60,7 +60,7 @@ export class NotificationsController {
       '로그인된 유저들에게 보내진 알림들을 조회한다. query를 통해 알림 조회 옵션 설정. sse 연결 이전 이니셜 데이터 fetch 시 사용',
   })
   @ApiOkResponse({ type: [FetchNotiResponse] })
-  @Get('init')
+  @Get()
   @ApiCookieAuth()
   @UseGuards(AuthGuardV2)
   async fetchNoti(
@@ -75,14 +75,14 @@ export class NotificationsController {
   }
 
   @ApiOperation({
-    summary: '알림 토글',
+    summary: '알림 읽기',
     description: '알림을 읽음 처리한다.',
   })
   @ApiCookieAuth()
   @UseGuards(AuthGuardV2)
   @ApiOkResponse({ type: FetchNotiResponse })
   @HttpCode(200)
-  @Post('toggle/:id')
+  @Post(':id/read')
   async toggleNoti(
     @Req() req: Request,
     @Param('id') id: number,
@@ -92,11 +92,11 @@ export class NotificationsController {
   }
 
   @ApiOperation({
-    summary: 'kakaoId에게 알림 생성',
+    summary: 'userId에게 알림 생성',
     description:
-      'kakaoId에게 알림을 보낸다. sse로 연결되어 있을 경우 실시간으로 fetch된다.',
+      'userId에게 알림을 보낸다. sse로 연결되어 있을 경우 실시간으로 fetch된다.',
   })
-  @Post('send/:kakaoId')
+  @Post('send/:userId')
   async sendNoti(@Req() req: Request, @Body() body: EmitNotiInput) {
     const userKakaoId = req.user.userId;
     return await this.notificationsService.emitAlarm({ userKakaoId, ...body });

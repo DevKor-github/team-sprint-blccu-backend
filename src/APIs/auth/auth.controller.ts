@@ -32,7 +32,7 @@ export class AuthController {
   @ApiMovedPermanentlyResponse({
     description: `카카오에서 인증 완료 후 클라이언트 루트 url로 리다이렉트 한다.`,
   })
-  @Get('kakao') // 카카오 서버를 거쳐서 도착하게 될 엔드포인트
+  @Get('login/kakao') // 카카오 서버를 거쳐서 도착하게 될 엔드포인트
   @UseGuards(AuthGuard('kakao')) // kakao.strategy를 실행시켜 줍니다.
   @HttpCode(301)
   async kakaoLogin(@Req() req: Request, @Res() res: Response) {
@@ -58,7 +58,7 @@ export class AuthController {
       'refresh 토큰이 만료되었거나 없을 경우 cookie를 모두 clear한다.',
   })
   @ApiCookieAuth()
-  @Get('refresh')
+  @Get('refresh-token')
   @HttpCode(201)
   async refresh(@Req() req: Request, @Res() res: Response) {
     try {

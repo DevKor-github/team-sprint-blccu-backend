@@ -23,18 +23,18 @@ import { JwtModule } from '@nestjs/jwt';
 @Module({
   imports: [
     AnnouncementsModule,
-    CommentsModule,
     StickersModule,
     StickerCategoriesModule,
     StickerBlocksModule,
     PostsModule,
+    CommentsModule,
     LikesModule,
     UsersModule,
+    PostCategoriesModule,
     AuthModule,
     NeighborsModule,
     NotificationsModule,
     PostBackgroundsModule,
-    PostCategoriesModule,
     ReportsModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

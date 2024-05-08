@@ -21,7 +21,7 @@ export class CreateCommentDto {
   parentId?: number;
 
   @ApiProperty({
-    description: '[optional] 수정 시 댓글 id',
+    description: '[optional] 수정 시 댓글 id',
     type: Number,
     required: false,
   })
@@ -32,4 +32,5 @@ export class CreateCommentDto {
 
 export class CreateCommentInput extends OmitType(CreateCommentDto, [
   'userKakaoId',
+  'postsId',
 ]) {}
