@@ -15,6 +15,14 @@ export class LikesService {
     private readonly dataSource: DataSource,
   ) {}
 
+  async fetchIfLiked({ kakaoId, id }): Promise<boolean> {
+    const alreadyLiked = await this.likesRepository.findOne({
+      where: { posts: { id }, user: { kakaoId } },
+    });
+    if (alreadyLiked) return true;
+    return false;
+  }
+
   async toggleLike({ id, kakaoId }): Promise<ToggleLikeResponseDto> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -26,7 +34,7 @@ export class LikesService {
       if (!postData) throw new NotFoundException('게시글이 존재하지 않습니다.');
       // 좋아요 눌렀는지 확인하기
       const alreadyLiked = await this.likesRepository.findOne({
-        where: { posts: { id } },
+        where: { posts: { id }, user: { kakaoId } },
       });
       if (alreadyLiked) {
         await queryRunner.manager.delete(Likes, { id: alreadyLiked.id });
