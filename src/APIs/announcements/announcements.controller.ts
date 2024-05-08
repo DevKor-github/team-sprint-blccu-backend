@@ -25,7 +25,7 @@ import { AnnouncementResponseDto } from './dtos/announcement-response.dto';
 import { PatchAnnouncementInput } from './dtos/patch-announcment.dto';
 
 @ApiTags('공지 API')
-@Controller('anmt')
+@Controller('anmts')
 export class AnnouncementsController {
   constructor(private readonly announcementsService: AnnouncementsService) {}
 
