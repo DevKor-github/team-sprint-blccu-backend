@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   Param,
   Post,
@@ -19,7 +20,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
-import { ChildrenComment } from './dtos/fetch-comments.dto';
+import { ChildrenComment, FetchCommentsDto } from './dtos/fetch-comments.dto';
 
 @ApiTags('게시글 API')
 @Controller('posts/:postId/comments')
@@ -42,6 +43,17 @@ export class CommentsController {
   ): Promise<ChildrenComment> {
     const userKakaoId = req.user.userId;
     return await this.commentsService.upsert({ ...body, postsId, userKakaoId });
+  }
+
+  @ApiOperation({
+    summary: '특정 게시글에 대한 댓글 조회',
+  })
+  @ApiOkResponse({ type: [FetchCommentsDto] })
+  @Get()
+  async fetchComments(
+    @Param('postId') postsId: number,
+  ): Promise<FetchCommentsDto[]> {
+    return await this.commentsService.fetchComments({ postsId });
   }
 
   @ApiOperation({
