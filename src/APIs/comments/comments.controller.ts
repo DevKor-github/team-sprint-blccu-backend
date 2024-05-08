@@ -21,7 +21,7 @@ import {
 import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
 import { ChildrenComment } from './dtos/fetch-comments.dto';
 
-@ApiTags('댓글 API')
+@ApiTags('게시글 API')
 @Controller('posts/:postId/comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
