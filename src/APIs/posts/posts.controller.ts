@@ -50,23 +50,6 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @ApiOperation({
-    summary: '게시글 임시등록',
-    description: `게시글을 임시등록한다.
-    id를 입력하지 않으면 생성하고 있는 아이디를 치면 update하는 로직으로 
-    바로 게시글 생성에 사용해도 되고, 수정용으로 사용해도 된다.`,
-  })
-  @Post('temp')
-  @ApiCookieAuth()
-  @ApiCreatedResponse({ description: '임시등록 성공', type: PublishPostDto })
-  @UseGuards(AuthGuardV2)
-  @HttpCode(201)
-  async updatePost(@Req() req: Request, @Body() body: CreatePostInput) {
-    const kakaoId = req.user.userId;
-    const dto = { ...body, userKakaoId: kakaoId, isPublished: false };
-    return await this.postsService.save(dto);
-  }
-
-  @ApiOperation({
     summary: '게시글 등록',
     description: `게시글을 등록한다.
     id를 입력하지 않으면 생성하고 있는 아이디를 치면 update하는 로직으로 
@@ -81,6 +64,35 @@ export class PostsController {
     const kakaoId = req.user.userId;
     console.log(body);
     const dto = { ...body, userKakaoId: kakaoId, isPublished: true };
+    return await this.postsService.save(dto);
+  }
+
+  @ApiOperation({
+    summary: '게시글 논리 삭제',
+    description: '로그인 된 유저의 postId에 해당하는 게시글을 논리삭제한다.',
+  })
+  @ApiCookieAuth()
+  @UseGuards(AuthGuardV2)
+  @Delete(':postId')
+  async softDelete(@Req() req: Request, @Param('postId') id: number) {
+    const kakaoId = req.user.userId;
+    return await this.postsService.softDelete({ kakaoId, id });
+  }
+
+  @ApiOperation({
+    summary: '게시글 임시등록',
+    description: `게시글을 임시등록한다.
+    id를 입력하지 않으면 생성하고 있는 아이디를 치면 update하는 로직으로 
+    바로 게시글 생성에 사용해도 되고, 수정용으로 사용해도 된다.`,
+  })
+  @Post('temp')
+  @ApiCookieAuth()
+  @ApiCreatedResponse({ description: '임시등록 성공', type: PublishPostDto })
+  @UseGuards(AuthGuardV2)
+  @HttpCode(201)
+  async updatePost(@Req() req: Request, @Body() body: CreatePostInput) {
+    const kakaoId = req.user.userId;
+    const dto = { ...body, userKakaoId: kakaoId, isPublished: false };
     return await this.postsService.save(dto);
   }
 
@@ -125,30 +137,32 @@ export class PostsController {
     return await this.postsService.saveImage(file);
   }
 
-  @ApiOperation({
-    summary: '게시글 soft delete',
-    description:
-      '로그인 된 유저의 {id}에 해당하는 게시글을 논리삭제한다. 발행된 게시글에 사용을 권장',
-  })
-  @ApiCookieAuth()
-  @UseGuards(AuthGuardV2)
-  @Delete('soft/:id')
-  async softDelete(@Req() req: Request, @Param('id') id: number) {
-    const kakaoId = req.user.userId;
-    return await this.postsService.softDelete({ kakaoId, id });
-  }
+  // @ApiOperation({
+  //   summary: '게시글 hard delete',
+  //   description:
+  //     '로그인 된 유저의 {id}에 해당하는 게시글을 물리삭제한다. 임시 저장된 게시글에 사용을 권장',
+  // })
+  // @ApiCookieAuth()
+  // @UseGuards(AuthGuardV2)
+  // @Delete('hard/:id')
+  // async hardDelete(@Req() req: Request, @Param('id') id: number) {
+  //   const kakaoId = req.user.userId;
+  //   return await this.postsService.hardDelete({ kakaoId, id });
+  // }
 
   @ApiOperation({
-    summary: '게시글 hard delete',
+    summary: '게시글 디테일 뷰 fetch',
     description:
-      '로그인 된 유저의 {id}에 해당하는 게시글을 물리삭제한다. 임시 저장된 게시글에 사용을 권장',
+      'id에 해당하는 게시글과 댓글을 가져온다. 조회수를 올린다. 보호된 게시글은 권한이 있는 사용자만 접근 가능하다.',
   })
-  @ApiCookieAuth()
-  @UseGuards(AuthGuardV2)
-  @Delete('hard/:id')
-  async hardDelete(@Req() req: Request, @Param('id') id: number) {
+  @Get('detail/:postId')
+  @ApiOkResponse({ type: fetchPostDetailDto })
+  async fetchPostDetail(
+    @Param('postId') id: number,
+    @Req() req: Request,
+  ): Promise<fetchPostDetailDto> {
     const kakaoId = req.user.userId;
-    return await this.postsService.hardDelete({ kakaoId, id });
+    return await this.postsService.fetchDetail({ kakaoId, id });
   }
 
   @ApiOperation({
@@ -160,28 +174,13 @@ export class PostsController {
   @ApiOkResponse({ type: FetchPostForUpdateDto })
   @UseGuards(AuthGuardV2)
   @HttpCode(200)
-  @Get('update/:id')
+  @Get('update/:postId')
   async fetchPost(
     @Req() req: Request,
-    @Param('id') id: number,
+    @Param('postId') id: number,
   ): Promise<FetchPostForUpdateDto> {
     const kakaoId = req.user.userId;
     return await this.postsService.fetchPostForUpdate({ id, kakaoId });
-  }
-
-  @ApiOperation({
-    summary: '게시글 디테일 뷰 fetch',
-    description:
-      'id에 해당하는 게시글과 댓글을 가져온다. 조회수를 올린다. 보호된 게시글은 권한이 있는 사용자만 접근 가능하다.',
-  })
-  @Get('detail/:id')
-  @ApiOkResponse({ type: fetchPostDetailDto })
-  async fetchPostDetail(
-    @Param('id') id: number,
-    @Req() req: Request,
-  ): Promise<fetchPostDetailDto> {
-    const kakaoId = req.user.userId;
-    return await this.postsService.fetchDetail({ kakaoId, id });
   }
 
   @ApiOperation({
@@ -259,10 +258,10 @@ export class PostsController {
     description:
       '로그인 된 유저의 경우 private/protected 게시글 조회 권한 체크 후 조회. 카테고리 이름으로 필터링 가능',
   })
-  @Get('/cursor/user/:kakaoId')
+  @Get('/cursor/user/:userId')
   @ApiOkResponse({ type: CursorPagePostResponseDto })
   async fetchUserPosts(
-    @Param('kakaoId') targetKakaoId: number,
+    @Param('userId') targetKakaoId: number,
     @Req() req: Request,
     @Query() cursorOption: FetchUserPostsInput,
   ): Promise<CursorPagePostResponseDto> {

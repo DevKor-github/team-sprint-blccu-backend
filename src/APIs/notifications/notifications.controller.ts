@@ -37,7 +37,7 @@ export class NotificationsController {
   브라우저를 끄거나 refetching이 한동안 일어나지 않으면 sse를 끊는다.
   */
   @ApiOperation({
-    summary: '[SSE] kakaoId로 오는 알림을 구독한다.',
+    summary: '[SSE] 알림을 구독한다.',
     description:
       '[swagger 불가능, postman 권장] sse를 연결한다. 로그인된 유저를 타겟으로 하는 알림이 보내졌을경우 sse를 통해 전달받는다.',
   })
@@ -92,11 +92,11 @@ export class NotificationsController {
   }
 
   @ApiOperation({
-    summary: 'kakaoId에게 알림 생성',
+    summary: 'userId에게 알림 생성',
     description:
-      'kakaoId에게 알림을 보낸다. sse로 연결되어 있을 경우 실시간으로 fetch된다.',
+      'userId에게 알림을 보낸다. sse로 연결되어 있을 경우 실시간으로 fetch된다.',
   })
-  @Post('send/:kakaoId')
+  @Post('send/:userId')
   async sendNoti(@Req() req: Request, @Body() body: EmitNotiInput) {
     const userKakaoId = req.user.userId;
     return await this.notificationsService.emitAlarm({ userKakaoId, ...body });
