@@ -33,9 +33,11 @@ export class Neighbor {
   })
   from_user: User;
 
+  @ApiProperty({ type: Number, description: '이웃 추가를 받은 유저' })
   @RelationId((neighbor: Neighbor) => neighbor.to_user) // you need to specify target relation
   toUserKakaoId: number;
 
+  @ApiProperty({ type: Number, description: '이웃 추가를 한 유저' })
   @RelationId((neighbor: Neighbor) => neighbor.from_user) // you need to specify target relation
   fromUserKakaoId: number;
 }
