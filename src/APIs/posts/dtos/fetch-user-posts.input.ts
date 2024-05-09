@@ -11,5 +11,5 @@ export class FetchUserPostsInput extends CursorFetchPosts {
   })
   @IsOptional()
   @Type(() => String)
-  postCategoryName?: string | null;
+  category_name?: string | null;
 }

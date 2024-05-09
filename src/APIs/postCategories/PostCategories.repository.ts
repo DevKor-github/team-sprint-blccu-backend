@@ -23,7 +23,7 @@ export class PostCategoriesRepository extends Repository<PostCategory> {
       ) // LEFT JOIN으로 연결된 엔티티의 조건을 추가
       .where('pc.userKakaoId = :userKakaoId', { userKakaoId })
       .groupBy('pc.id'); // postCategory.id를 기준으로 그룹화
-    console.log(userKakaoId);
+    console.log('??', userKakaoId);
 
     return await query.getRawMany();
   }

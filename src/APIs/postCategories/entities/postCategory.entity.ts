@@ -28,6 +28,7 @@ export class PostCategory {
   @OneToMany(() => Posts, (posts) => posts.postCategory)
   posts: Posts;
 
+  @ApiProperty({ type: Number, description: '유저 아이디' })
   @Column()
   @RelationId((postCategory: PostCategory) => postCategory.user)
   userKakaoId: number;

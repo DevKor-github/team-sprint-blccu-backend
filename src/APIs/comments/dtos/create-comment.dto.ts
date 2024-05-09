@@ -20,13 +20,6 @@ export class CreateCommentDto {
   })
   parentId?: number;
 
-  @ApiProperty({
-    description: '[optional] 수정 시 댓글 id',
-    type: Number,
-    required: false,
-  })
-  id?: number;
-
   userKakaoId: string;
 }
 

@@ -1,8 +1,16 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreatePostCategoryResponseDto } from './dtos/create-post-category-response.dto';
 import { PostCategoriesRepository } from './PostCategories.repository';
 
-import { FetchPostCategoryDto } from './dtos/fetch-post-category.dto';
+import {
+  FetchPostCategoriesDto,
+  FetchPostCategoryDto,
+} from './dtos/fetch-post-category.dto';
 import { NeighborsService } from '../neighbors/neighbors.service';
 
 @Injectable()
@@ -29,7 +37,25 @@ export class PostCategoriesService {
     return result;
   }
 
-  async fetchAll({ kakaoId, targetKakaoId }): Promise<FetchPostCategoryDto[]> {
+  async patch({ kakaoId, id, name }): Promise<FetchPostCategoryDto> {
+    const data = await this.findWithId({ kakaoId, id });
+    if (!data) throw new NotFoundException('카테고리를 찾을 수 없습니다.');
+    if (data.userKakaoId != kakaoId)
+      throw new ForbiddenException('카테고리를 수정할 권한이 없습니다.');
+    data.name = name;
+    return await this.postCategoriesRepository.save(data);
+  }
+
+  async findWithId({ kakaoId, id }): Promise<FetchPostCategoryDto> {
+    return await this.postCategoriesRepository.findOne({
+      where: { user: { kakaoId }, id },
+    });
+  }
+
+  async fetchAll({
+    kakaoId,
+    targetKakaoId,
+  }): Promise<FetchPostCategoriesDto[]> {
     const scope = await this.neighborsService.getScope({
       from_user: targetKakaoId,
       to_user: kakaoId,

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,7 +9,11 @@ import { UsersService } from '../users/users.service';
 import { CommentsRepository } from './comments.repository';
 import { DataSource } from 'typeorm';
 import { Posts } from '../posts/entities/posts.entity';
-import { ChildrenComment, FetchCommentsDto } from './dtos/fetch-comments.dto';
+import {
+  ChildrenComment,
+  FetchCommentDto,
+  FetchCommentsDto,
+} from './dtos/fetch-comments.dto';
 import { USER_PRIMARY_SELECT_OPTION } from '../users/dtos/user-response.dto';
 
 @Injectable()
@@ -37,25 +42,20 @@ export class CommentsService {
     }
     return comment;
   }
-  async upsert(createCommentDto: CreateCommentDto): Promise<ChildrenComment> {
+  async insert(createCommentDto: CreateCommentDto): Promise<ChildrenComment> {
     if (createCommentDto.parentId)
       await this.postsIdValidCheck({
         parentId: createCommentDto.parentId,
         postsId: createCommentDto.postsId,
       });
-    if (createCommentDto.id) {
-      await this.existCheck({ id: createCommentDto.id });
-    } else {
-      // id를 입력하지 않았을 경우(생성의 경우)에만 count 증가
-      await this.dataSource.manager.update(Posts, createCommentDto.postsId, {
-        comment_count: () => 'comment_count +1',
-      });
-    }
-    const upsertData = await this.commentsRepository.upsertComment({
+    await this.dataSource.manager.update(Posts, createCommentDto.postsId, {
+      comment_count: () => 'comment_count +1',
+    });
+
+    const commentData = await this.commentsRepository.upsertComment({
       createCommentDto,
     });
-    const id = upsertData.identifiers[0];
-    console.log(id);
+    const id = commentData.identifiers[0];
     return await this.commentsRepository.findOne({
       select: {
         user: USER_PRIMARY_SELECT_OPTION,
@@ -63,6 +63,22 @@ export class CommentsService {
       relations: { user: true },
       where: { ...id },
     });
+  }
+
+  async patchComment({
+    kakaoId,
+    postsId,
+    id,
+    content,
+  }): Promise<FetchCommentDto> {
+    const commentData = await this.existCheck({ id });
+    if (!commentData) throw new NotFoundException('댓글을 찾을 수 없습니다.');
+    if (commentData.postsId != postsId)
+      throw new NotFoundException('루트 게시글의 아이디가 일치하지 않습니다.');
+    if (commentData.userKakaoId != kakaoId)
+      throw new ForbiddenException('댓글을 수정할 권한이 없습니다.');
+    commentData.content = content;
+    return await this.commentsRepository.save(commentData);
   }
 
   async fetchComments({ postsId }): Promise<FetchCommentsDto[]> {
