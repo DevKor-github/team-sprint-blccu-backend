@@ -160,9 +160,9 @@ export class PostsRepository extends Repository<Posts> {
     const { order, cursor, take, sort } = cursorOption;
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
 
-    if (cursorOption.postCategoryName) {
-      queryBuilder.andWhere('postCategory.name = :postCategoryName', {
-        postCategoryName: cursorOption.postCategoryName,
+    if (cursorOption.category_name) {
+      queryBuilder.andWhere('postCategory.name = :category_name', {
+        category_name: cursorOption.category_name,
       });
     }
     queryBuilder
