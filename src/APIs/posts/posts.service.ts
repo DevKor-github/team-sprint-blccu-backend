@@ -31,6 +31,7 @@ import { CustomCursorPageMetaDto } from 'src/utils/cursor-pages/dtos/cursor-page
 import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
 import { PostsOrderOption } from 'src/commons/enums/posts-order-option';
 import { NeighborsService } from '../neighbors/neighbors.service';
+import { DateOption } from 'src/commons/enums/date-option';
 
 @Injectable()
 export class PostsService {
@@ -238,6 +239,9 @@ export class PostsService {
     targetKakaoId,
     cursorOption,
   }): Promise<CustomCursorPageDto<PostResponseDto>> {
+    if (cursorOption.date_created)
+      cursorOption.date_created = this.getDate(cursorOption.date_created);
+
     const scope = await this.neighborsService.getScope({
       from_user: targetKakaoId,
       to_user: kakaoId,
@@ -252,9 +256,9 @@ export class PostsService {
 
   async paginateByCustomCursor({
     cursorOption,
-    kakaoId,
   }): Promise<CustomCursorPageDto<PostResponseDto>> {
-    console.log(kakaoId);
+    if (cursorOption.date_created)
+      cursorOption.date_created = this.getDate(cursorOption.date_created);
     const { posts } = await this.postsRepository.paginateByCustomCursor({
       cursorOption,
     });
@@ -285,7 +289,8 @@ export class PostsService {
     cursorOption,
     kakaoId,
   }): Promise<CustomCursorPageDto<PostResponseDto>> {
-    console.log(kakaoId);
+    if (cursorOption.date_created)
+      cursorOption.date_created = this.getDate(cursorOption.date_created);
     const subQuery = await this.dataSource
       .createQueryBuilder(Neighbor, 'n')
       .select('n.toUserKakaoId')
@@ -296,5 +301,23 @@ export class PostsService {
       subQuery,
     });
     return await this.createCursorResponse({ posts, cursorOption });
+  }
+
+  getDate({ date_created }) {
+    let currentDate;
+    switch (date_created) {
+      case DateOption.WEEK:
+        currentDate.setDate(currentDate.getDate() - 7);
+        break;
+      case DateOption.MONTH:
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        break;
+      case DateOption.YEAR:
+        currentDate.setFullYear(currentDate.getFullYear() - 1);
+        break;
+      default:
+        currentDate = null;
+    }
+    return currentDate;
   }
 }

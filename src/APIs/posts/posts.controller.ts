@@ -216,21 +216,19 @@ export class PostsController {
   @ApiOperation({
     summary: '[cursor]전체 게시글 조회 API',
     description:
-      '커서 기반으로 게시글을 조회한다. 최초 조회 시 커서 값을 비워서 요청한다. 쿼리 옵션을 변경할 경우 기존의 커서 값을 쓸 수 없다.',
+      '커서 기반으로 게시글을 조회한다. 최초 조회 시 커서 값을 비워서 요청한다. 쿼리 옵션을 변경할 경우 기존의 커서 값을 쓸 수 없다. PUBLIC 게시글만 조회한다.',
   })
   @Get('cursor')
   @ApiOkResponse({ type: CursorPagePostResponseDto })
   async fetchCursor(
     @Query() cursorOption: CursorFetchPosts,
-    @Req() req: Request,
   ): Promise<CustomCursorPageDto<PostResponseDto>> {
-    const kakaoId = req.user.userId;
     if (!cursorOption.cursor && cursorOption.sort === SortOption.ASC) {
       cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '0');
     } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
       cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '9');
     }
-    return this.postsService.paginateByCustomCursor({ cursorOption, kakaoId });
+    return this.postsService.paginateByCustomCursor({ cursorOption });
   }
 
   @ApiOperation({

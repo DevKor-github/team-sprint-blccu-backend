@@ -186,6 +186,12 @@ export class PostsRepository extends Repository<Posts> {
         scopes: [OpenScope.PUBLIC, OpenScope.PROTECTED],
       }); //sql injection 방지를 위해 만드시 enum 거칠 것
 
+    if (cursorOption.date_created) {
+      queryBuilder.andWhere('date_created > :date_created', {
+        date_created: cursorOption.date_created,
+      });
+    }
+
     const posts: Posts[] = await queryBuilder.getMany();
 
     return { posts };
@@ -199,6 +205,11 @@ export class PostsRepository extends Repository<Posts> {
       scopes: [OpenScope.PUBLIC],
     });
 
+    if (cursorOption.date_created) {
+      queryBuilder.andWhere('date_created > :date_created', {
+        date_created: cursorOption.date_created,
+      });
+    }
     const posts: Posts[] = await queryBuilder.getMany();
 
     return { posts };
