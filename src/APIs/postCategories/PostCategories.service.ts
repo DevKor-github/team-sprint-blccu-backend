@@ -2,7 +2,10 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreatePostCategoryResponseDto } from './dtos/create-post-category-response.dto';
 import { PostCategoriesRepository } from './PostCategories.repository';
 
-import { FetchPostCategoryDto } from './dtos/fetch-post-category.dto';
+import {
+  FetchPostCategoriesDto,
+  FetchPostCategoryDto,
+} from './dtos/fetch-post-category.dto';
 import { NeighborsService } from '../neighbors/neighbors.service';
 
 @Injectable()
@@ -29,7 +32,16 @@ export class PostCategoriesService {
     return result;
   }
 
-  async fetchAll({ kakaoId, targetKakaoId }): Promise<FetchPostCategoryDto[]> {
+  async findWithId({ kakaoId, id }): Promise<FetchPostCategoryDto> {
+    return await this.postCategoriesRepository.findOne({
+      where: { user: { kakaoId }, id },
+    });
+  }
+
+  async fetchAll({
+    kakaoId,
+    targetKakaoId,
+  }): Promise<FetchPostCategoriesDto[]> {
     const scope = await this.neighborsService.getScope({
       from_user: targetKakaoId,
       to_user: kakaoId,

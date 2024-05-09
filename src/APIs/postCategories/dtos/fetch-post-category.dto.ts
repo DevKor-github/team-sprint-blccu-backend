@@ -1,6 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
+import { PostCategory } from '../entities/postCategory.entity';
+export class FetchPostCategoryDto extends OmitType(PostCategory, ['user']) {}
 
-export class FetchPostCategoryDto {
+export class FetchPostCategoriesDto {
   @ApiProperty({ type: Number })
   postCount: number;
 
