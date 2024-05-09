@@ -17,7 +17,7 @@ export class CursorFetchPosts extends CustomCursorPageOptionsDto {
   @ApiProperty({
     type: 'enun',
     enum: DateOption,
-    description: '특정 기간 이후 알림 조회, null 일 경우 전체 조회',
+    description: '특정 기간 이후 게시글 조회, null 일 경우 전체 조회',
     required: false,
     default: null,
   })
