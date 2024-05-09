@@ -14,7 +14,6 @@ export class CommentsRepository extends Repository<Comment> {
       .insert()
       .into(Comment, Object.keys(createCommentDto))
       .values(createCommentDto)
-      .orUpdate(Object.keys(createCommentDto), ['id'])
       .execute();
   }
 

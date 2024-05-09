@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -25,6 +26,7 @@ import {
   FetchPostCategoryDto,
   FetchPostCategoriesDto,
 } from './dtos/fetch-post-category.dto';
+import { PatchPostCategoryDto } from './dtos/patch-post-category.dto';
 
 @ApiTags('유저 API')
 @Controller('users')
@@ -109,6 +111,24 @@ export class PostCategoriesController {
   ): Promise<FetchPostCategoryDto> {
     const kakaoId = req.user.userId;
     return await this.postCategoriesService.findWithId({ kakaoId, id });
+  }
+
+  @ApiOperation({ summary: '로그인된 유저의 특정 카테고리 수정' })
+  @ApiCookieAuth()
+  @ApiOkResponse({ type: FetchPostCategoryDto })
+  @UseGuards(AuthGuardV2)
+  @Patch('me/categories/:categoryId')
+  async patchCategory(
+    @Req() req: Request,
+    @Param('categoryId') id: string,
+    @Body() body: PatchPostCategoryDto,
+  ): Promise<FetchPostCategoryDto> {
+    const kakaoId = req.user.userId;
+    return await this.postCategoriesService.patch({
+      kakaoId,
+      id,
+      ...body,
+    });
   }
 
   @ApiOperation({

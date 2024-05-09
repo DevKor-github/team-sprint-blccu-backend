@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreatePostCategoryResponseDto } from './dtos/create-post-category-response.dto';
 import { PostCategoriesRepository } from './PostCategories.repository';
 
@@ -30,6 +35,15 @@ export class PostCategoriesService {
       name,
     });
     return result;
+  }
+
+  async patch({ kakaoId, id, name }): Promise<FetchPostCategoryDto> {
+    const data = await this.findWithId({ kakaoId, id });
+    if (!data) throw new NotFoundException('카테고리를 찾을 수 없습니다.');
+    if (data.userKakaoId != kakaoId)
+      throw new ForbiddenException('카테고리를 수정할 권한이 없습니다.');
+    data.name = name;
+    return await this.postCategoriesRepository.save(data);
   }
 
   async findWithId({ kakaoId, id }): Promise<FetchPostCategoryDto> {
