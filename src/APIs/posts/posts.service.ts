@@ -210,8 +210,6 @@ export class PostsService {
     let customCursor: string;
 
     const takePerPage = cursorOption.take;
-    console.log(posts.length);
-    console.log(cursorOption);
     const isLastPage = posts.length <= takePerPage;
     const responseData = posts.slice(0, takePerPage);
     const lastDataPerPage = responseData[responseData.length - 1];
@@ -303,8 +301,8 @@ export class PostsService {
     return await this.createCursorResponse({ posts, cursorOption });
   }
 
-  getDate({ date_created }) {
-    let currentDate;
+  getDate(date_created) {
+    let currentDate = new Date();
     switch (date_created) {
       case DateOption.WEEK:
         currentDate.setDate(currentDate.getDate() - 7);
