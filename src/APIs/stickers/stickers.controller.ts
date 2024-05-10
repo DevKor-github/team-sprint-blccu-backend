@@ -23,15 +23,15 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
+import { ImageUploadDto } from 'src/common/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { Sticker } from './entities/sticker.entity';
 import { RemoveBgDto } from './dtos/remove-bg.dto';
-import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
+import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { FindStickerInput } from './dtos/find-sticker.dto';
 import { UpdateStickerInput } from './dtos/update-sticker.dto';
-import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 
 @ApiTags('스티커 API')
 @Controller('stickers')

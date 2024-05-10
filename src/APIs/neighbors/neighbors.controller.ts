@@ -23,7 +23,7 @@ import {
 import { FromUserResponseDto } from './dtos/from-user-response.dto';
 import { ToUserResponseDto } from './dtos/to-user-response.dto';
 import { FollowUserDto } from './dtos/follow-user.dto';
-import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 
 @ApiTags('유저 API')
 @Controller('users/:userId')

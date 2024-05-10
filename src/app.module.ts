@@ -17,7 +17,7 @@ import { StickerBlocksModule } from './APIs/stickerBlocks/stickerBlocks.module';
 import { NotificationsModule } from './APIs/notifications/notifications.module';
 import { AnnouncementsModule } from './APIs/announcements/announcements.module';
 import { ReportsModule } from './APIs/reports/reports.module';
-import { AuthTokenMiddleware } from './commons/middlewares/auth-token.middleware';
+import { AuthTokenMiddleware } from './common/middlewares/auth-token.middleware';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({

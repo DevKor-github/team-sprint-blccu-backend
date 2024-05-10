@@ -17,7 +17,7 @@ import {
 import { Request } from 'express';
 import { MapCategoryDto } from './dtos/map-category.dto';
 import { StickerCategory } from './entities/stickerCategory.entity';
-import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 
 @ApiTags('스티커 카테고리 API')
 @Controller('stickercg')

@@ -7,7 +7,7 @@ import { ToUserResponseDto } from './dtos/to-user-response.dto';
 import { FollowUserDto } from './dtos/follow-user.dto';
 import { USER_SELECT_OPTION } from '../users/dtos/user-response.dto';
 import e from 'express';
-import { OpenScope } from 'src/commons/enums/open-scope.enum';
+import { OpenScope } from 'src/common/enums/open-scope.enum';
 
 @Injectable()
 export class NeighborsService {

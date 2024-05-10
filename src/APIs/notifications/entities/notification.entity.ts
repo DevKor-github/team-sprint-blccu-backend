@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/APIs/users/entities/user.entity';
-import { NotType } from 'src/commons/enums/not-type.enum';
+import { NotType } from 'src/common/enums/not-type.enum';
 import {
   Column,
   CreateDateColumn,

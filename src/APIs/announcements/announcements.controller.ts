@@ -18,7 +18,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { Request } from 'express';
 import { CreateAnouncementInput } from './dtos/create-announcement.dto';
 import { AnnouncementResponseDto } from './dtos/announcement-response.dto';

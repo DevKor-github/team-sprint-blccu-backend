@@ -21,7 +21,7 @@ import {
 import { Request } from 'express';
 import { EmitNotiInput } from './dtos/emit-noti.dto';
 
-import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { FetchNotiInput, FetchNotiResponse } from './dtos/fetch-noti.dto';
 
 @ApiTags('알림 API')

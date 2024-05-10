@@ -16,7 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateReportInput } from './dtos/create-report.dto';
-import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { Request } from 'express';
 import { FetchReportResponse } from './dtos/fetch-report.dto';
 

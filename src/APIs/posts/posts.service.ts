@@ -17,7 +17,7 @@ import { CreatePostDto } from './dtos/create-post.dto';
 import { PostCategory } from '../postCategories/entities/postCategory.entity';
 import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
 import { User } from '../users/entities/user.entity';
-import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
+import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { StickerBlocksService } from '../stickerBlocks/stickerBlocks.service';
 import { PostsRepository } from './posts.repository';
 import { CommentsService } from '../comments/comments.service';
@@ -29,9 +29,9 @@ import {
 } from './dtos/fetch-post-for-update.dto';
 import { CustomCursorPageMetaDto } from 'src/utils/cursor-pages/dtos/cursor-page-meta.dto';
 import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
-import { PostsOrderOption } from 'src/commons/enums/posts-order-option';
+import { PostsOrderOption } from 'src/common/enums/posts-order-option';
 import { NeighborsService } from '../neighbors/neighbors.service';
-import { DateOption } from 'src/commons/enums/date-option';
+import { DateOption } from 'src/common/enums/date-option';
 
 @Injectable()
 export class PostsService {
