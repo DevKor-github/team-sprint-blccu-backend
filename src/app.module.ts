@@ -20,11 +20,13 @@ import { ReportsModule } from './APIs/reports/reports.module';
 import { AuthTokenMiddleware } from './common/middlewares/auth-token.middleware';
 import { JwtModule } from '@nestjs/jwt';
 import { AgreementsModule } from './APIs/agreements/agreements.module';
+import { FeedbacksModule } from './APIs/feedbacks/feedbacks.module';
 
 @Module({
   imports: [
     AnnouncementsModule,
     AgreementsModule,
+    FeedbacksModule,
     StickersModule,
     StickerCategoriesModule,
     StickerBlocksModule,
