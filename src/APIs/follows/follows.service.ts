@@ -27,10 +27,10 @@ export class FollowsService {
     if (from_user === to_user)
       return [OpenScope.PUBLIC, OpenScope.PROTECTED, OpenScope.PRIVATE];
     if (from_user !== null && to_user !== null) {
-      const neighbor = await this.followsRepository.findOne({
+      const follow = await this.followsRepository.findOne({
         where: { from_user, to_user },
       });
-      if (neighbor) {
+      if (follow) {
         return [OpenScope.PUBLIC, OpenScope.PROTECTED];
       }
     }
@@ -40,14 +40,14 @@ export class FollowsService {
 
   async isExist({ from_user, to_user }): Promise<boolean> {
     console.log(from_user, to_user);
-    const neighbor = await this.followsRepository.findOne({
+    const follow = await this.followsRepository.findOne({
       where: {
         from_user: { kakaoId: from_user },
         to_user: { kakaoId: to_user },
       },
       loadRelationIds: true,
     });
-    if (!neighbor) {
+    if (!follow) {
       return false;
     }
     return true;
@@ -60,11 +60,11 @@ export class FollowsService {
     if (this.isSame({ from_user, to_user })) {
       throw new ConflictException('you cannot follow yourself!');
     }
-    const neighbor = await this.followsRepository.save({
+    const follow = await this.followsRepository.save({
       from_user,
       to_user,
     });
-    return neighbor;
+    return follow;
   }
 
   async unfollowUser({ from_user, to_user }) {
