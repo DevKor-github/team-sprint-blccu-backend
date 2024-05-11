@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   RelationId,
@@ -19,7 +20,7 @@ export class Agreement {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @JoinColumn()
   @ManyToOne(() => User, (users) => users.kakaoId, {
     nullable: false,
     onUpdate: 'NO ACTION',
