@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Neighbor {
+export class Follow {
   @ApiProperty({ type: String, description: 'PK: uuid' })
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -34,10 +34,10 @@ export class Neighbor {
   from_user: User;
 
   @ApiProperty({ type: Number, description: '이웃 추가를 받은 유저' })
-  @RelationId((neighbor: Neighbor) => neighbor.to_user) // you need to specify target relation
+  @RelationId((follow: Follow) => follow.to_user)
   toUserKakaoId: number;
 
   @ApiProperty({ type: Number, description: '이웃 추가를 한 유저' })
-  @RelationId((neighbor: Neighbor) => neighbor.from_user) // you need to specify target relation
+  @RelationId((follow: Follow) => follow.from_user)
   fromUserKakaoId: number;
 }

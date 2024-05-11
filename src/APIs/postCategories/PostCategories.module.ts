@@ -4,10 +4,10 @@ import { PostCategory } from './entities/postCategory.entity';
 import { PostCategoriesService } from './PostCategories.service';
 import { PostCategoriesController } from './PostCategories.controller';
 import { PostCategoriesRepository } from './PostCategories.repository';
-import { NeighborsModule } from '../neighbors/neighbors.module';
+import { FollowsModule } from '../follows/follows.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PostCategory]), NeighborsModule],
+  imports: [TypeOrmModule.forFeature([PostCategory]), FollowsModule],
   providers: [PostCategoriesService, PostCategoriesRepository],
   controllers: [PostCategoriesController],
 })

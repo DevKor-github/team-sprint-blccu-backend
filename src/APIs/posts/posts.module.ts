@@ -6,20 +6,19 @@ import { PostsController } from './posts.controller';
 import { UtilsModule } from 'src/utils/utils.module';
 import { AwsModule } from 'src/utils/aws/aws.module';
 import { PostsService } from './posts.service';
-import { Neighbor } from '../neighbors/entities/neighbor.entity';
 import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
 import { PostCategory } from '../postCategories/entities/postCategory.entity';
 import { StickerBlocksModule } from '../stickerBlocks/stickerBlocks.module';
 import { PostsRepository } from './posts.repository';
 import { CommentsModule } from '../comments/comments.module';
-import { NeighborsModule } from '../neighbors/neighbors.module';
+import { FollowsModule } from '../follows/follows.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Posts, User, PostBackground, PostCategory]),
     UtilsModule,
     AwsModule,
-    NeighborsModule,
+    FollowsModule,
     StickerBlocksModule,
     CommentsModule,
   ],

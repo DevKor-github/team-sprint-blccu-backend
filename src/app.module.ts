@@ -7,7 +7,7 @@ import { PostsModule } from './APIs/posts/posts.module';
 import { UsersModule } from './APIs/users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './APIs/auth/auth.module';
-import { NeighborsModule } from './APIs/neighbors/neighbors.module';
+import { FollowsModule } from './APIs/follows/follows.module';
 import { PostBackgroundsModule } from './APIs/postBackgrounds/postBackgrounds.module';
 import { PostCategoriesModule } from './APIs/postCategories/PostCategories.module';
 import { LikesModule } from './APIs/likes/likes.module';
@@ -34,7 +34,7 @@ import { AgreementsModule } from './APIs/agreements/agreements.module';
     UsersModule,
     PostCategoriesModule,
     AuthModule,
-    NeighborsModule,
+    FollowsModule,
     NotificationsModule,
     PostBackgroundsModule,
     ReportsModule,
