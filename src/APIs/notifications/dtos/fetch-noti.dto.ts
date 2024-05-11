@@ -1,6 +1,6 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { IsEnum, IsOptional } from 'class-validator';
-import { DateOption } from 'src/commons/enums/date-option';
+import { DateOption } from 'src/common/enums/date-option';
 import { Notification } from '../entities/notification.entity';
 
 export class FetchNotiInput {

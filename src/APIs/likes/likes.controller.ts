@@ -19,7 +19,7 @@ import { Request } from 'express';
 import { ToggleLikeResponseDto } from './dtos/toggle-like-response.dto';
 import { Likes } from './entities/like.entity';
 import { FetchLikesResponseDto } from './dtos/fetch-likes-response.dto';
-import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 
 @ApiTags('게시글 API')
 @Controller('posts/:postId/like')

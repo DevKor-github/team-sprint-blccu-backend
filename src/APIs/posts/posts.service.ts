@@ -11,13 +11,12 @@ import { Posts } from './entities/posts.entity';
 import { Page } from '../../utils/pages/page';
 import { FetchPostsDto } from './dtos/fetch-posts.dto';
 import { PagePostResponseDto } from './dtos/page-post-response.dto';
-import { Neighbor } from '../neighbors/entities/neighbor.entity';
 import { FetchFriendsPostsDto } from './dtos/fetch-friends-posts.dto';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { PostCategory } from '../postCategories/entities/postCategory.entity';
 import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
 import { User } from '../users/entities/user.entity';
-import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
+import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { StickerBlocksService } from '../stickerBlocks/stickerBlocks.service';
 import { PostsRepository } from './posts.repository';
 import { CommentsService } from '../comments/comments.service';
@@ -29,9 +28,10 @@ import {
 } from './dtos/fetch-post-for-update.dto';
 import { CustomCursorPageMetaDto } from 'src/utils/cursor-pages/dtos/cursor-page-meta.dto';
 import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
-import { PostsOrderOption } from 'src/commons/enums/posts-order-option';
-import { NeighborsService } from '../neighbors/neighbors.service';
-import { DateOption } from 'src/commons/enums/date-option';
+import { PostsOrderOption } from 'src/common/enums/posts-order-option';
+import { FollowsService } from '../follows/follows.service';
+import { DateOption } from 'src/common/enums/date-option';
+import { Follow } from '../follows/entities/follow.entity';
 
 @Injectable()
 export class PostsService {
@@ -42,7 +42,7 @@ export class PostsService {
     private readonly stickerBlocksService: StickerBlocksService,
     private readonly commentsService: CommentsService,
     private readonly postsRepository: PostsRepository,
-    private readonly neighborsService: NeighborsService,
+    private readonly followsService: FollowsService,
   ) {}
   async saveImage(file: Express.Multer.File) {
     return await this.imageUpload(file);
@@ -164,7 +164,7 @@ export class PostsService {
     page,
   }: FetchFriendsPostsDto): Promise<PagePostResponseDto> {
     const subQuery = await this.dataSource
-      .createQueryBuilder(Neighbor, 'n')
+      .createQueryBuilder(Follow, 'n')
       .select('n.toUserKakaoId')
       .where(`n.fromUserKakaoId = ${kakaoId}`)
       .getQuery();
@@ -183,7 +183,7 @@ export class PostsService {
   async fetchDetail({ kakaoId, id }): Promise<fetchPostDetailDto> {
     const data = await this.existCheck({ id });
     await this.fkValidCheck({ posts: data, passNonEssentail: false });
-    const scope = await this.neighborsService.getScope({
+    const scope = await this.followsService.getScope({
       from_user: data.userKakaoId,
       to_user: kakaoId,
     });
@@ -240,7 +240,7 @@ export class PostsService {
     if (cursorOption.date_created)
       cursorOption.date_created = this.getDate(cursorOption.date_created);
 
-    const scope = await this.neighborsService.getScope({
+    const scope = await this.followsService.getScope({
       from_user: targetKakaoId,
       to_user: kakaoId,
     });
@@ -290,7 +290,7 @@ export class PostsService {
     if (cursorOption.date_created)
       cursorOption.date_created = this.getDate(cursorOption.date_created);
     const subQuery = await this.dataSource
-      .createQueryBuilder(Neighbor, 'n')
+      .createQueryBuilder(Follow, 'n')
       .select('n.toUserKakaoId')
       .where(`n.fromUserKakaoId = ${kakaoId}`)
       .getQuery();

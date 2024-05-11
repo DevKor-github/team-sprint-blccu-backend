@@ -21,7 +21,7 @@ import { PostCategoriesService } from './PostCategories.service';
 import { Request } from 'express';
 import { CreatePostCategoryDto } from './dtos/create-post-category.dto';
 import { CreatePostCategoryResponseDto } from './dtos/create-post-category-response.dto';
-import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import {
   FetchPostCategoryDto,
   FetchPostCategoriesDto,

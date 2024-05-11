@@ -11,12 +11,12 @@ import {
   FetchPostCategoriesDto,
   FetchPostCategoryDto,
 } from './dtos/fetch-post-category.dto';
-import { NeighborsService } from '../neighbors/neighbors.service';
+import { FollowsService } from '../follows/follows.service';
 
 @Injectable()
 export class PostCategoriesService {
   constructor(
-    private readonly neighborsService: NeighborsService,
+    private readonly followsService: FollowsService,
     private readonly postCategoriesRepository: PostCategoriesRepository,
   ) {}
   async findWithName({ kakaoId, name }) {
@@ -56,7 +56,7 @@ export class PostCategoriesService {
     kakaoId,
     targetKakaoId,
   }): Promise<FetchPostCategoriesDto[]> {
-    const scope = await this.neighborsService.getScope({
+    const scope = await this.followsService.getScope({
       from_user: targetKakaoId,
       to_user: kakaoId,
     });

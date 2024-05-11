@@ -3,7 +3,7 @@ import { IsString } from 'class-validator';
 import { PostBackground } from 'src/APIs/postBackgrounds/entities/postBackground.entity';
 import { PostCategory } from 'src/APIs/postCategories/entities/postCategory.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
-import { OpenScope } from 'src/commons/enums/open-scope.enum';
+import { OpenScope } from 'src/common/enums/open-scope.enum';
 import {
   Column,
   CreateDateColumn,

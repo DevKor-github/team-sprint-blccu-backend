@@ -24,10 +24,10 @@ import {
 import { Request } from 'express';
 import { UserResponseDto } from './dtos/user-response.dto';
 import { PatchUserInput } from './dtos/patch-user.input';
-import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
-import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
+import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
+import { ImageUploadDto } from 'src/common/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 
 @ApiTags('유저 API')
 @Controller('users')

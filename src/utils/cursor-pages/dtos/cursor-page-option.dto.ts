@@ -3,7 +3,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsOptional } from 'class-validator';
-import { SortOption } from 'src/commons/enums/sort-option';
+import { SortOption } from 'src/common/enums/sort-option';
 
 export class CustomCursorPageOptionsDto {
   @ApiProperty({

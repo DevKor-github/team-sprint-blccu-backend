@@ -9,7 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { NeighborsService } from './neighbors.service';
 import {
   ApiConflictResponse,
   ApiCookieAuth,
@@ -23,12 +22,13 @@ import {
 import { FromUserResponseDto } from './dtos/from-user-response.dto';
 import { ToUserResponseDto } from './dtos/to-user-response.dto';
 import { FollowUserDto } from './dtos/follow-user.dto';
-import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
+import { FollowsService } from './follows.service';
 
 @ApiTags('유저 API')
 @Controller('users/:userId')
-export class NeighborsController {
-  constructor(private readonly neighborsService: NeighborsService) {}
+export class FollowsController {
+  constructor(private readonly followsService: FollowsService) {}
 
   @ApiOperation({
     summary: '이웃 추가하기',
@@ -45,7 +45,7 @@ export class NeighborsController {
     @Param('userId') to_user: number,
   ): Promise<FollowUserDto> {
     const kakaoId = parseInt(req.user.userId);
-    return await this.neighborsService.followUser({
+    return await this.followsService.followUser({
       from_user: kakaoId,
       to_user,
     });
@@ -63,7 +63,7 @@ export class NeighborsController {
   @HttpCode(204)
   unfollowUser(@Req() req: Request, @Param('userId') to_user: number) {
     const kakaoId = parseInt(req.user.userId);
-    return this.neighborsService.unfollowUser({
+    return this.followsService.unfollowUser({
       from_user: kakaoId,
       to_user,
     });
@@ -82,7 +82,7 @@ export class NeighborsController {
   getFollowers(
     @Param('userId') kakaoId: number,
   ): Promise<FromUserResponseDto[]> {
-    return this.neighborsService.getFollowers({ kakaoId });
+    return this.followsService.getFollowers({ kakaoId });
   }
 
   @ApiOperation({
@@ -96,6 +96,6 @@ export class NeighborsController {
   @HttpCode(200)
   @Get('following')
   getFollows(@Param('userId') kakaoId: number): Promise<ToUserResponseDto[]> {
-    return this.neighborsService.getFollows({ kakaoId });
+    return this.followsService.getFollows({ kakaoId });
   }
 }

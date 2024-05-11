@@ -1,8 +1,8 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PageRequest } from '../../../utils/pages/page-request';
 import { ApiProperty } from '@nestjs/swagger';
-import { PostsOrderOptionWrap } from 'src/commons/enums/posts-order-option';
-import { PostsFilterOptionWrap } from 'src/commons/enums/posts-filter-option';
+import { PostsOrderOptionWrap } from 'src/common/enums/posts-order-option';
+import { PostsFilterOptionWrap } from 'src/common/enums/posts-filter-option';
 
 export class FetchPostsDto extends PageRequest {
   @ApiProperty({

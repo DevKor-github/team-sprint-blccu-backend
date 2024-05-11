@@ -1,12 +1,12 @@
 import { DataSource, Repository } from 'typeorm';
 import { Posts } from './entities/posts.entity';
 import { Injectable } from '@nestjs/common';
-import { OpenScope } from 'src/commons/enums/open-scope.enum';
+import { OpenScope } from 'src/common/enums/open-scope.enum';
 import { PostResponseDto } from './dtos/post-response.dto';
 import { PostResponseDtoExceptCategory } from './dtos/fetch-post-for-update.dto';
-import { PostsOrderOption } from 'src/commons/enums/posts-order-option';
-import { PostsFilterOption } from 'src/commons/enums/posts-filter-option';
-import { SortOption } from 'src/commons/enums/sort-option';
+import { PostsOrderOption } from 'src/common/enums/posts-order-option';
+import { PostsFilterOption } from 'src/common/enums/posts-filter-option';
+import { SortOption } from 'src/common/enums/sort-option';
 @Injectable()
 export class PostsRepository extends Repository<Posts> {
   constructor(private dataSource: DataSource) {

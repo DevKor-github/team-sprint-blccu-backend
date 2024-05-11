@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { OpenScope } from 'src/commons/enums/open-scope.enum';
+import { OpenScope } from 'src/common/enums/open-scope.enum';
 
 export class CreatePostInput {
   @ApiProperty({

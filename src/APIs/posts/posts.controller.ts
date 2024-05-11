@@ -28,11 +28,11 @@ import { PublishPostDto } from './dtos/publish-post.dto';
 import { PagePostResponseDto } from './dtos/page-post-response.dto';
 import { CreatePostInput } from './dtos/create-post.input';
 import { PublishPostInput } from './dtos/publish-post.input';
-import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
+import { ImageUploadDto } from 'src/common/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
+import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { FetchUserPostsInput } from './dtos/fetch-user-posts.input';
-import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { PostResponseDto } from './dtos/post-response.dto';
 import { fetchPostDetailDto } from './dtos/fetch-post-detail.dto';
 import {
@@ -40,7 +40,7 @@ import {
   PostResponseDtoExceptCategory,
 } from './dtos/fetch-post-for-update.dto';
 import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
-import { SortOption } from 'src/commons/enums/sort-option';
+import { SortOption } from 'src/common/enums/sort-option';
 import { CursorFetchPosts } from './dtos/cursor-fetch-posts.dto';
 import { CursorPagePostResponseDto } from './dtos/cursor-page-post-response.dto';
 

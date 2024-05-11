@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
-import { HttpExceptionFilter } from './commons/filter/http-exception.filter';
+import { HttpExceptionFilter } from './common/filter/http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
 import expressBasicAuth from 'express-basic-auth';
 // import * as expressBasicAuth from 'express-basic-auth';

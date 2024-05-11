@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional } from 'class-validator';
-import { DateOption } from 'src/commons/enums/date-option';
-import { PostsOrderOptionWrap } from 'src/commons/enums/posts-order-option';
+import { DateOption } from 'src/common/enums/date-option';
+import { PostsOrderOptionWrap } from 'src/common/enums/posts-order-option';
 import { CustomCursorPageOptionsDto } from 'src/utils/cursor-pages/dtos/cursor-page-option.dto';
 
 export class CursorFetchPosts extends CustomCursorPageOptionsDto {
