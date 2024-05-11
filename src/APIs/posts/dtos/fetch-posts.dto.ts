@@ -53,7 +53,7 @@ export const FETCH_POST_OPTION = {
   main_image_url: true,
   isPublished: true,
   like_count: true,
-  blame_count: true,
+  report_count: true,
   allow_comment: true,
   scope: true,
   date_created: true,

@@ -51,7 +51,7 @@ export class Comment {
 
   @ApiProperty({ type: Number, description: '신고 당한 횟수' })
   @Column({ default: 0 })
-  blame_count: number;
+  report_count: number;
 
   @ApiProperty({ type: Comment, description: '루트 댓글 정보' })
   @ManyToOne(() => Comment, (comment) => comment.children, {
