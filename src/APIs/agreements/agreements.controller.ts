@@ -19,6 +19,7 @@ import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { Request } from 'express';
 import { CreateAgreementsInput } from './dtos/create-agreements.dto';
 import { FetchAgreementDto } from './dtos/fetch-agreement.dto';
+import { PatchAgreementInput } from './dtos/patch-agreement.dto';
 
 @Controller('users')
 export class AgreementsController {
@@ -63,12 +64,17 @@ export class AgreementsController {
     });
   }
 
-  @ApiOperation({})
+  @ApiOperation({ summary: '동의 여부를 수정' })
   @ApiCookieAuth()
-  @ApiCreatedResponse({})
+  @ApiOkResponse({ type: FetchAgreementDto })
   @UseGuards(AuthGuardV2)
   @Patch('me/agreement/:agreementId')
-  async patchAgreement(@Req() req: Request, @Param('agreementId') id: number) {
-    const kakaoId = req.user.kakaoId;
+  async patchAgreement(
+    @Req() req: Request,
+    @Param('agreementId') id: number,
+    @Body() body: PatchAgreementInput,
+  ): Promise<FetchAgreementDto> {
+    const userKakaoId = req.user.kakaoId;
+    return await this.agreementsService.patch({ ...body, id, userKakaoId });
   }
 }
