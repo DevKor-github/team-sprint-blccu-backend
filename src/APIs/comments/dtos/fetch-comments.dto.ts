@@ -9,7 +9,7 @@ export class ChildrenComment extends PickType(Comment, [
   'date_created',
   'date_updated',
   'date_deleted',
-  'blame_count',
+  'report_count',
   'parentId',
   'postsId',
 ]) {
@@ -31,7 +31,7 @@ export class FetchCommentsDto extends PickType(Comment, [
   'date_created',
   'date_updated',
   'date_deleted',
-  'blame_count',
+  'report_count',
   'parentId',
   'postsId',
 ]) {
