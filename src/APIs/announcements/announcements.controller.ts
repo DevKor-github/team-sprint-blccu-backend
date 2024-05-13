@@ -25,15 +25,16 @@ import { AnnouncementResponseDto } from './dtos/announcement-response.dto';
 import { PatchAnnouncementInput } from './dtos/patch-announcment.dto';
 
 @ApiTags('공지 API')
-@Controller('anmts')
+@Controller()
 export class AnnouncementsController {
   constructor(private readonly announcementsService: AnnouncementsService) {}
 
+  @ApiTags('어드민 API')
   @ApiOperation({ summary: '[어드민용] 공지사항 작성' })
   @ApiCookieAuth()
   @UseGuards(AuthGuardV2)
   @ApiCreatedResponse({ type: AnnouncementResponseDto })
-  @Post()
+  @Post('users/admin/anmts')
   @HttpCode(201)
   async createAnmt(
     @Req() req: Request,
@@ -45,16 +46,17 @@ export class AnnouncementsController {
 
   @ApiOperation({ summary: '공지사항 조회' })
   @ApiOkResponse({ type: [AnnouncementResponseDto] })
-  @Get()
+  @Get('anmts')
   async fetchAnmts(): Promise<AnnouncementResponseDto[]> {
     return await this.announcementsService.fetchAll();
   }
 
+  @ApiTags('어드민 API')
   @ApiOperation({ summary: '[어드민용] 공지사항 수정' })
   @ApiCookieAuth()
   @ApiOkResponse({ type: [AnnouncementResponseDto] })
   @UseGuards(AuthGuardV2)
-  @Patch(':id')
+  @Patch('users/admin/anmts/:id')
   async patchAnmt(
     @Req() req: Request,
     @Body() body: PatchAnnouncementInput,
@@ -64,6 +66,7 @@ export class AnnouncementsController {
     return await this.announcementsService.patch({ ...body, id, kakaoId });
   }
 
+  @ApiTags('어드민 API')
   @ApiOperation({
     summary: '[어드민용] 공지사항 삭제',
     description: 'id에 해당하는 공지사항 삭제, 삭제된 공지사항을 반환',
@@ -71,7 +74,7 @@ export class AnnouncementsController {
   @ApiCookieAuth()
   @ApiOkResponse({ type: AnnouncementResponseDto })
   @UseGuards(AuthGuardV2)
-  @Delete(':id')
+  @Delete('users/admin/anmts/:id')
   async removeAnmt(
     @Req() req: Request,
     @Param('id') id: number,
