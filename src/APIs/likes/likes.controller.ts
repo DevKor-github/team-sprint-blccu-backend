@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -10,13 +11,15 @@ import {
 import { LikesService } from './likes.service';
 import {
   ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { ToggleLikeResponseDto } from './dtos/toggle-like-response.dto';
+import { FetchLikeDto } from './dtos/toggle-like-response.dto';
 import { Likes } from './entities/like.entity';
 import { FetchLikesResponseDto } from './dtos/fetch-likes-response.dto';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
@@ -27,21 +30,45 @@ export class LikesController {
   constructor(private readonly likesService: LikesService) {}
 
   @ApiOperation({
-    summary: '좋아요 토글하기',
-    description: '로그인 된 유저가 {id}인 게시글에 좋아요를 토글한다.',
+    summary: '좋아요',
+    description: '로그인 된 유저가 {id}인 게시글에 좋아요를 한다.',
   })
   @ApiCookieAuth()
-  @ApiOkResponse({ description: '토글 성공', type: ToggleLikeResponseDto })
+  @ApiCreatedResponse({
+    description: '좋아요 성공',
+    type: FetchLikeDto,
+  })
   @ApiNotFoundResponse({ description: '게시글을 찾을 수 없는 경우' })
   @UseGuards(AuthGuardV2)
-  @HttpCode(200)
+  @HttpCode(201)
   @Post()
-  async toggleLike(
+  async like(
     @Param('postId') id: number,
     @Req() req: Request,
-  ): Promise<ToggleLikeResponseDto> {
+  ): Promise<FetchLikeDto> {
     const kakaoId = req.user.userId;
-    return this.likesService.toggleLike({ id, kakaoId });
+    return await this.likesService.like({ id, kakaoId });
+  }
+
+  @ApiOperation({
+    summary: '좋아요 취소',
+    description: '로그인 된 유저가 {id}인 게시글에 좋아요를 취소한다.',
+  })
+  @ApiCookieAuth()
+  @ApiNoContentResponse({
+    description: '좋아요 취소 성공',
+  })
+  @ApiNotFoundResponse({ description: '게시글을 찾을 수 없는 경우' })
+  @UseGuards(AuthGuardV2)
+  @HttpCode(204)
+  @Delete()
+  async deleteLike(
+    @Param('postId') id: number,
+    @Req() req: Request,
+  ): Promise<void> {
+    const kakaoId = req.user.userId;
+    await this.likesService.cancel_like({ id, kakaoId });
+    return;
   }
 
   @ApiOperation({
