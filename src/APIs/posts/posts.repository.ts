@@ -161,8 +161,8 @@ export class PostsRepository extends Repository<Posts> {
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
 
     if (cursorOption.category_name) {
-      queryBuilder.andWhere('postCategory.name = :category_name', {
-        category_name: cursorOption.category_name,
+      queryBuilder.andWhere('postCategory.id = :categoryId', {
+        categoryId: cursorOption.categoryId,
       });
     }
     queryBuilder
