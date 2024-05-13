@@ -58,7 +58,7 @@ import { AgreementsModule } from './APIs/agreements/agreements.module';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_DATABASE,
       entities: [__dirname + '/APIs/**/*.entity.*'],
-      synchronize: false,
+      synchronize: true,
       logging: true,
     }),
   ],
