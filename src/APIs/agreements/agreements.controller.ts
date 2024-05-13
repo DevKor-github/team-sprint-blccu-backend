@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -20,10 +21,20 @@ import { Request } from 'express';
 import { CreateAgreementsInput } from './dtos/create-agreements.dto';
 import { FetchAgreementDto } from './dtos/fetch-agreement.dto';
 import { PatchAgreementInput } from './dtos/patch-agreement.dto';
+import { FetchContractDto } from './dtos/fetch-contract.dto';
 
 @Controller('users')
 export class AgreementsController {
   constructor(private readonly agreementsService: AgreementsService) {}
+
+  @ApiOperation({ summary: 'contract fetch' })
+  @ApiCookieAuth()
+  @UseGuards(AuthGuardV2)
+  @Get('contracts')
+  async fetchContract(@Query() query: FetchContractDto) {
+    const data = await this.agreementsService.fetchContract({ ...query });
+    return data;
+  }
 
   @ApiOperation({ summary: '온보딩 동의' })
   @ApiCookieAuth()

@@ -14,4 +14,4 @@ export interface IAgreementsServiceCreate
 }
 
 export interface IAgreementsServicePatch
-extends Pick<Agreement, 'id' | 'isAgreed' | 'userKakaoId'>
+  extends Pick<Agreement, 'id' | 'isAgreed' | 'userKakaoId'> {}

@@ -10,6 +10,8 @@ import {
 } from './interfaces/agreements.service.interface';
 import { FetchAgreementDto } from './dtos/fetch-agreement.dto';
 import { UsersService } from '../users/users.service';
+import path from 'path';
+import fs from 'fs';
 
 @Injectable()
 export class AgreementsService {
@@ -32,6 +34,14 @@ export class AgreementsService {
       isAgreed,
       user: { kakaoId },
     });
+  }
+
+  async fetchContract({ agreementType }) {
+    const fileName = agreementType + '.txt';
+    const rootPath = process.cwd();
+    const filePath = path.join(rootPath, 'src', 'assets', 'terms', fileName);
+    const data = await fs.promises.readFile(filePath, 'utf8');
+    return data;
   }
 
   async fetchOne({ id }): Promise<FetchAgreementDto> {
