@@ -34,7 +34,6 @@ import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto
 import { FetchUserPostsInput } from './dtos/fetch-user-posts.input';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { PostResponseDto } from './dtos/post-response.dto';
-import { fetchPostDetailDto } from './dtos/fetch-post-detail.dto';
 import {
   FetchPostForUpdateDto,
   PostResponseDtoExceptCategory,
@@ -156,11 +155,11 @@ export class PostsController {
       'id에 해당하는 게시글과 댓글을 가져온다. 조회수를 올린다. 보호된 게시글은 권한이 있는 사용자만 접근 가능하다.',
   })
   @Get('detail/:postId')
-  @ApiOkResponse({ type: fetchPostDetailDto })
+  @ApiOkResponse({ type: PostResponseDto })
   async fetchPostDetail(
     @Param('postId') id: number,
     @Req() req: Request,
-  ): Promise<fetchPostDetailDto> {
+  ): Promise<PostResponseDto> {
     const kakaoId = req.user.userId;
     return await this.postsService.fetchDetail({ kakaoId, id });
   }

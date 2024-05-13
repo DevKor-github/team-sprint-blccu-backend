@@ -21,7 +21,6 @@ import { StickerBlocksService } from '../stickerBlocks/stickerBlocks.service';
 import { PostsRepository } from './posts.repository';
 import { CommentsService } from '../comments/comments.service';
 import { PostResponseDto } from './dtos/post-response.dto';
-import { fetchPostDetailDto } from './dtos/fetch-post-detail.dto';
 import {
   FetchPostForUpdateDto,
   PostResponseDtoExceptCategory,
@@ -180,16 +179,16 @@ export class PostsService {
     return await this.postsRepository.fetchTempPosts(kakaoId);
   }
 
-  async fetchDetail({ kakaoId, id }): Promise<fetchPostDetailDto> {
+  async fetchDetail({ kakaoId, id }): Promise<PostResponseDto> {
     const data = await this.existCheck({ id });
     await this.fkValidCheck({ posts: data, passNonEssentail: false });
     const scope = await this.followsService.getScope({
       from_user: data.userKakaoId,
       to_user: kakaoId,
     });
-    const comments = await this.commentsService.fetchComments({ postsId: id });
+    // const comments = await this.commentsService.fetchComments({ postsId: id });
     const post = await this.postsRepository.fetchPostDetail({ id, scope });
-    return { comments, post };
+    return post;
   }
 
   async softDelete({ kakaoId, id }) {
