@@ -56,7 +56,7 @@ export class ReportsController {
   @ApiCookieAuth()
   @ApiCreatedResponse({ type: FetchReportResponse })
   @UseGuards(AuthGuardV2)
-  @Post('post/:postId/comments/:commentId/report')
+  @Post('posts/:postId/comments/:commentId/report')
   @HttpCode(201)
   async reportComment(
     @Req() req: Request,
@@ -73,6 +73,7 @@ export class ReportsController {
     });
   }
 
+  @ApiTags('어드민 API')
   @ApiTags('유저 API')
   @ApiOperation({
     summary: '[어드민용] 신고 내역 조회',
@@ -80,7 +81,7 @@ export class ReportsController {
   @ApiCookieAuth()
   @ApiOkResponse({ type: [FetchReportResponse] })
   @UseGuards(AuthGuardV2)
-  @Get('users/reports')
+  @Get('users/admin/reports')
   async fetchAll(@Req() req: Request): Promise<FetchReportResponse[]> {
     const kakaoId = req.user.userId;
     return await this.reportsService.fetchAll({ kakaoId });

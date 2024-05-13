@@ -4,9 +4,10 @@ import { Feedback } from './entities/feedback.entity';
 import { FeedbacksController } from './feedbacks.controller';
 import { FeedbacksService } from './feedbacks.service';
 import { FeedbacksRepository } from './feedbacks.repository';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Feedback])],
+  imports: [TypeOrmModule.forFeature([Feedback]), UsersModule],
   controllers: [FeedbacksController],
   providers: [FeedbacksService, FeedbacksRepository],
   exports: [],
