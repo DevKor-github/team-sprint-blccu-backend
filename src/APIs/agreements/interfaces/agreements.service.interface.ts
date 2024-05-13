@@ -12,3 +12,6 @@ export interface IAgreementsServiceCreate
   > {
   kakaoId: number;
 }
+
+export interface IAgreementsServicePatch
+  extends Pick<Agreement, 'id' | 'isAgreed' | 'userKakaoId'> {}

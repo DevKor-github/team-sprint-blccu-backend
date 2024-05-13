@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Param,
   Post,
   Req,
   UseGuards,
@@ -19,35 +20,67 @@ import { CreateReportInput } from './dtos/create-report.dto';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { Request } from 'express';
 import { FetchReportResponse } from './dtos/fetch-report.dto';
+import { ReportTarget } from 'src/common/enums/report-target.enum';
 
-@ApiTags('신고 API')
-@Controller('reports')
+@Controller('')
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
+  @ApiTags('게시글 API')
   @ApiOperation({
-    summary: '게시물 || 댓글 신고',
+    summary: '게시물 신고',
   })
   @ApiCookieAuth()
   @ApiCreatedResponse({ type: FetchReportResponse })
   @UseGuards(AuthGuardV2)
-  @Post()
+  @Post('posts/:postId/report')
   @HttpCode(201)
-  async report(
+  async reportPost(
     @Req() req: Request,
     @Body() body: CreateReportInput,
+    @Param('postId') targetId: number,
   ): Promise<FetchReportResponse> {
     const userKakaoId = req.user.userId;
-    return await this.reportsService.create({ userKakaoId, ...body });
+    return await this.reportsService.create({
+      targetId,
+      target: ReportTarget.POSTS,
+      userKakaoId,
+      ...body,
+    });
   }
 
+  @ApiTags('게시글 API')
+  @ApiOperation({
+    summary: '댓글 신고',
+  })
+  @ApiCookieAuth()
+  @ApiCreatedResponse({ type: FetchReportResponse })
+  @UseGuards(AuthGuardV2)
+  @Post('post/:postId/comments/:commentId/report')
+  @HttpCode(201)
+  async reportComment(
+    @Req() req: Request,
+    @Body() body: CreateReportInput,
+    @Param('postId') postId: number,
+    @Param('commentId') targetId: number,
+  ): Promise<FetchReportResponse> {
+    const userKakaoId = req.user.userId;
+    return await this.reportsService.create({
+      targetId,
+      target: ReportTarget.COMMENTS,
+      userKakaoId,
+      ...body,
+    });
+  }
+
+  @ApiTags('유저 API')
   @ApiOperation({
     summary: '[어드민용] 신고 내역 조회',
   })
   @ApiCookieAuth()
   @ApiOkResponse({ type: [FetchReportResponse] })
   @UseGuards(AuthGuardV2)
-  @Get()
+  @Get('users/reports')
   async fetchAll(@Req() req: Request): Promise<FetchReportResponse[]> {
     const kakaoId = req.user.userId;
     return await this.reportsService.fetchAll({ kakaoId });

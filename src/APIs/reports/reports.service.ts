@@ -45,7 +45,7 @@ export class ReportsService {
             throw new ConflictException('이미 신고한 게시물입니다.');
 
           await queryRunner.manager.update(Posts, postData.id, {
-            blame_count: () => 'blame_count +1',
+            report_count: () => 'report_count +1',
           });
           data = await queryRunner.manager.save(Report, {
             ...rest,
@@ -67,7 +67,7 @@ export class ReportsService {
             throw new ConflictException('이미 신고한 게시물입니다.');
 
           await queryRunner.manager.update(Comment, commentData.id, {
-            blame_count: () => 'blame_count +1',
+            report_count: () => 'report_count +1',
           });
           data = await queryRunner.manager.save(Report, {
             ...rest,

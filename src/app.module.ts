@@ -60,7 +60,7 @@ import { FeedbacksModule } from './APIs/feedbacks/feedbacks.module';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_DATABASE,
       entities: [__dirname + '/APIs/**/*.entity.*'],
-      synchronize: false,
+      synchronize: true,
       logging: true,
     }),
   ],

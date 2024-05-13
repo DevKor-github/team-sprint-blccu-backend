@@ -63,7 +63,7 @@ export class Posts {
 
   @ApiProperty({ description: '신고수 카운트', type: Number })
   @Column({ default: 0 })
-  blame_count: number;
+  report_count: number;
 
   @ApiProperty({ description: '댓글 허용 여부(boolean)', type: Boolean })
   @Column({ default: true })
