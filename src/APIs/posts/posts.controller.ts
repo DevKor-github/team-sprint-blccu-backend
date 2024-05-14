@@ -50,9 +50,7 @@ export class PostsController {
 
   @ApiOperation({
     summary: '게시글 등록',
-    description: `게시글을 등록한다.
-    id를 입력하지 않으면 생성하고 있는 아이디를 치면 update하는 로직으로 
-    바로 게시글 생성에 사용해도 되고, 수정용으로 사용해도 된다.`,
+    description: '게시글을 등록한다.',
   })
   @Post()
   @ApiCookieAuth()
@@ -80,9 +78,7 @@ export class PostsController {
 
   @ApiOperation({
     summary: '게시글 임시등록',
-    description: `게시글을 임시등록한다.
-    id를 입력하지 않으면 생성하고 있는 아이디를 치면 update하는 로직으로 
-    바로 게시글 생성에 사용해도 되고, 수정용으로 사용해도 된다.`,
+    description: '게시글을 임시등록한다.',
   })
   @Post('temp')
   @ApiCookieAuth()
@@ -227,7 +223,7 @@ export class PostsController {
     } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
       cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '9');
     }
-    return this.postsService.paginateByCustomCursor({ cursorOption });
+    return this.postsService.fetchPostsCursor({ cursorOption });
   }
 
   @ApiOperation({
@@ -247,7 +243,7 @@ export class PostsController {
     } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
       cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '9');
     }
-    return this.postsService.fetchFriendsCursor({ cursorOption, kakaoId });
+    return this.postsService.fetchFriendsPostsCursor({ cursorOption, kakaoId });
   }
 
   @ApiOperation({
@@ -268,7 +264,7 @@ export class PostsController {
     } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
       cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '9');
     }
-    return await this.postsService.fetchUserPosts({
+    return await this.postsService.fetchUserPostsCursor({
       kakaoId,
       targetKakaoId,
       cursorOption,

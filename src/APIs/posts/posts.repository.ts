@@ -7,6 +7,12 @@ import { PostResponseDtoExceptCategory } from './dtos/fetch-post-for-update.dto'
 import { PostsOrderOption } from 'src/common/enums/posts-order-option';
 import { PostsFilterOption } from 'src/common/enums/posts-filter-option';
 import { SortOption } from 'src/common/enums/sort-option';
+import {
+  IPostsRepoFetchFriendsPostsCursor,
+  IPostsRepoFetchPostsCursor,
+  IPostsRepoFetchUserPostsCursor,
+  IPostsRepoGetCursorQuery,
+} from './interfaces/posts.repository.interface';
 @Injectable()
 export class PostsRepository extends Repository<Posts> {
   constructor(private dataSource: DataSource) {
@@ -17,9 +23,6 @@ export class PostsRepository extends Repository<Posts> {
       .insert()
       .into(Posts, Object.keys(post))
       .values(post)
-      .orUpdate(Object.keys(post), ['id'], {
-        skipUpdateIfNoValuesChanged: true,
-      })
       .execute();
   }
 
@@ -107,7 +110,9 @@ export class PostsRepository extends Repository<Posts> {
       .getManyAndCount();
   }
 
-  async fetchTempPosts(kakaoId): Promise<PostResponseDtoExceptCategory[]> {
+  async fetchTempPosts(
+    kakaoId: number,
+  ): Promise<PostResponseDtoExceptCategory[]> {
     return (
       this.createQueryBuilder('p')
         .innerJoin('p.user', 'user')
@@ -126,14 +131,14 @@ export class PostsRepository extends Repository<Posts> {
     );
   }
 
-  getCursorQuery({ order, sort, take, cursor }) {
-    order = PostsOrderOption[order];
+  getCursorQuery({ order, sort, take, cursor }: IPostsRepoGetCursorQuery) {
+    const _order = PostsOrderOption[order];
 
     const queryBuilder = this.createQueryBuilder('p');
     const queryByOrderSort =
       sort === SortOption.ASC
-        ? `CONCAT(LPAD(p.${order}, 7, '0'), LPAD(p.id, 7, '0')) > :customCursor`
-        : `CONCAT(LPAD(p.${order}, 7, '0'), LPAD(p.id, 7, '0')) < :customCursor`;
+        ? `CONCAT(LPAD(p.${_order}, 7, '0'), LPAD(p.id, 7, '0')) > :customCursor`
+        : `CONCAT(LPAD(p.${_order}, 7, '0'), LPAD(p.id, 7, '0')) < :customCursor`;
 
     queryBuilder
       .take(take + 1)
@@ -150,17 +155,69 @@ export class PostsRepository extends Repository<Posts> {
       .andWhere(queryByOrderSort, {
         customCursor: cursor,
       })
-      .orderBy(`p.${order}`, sort as any)
+      .orderBy(`p.${_order}`, sort as any)
       .addOrderBy('p.id', sort as any);
 
     return queryBuilder;
   }
 
-  async fetchUserPosts({ cursorOption, scope, userKakaoId }) {
+  async fetchPostsCursor({
+    cursorOption,
+    date_filter,
+  }: IPostsRepoFetchPostsCursor) {
     const { order, cursor, take, sort } = cursorOption;
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
 
-    if (cursorOption.category_name) {
+    queryBuilder.andWhere('p.scope IN (:...scopes)', {
+      scopes: [OpenScope.PUBLIC],
+    });
+
+    if (date_filter) {
+      queryBuilder.andWhere('p.date_created > :date_filter', {
+        date_filter: date_filter,
+      });
+    }
+
+    const posts: Posts[] = await queryBuilder.getMany();
+
+    return { posts };
+  }
+
+  async fetchFriendsPostsCursor({
+    cursorOption,
+    subQuery,
+    date_filter,
+  }: IPostsRepoFetchFriendsPostsCursor) {
+    const { order, cursor, take, sort } = cursorOption;
+    const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
+
+    queryBuilder
+      .andWhere(`p.userKakaoId = any(${subQuery})`)
+      .andWhere('p.scope IN (:...scopes)', {
+        scopes: [OpenScope.PUBLIC, OpenScope.PROTECTED],
+      }); //sql injection 방지를 위해 만드시 enum 거칠 것
+
+    if (date_filter) {
+      queryBuilder.andWhere('p.date_created > :date_filter', {
+        date_filter: date_filter,
+      });
+    }
+
+    const posts: Posts[] = await queryBuilder.getMany();
+
+    return { posts };
+  }
+
+  async fetchUserPosts({
+    cursorOption,
+    scope,
+    userKakaoId,
+    date_filter,
+  }: IPostsRepoFetchUserPostsCursor) {
+    const { order, cursor, take, sort } = cursorOption;
+    const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
+
+    if (cursorOption.categoryId) {
       queryBuilder.andWhere('postCategory.id = :categoryId', {
         categoryId: cursorOption.categoryId,
       });
@@ -171,51 +228,12 @@ export class PostsRepository extends Repository<Posts> {
       })
       .andWhere('p.scope IN (:scope)', { scope });
 
-    if (cursorOption.date_created) {
-      queryBuilder.andWhere('p.date_created > :date_created', {
-        date_created: cursorOption.date_created,
+    if (date_filter) {
+      queryBuilder.andWhere('p.date_created > :date_filter', {
+        date_filter: date_filter,
       });
     }
 
-    const posts: Posts[] = await queryBuilder.getMany();
-
-    return { posts };
-  }
-
-  async paginateByCustomCursorFriends({ cursorOption, subQuery }) {
-    const { order, cursor, take, sort } = cursorOption;
-    const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
-
-    queryBuilder
-      .andWhere(`p.userKakaoId = any(${subQuery})`)
-      .andWhere('p.scope IN (:...scopes)', {
-        scopes: [OpenScope.PUBLIC, OpenScope.PROTECTED],
-      }); //sql injection 방지를 위해 만드시 enum 거칠 것
-
-    if (cursorOption.date_created) {
-      queryBuilder.andWhere('p.date_created > :date_created', {
-        date_created: cursorOption.date_created,
-      });
-    }
-
-    const posts: Posts[] = await queryBuilder.getMany();
-
-    return { posts };
-  }
-
-  async paginateByCustomCursor({ cursorOption }) {
-    const { order, cursor, take, sort } = cursorOption;
-    const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
-
-    queryBuilder.andWhere('p.scope IN (:...scopes)', {
-      scopes: [OpenScope.PUBLIC],
-    });
-
-    if (cursorOption.date_created) {
-      queryBuilder.andWhere('p.date_created > :date_created', {
-        date_created: cursorOption.date_created,
-      });
-    }
     const posts: Posts[] = await queryBuilder.getMany();
 
     return { posts };

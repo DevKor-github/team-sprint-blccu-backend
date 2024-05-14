@@ -32,7 +32,7 @@ export class Posts {
 
   @IsString()
   @ApiProperty({ description: '연결된 내지 fk', type: String })
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   @RelationId((posts: Posts) => posts.postBackground)
   postBackgroundId: string;
 
@@ -115,7 +115,7 @@ export class Posts {
   @ApiProperty({ description: '연결된 내지', type: PostBackground })
   @JoinColumn()
   @ManyToOne(() => PostBackground, {
-    nullable: false,
+    nullable: true,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })

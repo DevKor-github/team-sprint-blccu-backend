@@ -12,7 +12,6 @@ import { Page } from '../../utils/pages/page';
 import { FetchPostsDto } from './dtos/fetch-posts.dto';
 import { PagePostResponseDto } from './dtos/page-post-response.dto';
 import { FetchFriendsPostsDto } from './dtos/fetch-friends-posts.dto';
-import { CreatePostDto } from './dtos/create-post.dto';
 import { PostCategory } from '../postCategories/entities/postCategory.entity';
 import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
 import { User } from '../users/entities/user.entity';
@@ -31,6 +30,16 @@ import { PostsOrderOption } from 'src/common/enums/posts-order-option';
 import { FollowsService } from '../follows/follows.service';
 import { DateOption } from 'src/common/enums/date-option';
 import { Follow } from '../follows/entities/follow.entity';
+import {
+  IPostsServiceCreate,
+  IPostsServiceCreateCursorResponse,
+  IPostsServiceFetchFriendsPostsCursor,
+  IPostsServiceFetchPostForUpdate,
+  IPostsServiceFetchPostsCursor,
+  IPostsServiceFetchUserPostsCursor,
+  IPostsServicePostId,
+  IPostsServicePostUserIdPair,
+} from './interfaces/posts.service.interface';
 
 @Injectable()
 export class PostsService {
@@ -61,11 +70,11 @@ export class PostsService {
 
     return { image_url };
   }
-  async findPostsById({ id }) {
+  async findPostsById({ id }: IPostsServicePostId) {
     return await this.postsRepository.findOne({ where: { id } });
   }
 
-  async existCheck({ id }) {
+  async existCheck({ id }: IPostsServicePostId) {
     const data = await this.findPostsById({ id });
     if (!data) throw new NotFoundException('게시글을 찾을 수 없습니다.');
     return data;
@@ -84,7 +93,7 @@ export class PostsService {
       .createQueryBuilder('pg')
       .where('pg.id = :id', { id: posts.postBackgroundId })
       .getOne();
-    if (!pg)
+    if (!pg && !passNonEssentail)
       throw new BadRequestException('존재하지 않는 post_background입니다.');
     const us = await this.dataSource
       .getRepository(User)
@@ -94,24 +103,12 @@ export class PostsService {
     if (!us) throw new BadRequestException('존재하지 않는 user입니다.');
   }
 
-  async save(createPostDto: CreatePostDto) {
+  async save(createPostDto: IPostsServiceCreate) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    let post = {};
+    const post = {};
     try {
-      if (createPostDto.id) {
-        post = await queryRunner.manager.findOne(Posts, {
-          where: {
-            id: createPostDto.id,
-            user: { kakaoId: createPostDto.userKakaoId },
-          },
-        });
-        if (!post) {
-          await delete createPostDto.id;
-          post = {};
-        }
-      }
       Object.keys(createPostDto).map((el) => {
         const value = createPostDto[el];
         if (createPostDto[el]) {
@@ -132,7 +129,10 @@ export class PostsService {
         })
         .execute();
       await queryRunner.commitTransaction();
-      return data;
+      const result = this.postsRepository.findOne({
+        where: { id: data.identifiers[0].id },
+      });
+      return result;
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw e;
@@ -146,7 +146,10 @@ export class PostsService {
     return new Page<Posts>(postsAndCounts[1], page.pageSize, postsAndCounts[0]);
   }
 
-  async fetchPostForUpdate({ id, kakaoId }): Promise<FetchPostForUpdateDto> {
+  async fetchPostForUpdate({
+    id,
+    kakaoId,
+  }: IPostsServiceFetchPostForUpdate): Promise<FetchPostForUpdateDto> {
     const data = await this.existCheck({ id });
     await this.fkValidCheck({ posts: data, passNonEssentail: true });
     if (data.userKakaoId !== kakaoId)
@@ -179,7 +182,10 @@ export class PostsService {
     return await this.postsRepository.fetchTempPosts(kakaoId);
   }
 
-  async fetchDetail({ kakaoId, id }): Promise<PostResponseDto> {
+  async fetchDetail({
+    kakaoId,
+    id,
+  }: IPostsServicePostUserIdPair): Promise<PostResponseDto> {
     const data = await this.existCheck({ id });
     await this.fkValidCheck({ posts: data, passNonEssentail: false });
     const scope = await this.followsService.getScope({
@@ -191,11 +197,11 @@ export class PostsService {
     return post;
   }
 
-  async softDelete({ kakaoId, id }) {
+  async softDelete({ kakaoId, id }: IPostsServicePostUserIdPair) {
     return await this.postsRepository.softDelete({ user: { kakaoId }, id });
   }
 
-  async hardDelete({ kakaoId, id }) {
+  async hardDelete({ kakaoId, id }: IPostsServicePostUserIdPair) {
     return await this.postsRepository.delete({ user: { kakaoId }, id });
   }
 
@@ -203,7 +209,9 @@ export class PostsService {
   async createCursorResponse({
     cursorOption,
     posts,
-  }): Promise<CustomCursorPageDto<PostResponseDto>> {
+  }: IPostsServiceCreateCursorResponse): Promise<
+    CustomCursorPageDto<PostResponseDto>
+  > {
     const order = PostsOrderOption[cursorOption.order];
     let hasNextData: boolean = true;
     let customCursor: string;
@@ -231,13 +239,54 @@ export class PostsService {
 
     return new CustomCursorPageDto(responseData, customCursorPageMetaDto);
   }
-  async fetchUserPosts({
+
+  async fetchPostsCursor({
+    cursorOption,
+  }: IPostsServiceFetchPostsCursor): Promise<
+    CustomCursorPageDto<PostResponseDto>
+  > {
+    let date_filter: Date;
+    if (cursorOption.date_created)
+      date_filter = this.getDate(cursorOption.date_created);
+    const { posts } = await this.postsRepository.fetchPostsCursor({
+      cursorOption,
+      date_filter,
+    });
+    return await this.createCursorResponse({ posts, cursorOption });
+  }
+
+  async fetchFriendsPostsCursor({
+    cursorOption,
+    kakaoId,
+  }: IPostsServiceFetchFriendsPostsCursor): Promise<
+    CustomCursorPageDto<PostResponseDto>
+  > {
+    let date_filter: Date;
+    if (cursorOption.date_created)
+      date_filter = this.getDate(cursorOption.date_created);
+    const subQuery = await this.dataSource
+      .createQueryBuilder(Follow, 'n')
+      .select('n.toUserKakaoId')
+      .where(`n.fromUserKakaoId = ${kakaoId}`)
+      .getQuery();
+    const { posts } = await this.postsRepository.fetchFriendsPostsCursor({
+      cursorOption,
+      subQuery,
+      date_filter,
+    });
+    return await this.createCursorResponse({ posts, cursorOption });
+  }
+
+  async fetchUserPostsCursor({
     kakaoId,
     targetKakaoId,
     cursorOption,
-  }): Promise<CustomCursorPageDto<PostResponseDto>> {
+  }: IPostsServiceFetchUserPostsCursor): Promise<
+    CustomCursorPageDto<PostResponseDto>
+  > {
+    let date_filter: Date;
     if (cursorOption.date_created)
-      cursorOption.date_created = this.getDate(cursorOption.date_created);
+      date_filter = this.getDate(cursorOption.date_created);
 
     const scope = await this.followsService.getScope({
       from_user: targetKakaoId,
@@ -245,19 +294,9 @@ export class PostsService {
     });
     const { posts } = await this.postsRepository.fetchUserPosts({
       cursorOption,
+      date_filter,
       scope,
       userKakaoId: targetKakaoId,
-    });
-    return await this.createCursorResponse({ posts, cursorOption });
-  }
-
-  async paginateByCustomCursor({
-    cursorOption,
-  }): Promise<CustomCursorPageDto<PostResponseDto>> {
-    if (cursorOption.date_created)
-      cursorOption.date_created = this.getDate(cursorOption.date_created);
-    const { posts } = await this.postsRepository.paginateByCustomCursor({
-      cursorOption,
     });
     return await this.createCursorResponse({ posts, cursorOption });
   }
@@ -282,25 +321,7 @@ export class PostsService {
     return defaultCustomCursor;
   }
 
-  async fetchFriendsCursor({
-    cursorOption,
-    kakaoId,
-  }): Promise<CustomCursorPageDto<PostResponseDto>> {
-    if (cursorOption.date_created)
-      cursorOption.date_created = this.getDate(cursorOption.date_created);
-    const subQuery = await this.dataSource
-      .createQueryBuilder(Follow, 'n')
-      .select('n.toUserKakaoId')
-      .where(`n.fromUserKakaoId = ${kakaoId}`)
-      .getQuery();
-    const { posts } = await this.postsRepository.paginateByCustomCursorFriends({
-      cursorOption,
-      subQuery,
-    });
-    return await this.createCursorResponse({ posts, cursorOption });
-  }
-
-  getDate(date_created) {
+  getDate(date_created: DateOption): Date {
     let currentDate = new Date();
     switch (date_created) {
       case DateOption.WEEK:
