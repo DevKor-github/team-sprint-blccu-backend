@@ -1,11 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Likes } from './entities/like.entity';
 import { Posts } from '../posts/entities/posts.entity';
-import { ToggleLikeResponseDto } from './dtos/toggle-like-response.dto';
-import { FetchLikesDto } from './dtos/fetch-likes.dto';
+import {
+  FetchLikeDto,
+  ToggleLikeResponseDto,
+} from './dtos/toggle-like-response.dto';
+import { FetchLikeResponseDto, FetchLikesDto } from './dtos/fetch-likes.dto';
 import { USER_SELECT_OPTION } from '../users/dtos/user-response.dto';
+import { FetchLikesResponseDto } from './dtos/fetch-likes-response.dto';
 
 @Injectable()
 export class LikesService {
@@ -21,6 +29,69 @@ export class LikesService {
     });
     if (alreadyLiked) return true;
     return false;
+  }
+
+  async like({ id, kakaoId }): Promise<FetchLikeResponseDto> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const postData = await queryRunner.manager.findOne(Posts, {
+        where: { id },
+      });
+      const alreadyLiked = await this.likesRepository.findOne({
+        where: { posts: { id }, user: { kakaoId } },
+      });
+      if (alreadyLiked) {
+        throw new ConflictException('이미 좋아요 한 게시글입니다.');
+      } else {
+        const likeData = await queryRunner.manager.save(Likes, {
+          user: kakaoId,
+          posts: postData,
+        });
+        await queryRunner.manager.update(Posts, postData.id, {
+          like_count: () => 'like_count +1',
+        });
+        await queryRunner.commitTransaction();
+        return likeData;
+      }
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async cancel_like({ id, kakaoId }) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const postData = await queryRunner.manager.findOne(Posts, {
+        where: { id },
+      });
+      const alreadyLiked = await this.likesRepository.findOne({
+        where: { posts: { id }, user: { kakaoId } },
+      });
+      if (!alreadyLiked) {
+        throw new ConflictException('좋아요 내역을 찾을 수 없습니다.');
+      } else {
+        const likeData = await queryRunner.manager.delete(Likes, {
+          id: alreadyLiked.id,
+        });
+        await queryRunner.manager.update(Posts, postData.id, {
+          like_count: () => 'like_count -1',
+        });
+        await queryRunner.commitTransaction();
+        return likeData;
+      }
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async toggleLike({ id, kakaoId }): Promise<ToggleLikeResponseDto> {

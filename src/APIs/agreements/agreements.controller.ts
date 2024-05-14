@@ -47,7 +47,7 @@ export class AgreementsController {
     @Req() req: Request,
     @Body() body: CreateAgreementsInput,
   ): Promise<FetchAgreementDto> {
-    const kakaoId = req.user.kakaoId;
+    const kakaoId = req.user.userId;
     return await this.agreementsService.create({ ...body, kakaoId });
   }
 
@@ -57,7 +57,7 @@ export class AgreementsController {
   @UseGuards(AuthGuardV2)
   @Get('me/agreements')
   async fetchAgreements(@Req() req: Request): Promise<FetchAgreementDto[]> {
-    const kakaoId = req.user.kakaoId;
+    const kakaoId = req.user.userId;
     return await this.agreementsService.fetchAll({ kakaoId });
   }
 
@@ -71,7 +71,7 @@ export class AgreementsController {
     @Req() req: Request,
     @Param('userId') targetUserKakaoId: number,
   ): Promise<FetchAgreementDto[]> {
-    const kakaoId = req.user.kakaoId;
+    const kakaoId = req.user.userId;
     await this.agreementsService.adminCheck({ kakaoId });
     return await this.agreementsService.fetchAll({
       kakaoId: targetUserKakaoId,
@@ -88,7 +88,7 @@ export class AgreementsController {
     @Param('agreementId') id: number,
     @Body() body: PatchAgreementInput,
   ): Promise<FetchAgreementDto> {
-    const userKakaoId = req.user.kakaoId;
+    const userKakaoId = req.user.userId;
     return await this.agreementsService.patch({ ...body, id, userKakaoId });
   }
 }

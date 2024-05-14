@@ -34,7 +34,6 @@ import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto
 import { FetchUserPostsInput } from './dtos/fetch-user-posts.input';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { PostResponseDto } from './dtos/post-response.dto';
-import { fetchPostDetailDto } from './dtos/fetch-post-detail.dto';
 import {
   FetchPostForUpdateDto,
   PostResponseDtoExceptCategory,
@@ -51,9 +50,7 @@ export class PostsController {
 
   @ApiOperation({
     summary: '게시글 등록',
-    description: `게시글을 등록한다.
-    id를 입력하지 않으면 생성하고 있는 아이디를 치면 update하는 로직으로 
-    바로 게시글 생성에 사용해도 되고, 수정용으로 사용해도 된다.`,
+    description: '게시글을 등록한다.',
   })
   @Post()
   @ApiCookieAuth()
@@ -81,9 +78,7 @@ export class PostsController {
 
   @ApiOperation({
     summary: '게시글 임시등록',
-    description: `게시글을 임시등록한다.
-    id를 입력하지 않으면 생성하고 있는 아이디를 치면 update하는 로직으로 
-    바로 게시글 생성에 사용해도 되고, 수정용으로 사용해도 된다.`,
+    description: '게시글을 임시등록한다.',
   })
   @Post('temp')
   @ApiCookieAuth()
@@ -153,14 +148,14 @@ export class PostsController {
   @ApiOperation({
     summary: '게시글 디테일 뷰 fetch',
     description:
-      'id에 해당하는 게시글과 댓글을 가져온다. 조회수를 올린다. 보호된 게시글은 권한이 있는 사용자만 접근 가능하다.',
+      'id에 해당하는 게시글을 가져온다. 조회수를 올린다. 보호된 게시글은 권한이 있는 사용자만 접근 가능하다.',
   })
   @Get('detail/:postId')
-  @ApiOkResponse({ type: fetchPostDetailDto })
+  @ApiOkResponse({ type: PostResponseDto })
   async fetchPostDetail(
     @Param('postId') id: number,
     @Req() req: Request,
-  ): Promise<fetchPostDetailDto> {
+  ): Promise<PostResponseDto> {
     const kakaoId = req.user.userId;
     return await this.postsService.fetchDetail({ kakaoId, id });
   }
@@ -228,7 +223,7 @@ export class PostsController {
     } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
       cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '9');
     }
-    return this.postsService.paginateByCustomCursor({ cursorOption });
+    return this.postsService.fetchPostsCursor({ cursorOption });
   }
 
   @ApiOperation({
@@ -248,7 +243,7 @@ export class PostsController {
     } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
       cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '9');
     }
-    return this.postsService.fetchFriendsCursor({ cursorOption, kakaoId });
+    return this.postsService.fetchFriendsPostsCursor({ cursorOption, kakaoId });
   }
 
   @ApiOperation({
@@ -269,7 +264,7 @@ export class PostsController {
     } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
       cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '9');
     }
-    return await this.postsService.fetchUserPosts({
+    return await this.postsService.fetchUserPostsCursor({
       kakaoId,
       targetKakaoId,
       cursorOption,

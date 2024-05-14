@@ -59,16 +59,29 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: '특정 유저 프로필 조회',
+    summary: '특정 유저 프로필 조회(id)',
     description: 'id가 일치하는 유저 프로필을 조회한다.',
   })
   @ApiOkResponse({ description: '조회 성공', type: UserResponseDto })
   @HttpCode(200)
-  @Get('profile/:userId')
+  @Get('profile/id/:userId')
   async findUserByKakaoId(
     @Param('userId') kakaoId: number,
   ): Promise<UserResponseDto> {
     return await this.usersService.findUserByKakaoId({ kakaoId });
+  }
+
+  @ApiOperation({
+    summary: '특정 유저 프로필 조회(handle)',
+    description: 'handle이 일치하는 유저 프로필을 조회한다.',
+  })
+  @ApiOkResponse({ description: '조회 성공', type: UserResponseDto })
+  @HttpCode(200)
+  @Get('profile/handle/:handle')
+  async findUserByHandle(
+    @Param('handle') handle: string,
+  ): Promise<UserResponseDto> {
+    return await this.usersService.findUserByHandle({ handle });
   }
 
   @ApiOperation({
@@ -86,8 +99,8 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: '로그인된 유저의 이름이나 설명을 변경',
-    description: '로그인된 유저의 이름이나 설명, 혹은 둘 다를 변경한다.',
+    summary: '로그인된 유저의 이름이나 설명, 핸들을 변경',
+    description: '로그인된 유저의 이름이나 설명, 핸들, 혹은 모두를 변경한다.',
   })
   @ApiOkResponse({ description: '변경 성공', type: UserResponseDto })
   @ApiCookieAuth()
@@ -99,12 +112,12 @@ export class UsersController {
     @Body() body: PatchUserInput,
   ): Promise<UserResponseDto> {
     const kakaoId = req.user.userId;
-    const description = body.description;
-    const username = body.username;
+    const { description, username, handle } = body;
     return await this.usersService.patchUser({
       kakaoId,
       description,
       username,
+      handle,
     });
   }
 

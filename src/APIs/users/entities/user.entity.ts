@@ -14,6 +14,10 @@ export class User {
   @ApiProperty({ description: '카카오 id', type: Number })
   kakaoId: number;
 
+  @Column({ unique: true })
+  @ApiProperty({ description: '유저 핸들러', type: String })
+  handle: string;
+
   @Column({ default: '' })
   @ApiProperty({ description: 'crypted refresh token', type: String })
   current_refresh_token: string;

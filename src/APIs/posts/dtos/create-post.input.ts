@@ -1,23 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { OpenScope } from 'src/common/enums/open-scope.enum';
 
 export class CreatePostInput {
-  @ApiProperty({
-    description: '포스트의 고유 아이디',
-    type: Number,
-    required: false,
-  })
-  @IsNumber()
-  @IsOptional()
-  id?: number;
-
   @ApiProperty({
     description: '연결된 카테고리 fk',
     type: String,
@@ -27,9 +12,10 @@ export class CreatePostInput {
   @IsOptional()
   postCategoryId?: string;
 
-  @ApiProperty({ description: '연결된 내지 fk', type: String, required: false })
-  @IsString()
-  postBackgroundId?: string;
+  // @ApiProperty({ description: '연결된 내지 fk', type: String, required: false })
+  // @IsString()
+  // @IsOptional()
+  // postBackgroundId?: string;
 
   @ApiProperty({
     description: '제목(최대 100자)',
@@ -55,6 +41,7 @@ export class CreatePostInput {
     required: false,
   })
   @IsEnum(OpenScope)
+  @IsOptional()
   scope?: OpenScope;
 
   @ApiProperty({ description: '게시글 내용', type: String })

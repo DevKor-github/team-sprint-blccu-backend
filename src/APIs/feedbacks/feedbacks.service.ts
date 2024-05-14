@@ -15,7 +15,10 @@ export class FeedbacksService {
     kakaoId,
     content,
   }: IFeedbacksServiceCreate): Promise<FetchFeedbackDto> {
-    return await this.feedbacksRepository.save({ content, user: { kakaoId } });
+    return await this.feedbacksRepository.save({
+      content,
+      userKakaoId: kakaoId,
+    });
   }
 
   async fetchAll({ kakaoId }): Promise<FetchFeedbackDto[]> {

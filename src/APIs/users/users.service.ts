@@ -9,6 +9,7 @@ import { ILike, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import {
   IUsersServiceCreate,
+  IUsersServiceFindUserByHandle,
   IUsersServiceFindUserByKakaoId,
 } from './interfaces/users.service.interface';
 import { USER_SELECT_OPTION, UserResponseDto } from './dtos/user-response.dto';
@@ -46,10 +47,11 @@ export class UsersService {
   }
 
   async create({ kakaoId }: IUsersServiceCreate) {
-    const userTempName = 'user' + this.utilsService.getUUID().substring(0, 8);
+    const userTempName = 'USER' + this.utilsService.getUUID().substring(0, 8);
     const result = await this.usersRepository.save({
       kakaoId,
       username: userTempName,
+      handle: userTempName,
     });
     return result;
   }
@@ -63,6 +65,17 @@ export class UsersService {
     });
     return result;
   }
+
+  async findUserByHandle({
+    handle,
+  }: IUsersServiceFindUserByHandle): Promise<UserResponseDto> {
+    const result = await this.usersRepository.findOne({
+      select: USER_SELECT_OPTION,
+      where: { handle },
+    });
+    return result;
+  }
+
   async findUserByKakaoIdWithToken({
     kakaoId,
   }: IUsersServiceFindUserByKakaoId) {
@@ -82,6 +95,7 @@ export class UsersService {
 
   async patchUser({
     kakaoId,
+    handle,
     description,
     username,
   }): Promise<UserResponseDto> {
@@ -92,11 +106,14 @@ export class UsersService {
     if (username) {
       user.username = username;
     }
+    if (handle) user.handle = handle;
     try {
       const data = await this.usersRepository.save(user);
       return data;
     } catch (e) {
-      throw new ConflictException('UK: username이 중복됩니다.');
+      throw new ConflictException(
+        'username || handle 값이 Unique하지 않습니다.',
+      );
     }
   }
 

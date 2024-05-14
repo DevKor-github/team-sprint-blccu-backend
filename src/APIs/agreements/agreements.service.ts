@@ -32,7 +32,7 @@ export class AgreementsService {
     return await this.agreementsRepository.save({
       agreementType,
       isAgreed,
-      user: { kakaoId },
+      userKakaoId: kakaoId,
     });
   }
 

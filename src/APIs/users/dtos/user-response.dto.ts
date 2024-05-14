@@ -3,6 +3,7 @@ import { User } from '../entities/user.entity';
 
 export const USER_SELECT_OPTION = {
   kakaoId: true,
+  handle: true,
   isAdmin: true,
   username: true,
   description: true,
@@ -13,6 +14,7 @@ export const USER_SELECT_OPTION = {
 };
 export const USER_PRIMARY_SELECT_OPTION = {
   kakaoId: true,
+  handle: true,
   username: true,
   description: true,
   profile_image: true,
@@ -22,6 +24,7 @@ export class UserPrimaryResponseDto extends PickType(User, [
   'username',
   'profile_image',
   'description',
+  'handle',
 ]) {}
 export class UserResponseDto extends OmitType(User, ['current_refresh_token']) {
   // @ApiProperty({ description: '카카오 id', type: Number })
