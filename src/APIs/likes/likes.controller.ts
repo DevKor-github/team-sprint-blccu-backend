@@ -23,6 +23,7 @@ import { FetchLikeDto } from './dtos/toggle-like-response.dto';
 import { Likes } from './entities/like.entity';
 import { FetchLikesResponseDto } from './dtos/fetch-likes-response.dto';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
+import { FetchLikeResponseDto } from './dtos/fetch-likes.dto';
 
 @ApiTags('게시글 API')
 @Controller('posts/:postId/like')
@@ -36,7 +37,7 @@ export class LikesController {
   @ApiCookieAuth()
   @ApiCreatedResponse({
     description: '좋아요 성공',
-    type: FetchLikeDto,
+    type: FetchLikeResponseDto,
   })
   @ApiNotFoundResponse({ description: '게시글을 찾을 수 없는 경우' })
   @UseGuards(AuthGuardV2)
@@ -45,7 +46,7 @@ export class LikesController {
   async like(
     @Param('postId') id: number,
     @Req() req: Request,
-  ): Promise<FetchLikeDto> {
+  ): Promise<FetchLikeResponseDto> {
     const kakaoId = req.user.userId;
     return await this.likesService.like({ id, kakaoId });
   }

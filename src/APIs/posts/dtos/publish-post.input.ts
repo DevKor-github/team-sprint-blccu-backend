@@ -11,9 +11,9 @@ export class PublishPostInput {
   @IsString()
   postCategoryId: string;
 
-  @ApiProperty({ description: '연결된 내지 fk', type: String })
-  @IsString()
-  postBackgroundId: string;
+  // @ApiProperty({ description: '연결된 내지 fk', type: String })
+  // @IsString()
+  // postBackgroundId: string;
 
   @ApiProperty({
     description: '제목(최대 100자)',

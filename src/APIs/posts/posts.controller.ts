@@ -148,7 +148,7 @@ export class PostsController {
   @ApiOperation({
     summary: '게시글 디테일 뷰 fetch',
     description:
-      'id에 해당하는 게시글과 댓글을 가져온다. 조회수를 올린다. 보호된 게시글은 권한이 있는 사용자만 접근 가능하다.',
+      'id에 해당하는 게시글을 가져온다. 조회수를 올린다. 보호된 게시글은 권한이 있는 사용자만 접근 가능하다.',
   })
   @Get('detail/:postId')
   @ApiOkResponse({ type: PostResponseDto })

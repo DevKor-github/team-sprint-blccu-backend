@@ -11,8 +11,9 @@ import {
   FetchLikeDto,
   ToggleLikeResponseDto,
 } from './dtos/toggle-like-response.dto';
-import { FetchLikesDto } from './dtos/fetch-likes.dto';
+import { FetchLikeResponseDto, FetchLikesDto } from './dtos/fetch-likes.dto';
 import { USER_SELECT_OPTION } from '../users/dtos/user-response.dto';
+import { FetchLikesResponseDto } from './dtos/fetch-likes-response.dto';
 
 @Injectable()
 export class LikesService {
@@ -30,7 +31,7 @@ export class LikesService {
     return false;
   }
 
-  async like({ id, kakaoId }): Promise<FetchLikeDto> {
+  async like({ id, kakaoId }): Promise<FetchLikeResponseDto> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();

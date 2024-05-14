@@ -13,7 +13,7 @@ import { FetchPostsDto } from './dtos/fetch-posts.dto';
 import { PagePostResponseDto } from './dtos/page-post-response.dto';
 import { FetchFriendsPostsDto } from './dtos/fetch-friends-posts.dto';
 import { PostCategory } from '../postCategories/entities/postCategory.entity';
-import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
+// import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
 import { User } from '../users/entities/user.entity';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { StickerBlocksService } from '../stickerBlocks/stickerBlocks.service';
@@ -88,13 +88,13 @@ export class PostsService {
       .getOne();
     if (!pc && !passNonEssentail)
       throw new BadRequestException('존재하지 않는 post_category입니다.');
-    const pg = await this.dataSource
-      .getRepository(PostBackground)
-      .createQueryBuilder('pg')
-      .where('pg.id = :id', { id: posts.postBackgroundId })
-      .getOne();
-    if (!pg && !passNonEssentail)
-      throw new BadRequestException('존재하지 않는 post_background입니다.');
+    // const pg = await this.dataSource
+    //   .getRepository(PostBackground)
+    //   .createQueryBuilder('pg')
+    //   .where('pg.id = :id', { id: posts.postBackgroundId })
+    //   .getOne();
+    // if (!pg && !passNonEssentail)
+    //   throw new BadRequestException('존재하지 않는 post_background입니다.');
     const us = await this.dataSource
       .getRepository(User)
       .createQueryBuilder('us')
@@ -194,6 +194,7 @@ export class PostsService {
     });
     // const comments = await this.commentsService.fetchComments({ postsId: id });
     const post = await this.postsRepository.fetchPostDetail({ id, scope });
+    console.log(data, post);
     return post;
   }
 

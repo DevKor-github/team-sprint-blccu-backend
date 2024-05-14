@@ -21,7 +21,7 @@ export class Agreement {
   id: number;
 
   @JoinColumn()
-  @ManyToOne(() => User, (users) => users.kakaoId, {
+  @ManyToOne(() => User, (user) => user.kakaoId, {
     nullable: false,
     onUpdate: 'NO ACTION',
     onDelete: 'CASCADE',
@@ -29,8 +29,9 @@ export class Agreement {
   user: User;
 
   @ApiProperty({ type: Number, description: '약관에 동의한 유저 id' })
+  @Column()
   @RelationId((agreement: Agreement) => agreement.user)
-  @IsNumber()
+  // @IsNumber()
   userKakaoId: number;
 
   @ApiProperty({

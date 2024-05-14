@@ -36,6 +36,10 @@ export class Likes {
   })
   posts: Posts;
 
+  @ApiProperty({
+    type: Number,
+    description: '게시글 아이디',
+  })
   @RelationId((like: Likes) => like.posts)
   postsId: number;
 }

@@ -30,8 +30,8 @@ export class PostsRepository extends Repository<Posts> {
     return (
       this.createQueryBuilder('p')
         .innerJoin('p.user', 'user')
-        .innerJoinAndSelect('p.postBackground', 'postBackground')
-        .innerJoinAndSelect('p.postCategory', 'postCategory')
+        .leftJoinAndSelect('p.postBackground', 'postBackground')
+        .leftJoinAndSelect('p.postCategory', 'postCategory')
         .addSelect([
           'user.kakaoId',
           'user.description',
@@ -57,8 +57,8 @@ export class PostsRepository extends Repository<Posts> {
     });
     return await this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')
-      .innerJoinAndSelect('p.postBackground', 'postBackground')
-      .innerJoinAndSelect('p.postCategory', 'postCategory')
+      .leftJoinAndSelect('p.postBackground', 'postBackground')
+      .leftJoinAndSelect('p.postCategory', 'postCategory')
       .addSelect([
         'user.kakaoId',
         'user.description',
@@ -72,8 +72,8 @@ export class PostsRepository extends Repository<Posts> {
   async fetchPostForUpdate(id) {
     return await this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')
-      .innerJoinAndSelect('p.postBackground', 'postBackground')
-      // .innerJoinAndSelect('p.postCategory', 'postCategory')
+      .leftJoinAndSelect('p.postBackground', 'postBackground')
+      .leftJoinAndSelect('p.postCategory', 'postCategory')
       .addSelect([
         'user.kakaoId',
         'user.description',
@@ -87,8 +87,8 @@ export class PostsRepository extends Repository<Posts> {
   async fetchFriendsPosts(subQuery, page) {
     return this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')
-      .innerJoinAndSelect('p.postBackground', 'postBackground')
-      .innerJoinAndSelect('p.postCategory', 'postCategory')
+      .leftJoinAndSelect('p.postBackground', 'postBackground')
+      .leftJoinAndSelect('p.postCategory', 'postCategory')
       .addSelect([
         'user.kakaoId',
         'user.description',
@@ -113,22 +113,20 @@ export class PostsRepository extends Repository<Posts> {
   async fetchTempPosts(
     kakaoId: number,
   ): Promise<PostResponseDtoExceptCategory[]> {
-    return (
-      this.createQueryBuilder('p')
-        .innerJoin('p.user', 'user')
-        .innerJoinAndSelect('p.postBackground', 'postBackground')
-        // .innerJoinAndSelect('p.postCategory', 'postCategory')
-        .addSelect([
-          'user.kakaoId',
-          'user.description',
-          'user.profile_image',
-          'user.username',
-        ])
-        .where('p.userKakaoId = :kakaoId', { kakaoId })
-        .andWhere(`p.isPublished = false`)
-        .orderBy('p.id', 'DESC')
-        .getMany()
-    );
+    return this.createQueryBuilder('p')
+      .innerJoin('p.user', 'user')
+      .leftJoinAndSelect('p.postBackground', 'postBackground')
+      .leftJoinAndSelect('p.postCategory', 'postCategory')
+      .addSelect([
+        'user.kakaoId',
+        'user.description',
+        'user.profile_image',
+        'user.username',
+      ])
+      .where('p.userKakaoId = :kakaoId', { kakaoId })
+      .andWhere(`p.isPublished = false`)
+      .orderBy('p.id', 'DESC')
+      .getMany();
   }
 
   getCursorQuery({ order, sort, take, cursor }: IPostsRepoGetCursorQuery) {
@@ -143,8 +141,8 @@ export class PostsRepository extends Repository<Posts> {
     queryBuilder
       .take(take + 1)
       .innerJoin('p.user', 'user')
-      .innerJoinAndSelect('p.postBackground', 'postBackground')
-      .innerJoinAndSelect('p.postCategory', 'postCategory')
+      .leftJoinAndSelect('p.postBackground', 'postBackground')
+      .leftJoinAndSelect('p.postCategory', 'postCategory')
       .addSelect([
         'user.kakaoId',
         'user.description',
