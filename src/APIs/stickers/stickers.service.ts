@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Sticker } from './entities/sticker.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -87,15 +83,6 @@ export class StickersService {
     return data;
   }
 
-  async toggleReusable({ userKakaoId, id }) {
-    const sticker = await this.stickersRepository.findOne({ where: { id } });
-    if (!sticker) throw new NotFoundException('스티커가 존재하지 않습니다.');
-    if (sticker.userKakaoId != userKakaoId)
-      throw new UnauthorizedException('스티커 제작자가 아닙니다.');
-    return await this.stickersRepository.update(id, {
-      isReusable: () => '!isReusable',
-    });
-  }
   async fetchUserStickers({ userKakaoId }): Promise<Sticker[]> {
     return await this.stickersRepository.find({
       where: { userKakaoId, isReusable: true, isDefault: false },
@@ -125,6 +112,7 @@ export class StickersService {
 
   async updateSticker({
     image_url,
+    isReusable,
     kakaoId,
     id,
   }: UpdateStickerDto): Promise<Sticker> {
@@ -136,14 +124,14 @@ export class StickersService {
         throw new NotFoundException(
           '스티커가 존재하지 않거나 제작자 본인이 아닙니다.',
         );
-      await this.stickersRepository
-        .createQueryBuilder()
-        .update(Sticker)
-        .set({ image_url })
-        .where('id = :id', { id })
-        .execute();
       const data = await this.stickersRepository.findOne({ where: { id } });
-      return data;
+      if (isReusable) data.isReusable = isReusable;
+      if (image_url) {
+        await this.removeFromS3({ id, kakaoId });
+        data.image_url = image_url;
+      }
+      const result = await this.stickersRepository.save(data);
+      return result;
     } catch (e) {
       throw e;
     }
