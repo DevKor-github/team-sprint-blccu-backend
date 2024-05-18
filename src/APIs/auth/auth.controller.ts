@@ -42,7 +42,7 @@ export class AuthController {
     });
 
     // 클라이언트 도메인 설정
-    const clientDomain = process.env.CLIENT_URL;
+    const clientDomain = process.env.CLIENT_DOMAIN;
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
