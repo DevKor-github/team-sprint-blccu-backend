@@ -8,8 +8,8 @@ export class FollowsRepository extends Repository<Follow> {
     super(Follow, dataSource.createEntityManager());
   }
 
-  async getFollowers({ kakaoId }) {
-    const queryBuilder = this.getFollowQuery({ kakaoId });
+  async getFollowers({ kakaoId, loggedUser }) {
+    const queryBuilder = this.getFollowQuery({ kakaoId, loggedUser });
     const followings = await queryBuilder
       .innerJoin('follow.from_user', 'user')
       .andWhere('follow.toUserKakaoId = :kakaoId')
@@ -28,8 +28,8 @@ export class FollowsRepository extends Repository<Follow> {
     }));
   }
 
-  async getFollowings({ kakaoId }) {
-    const queryBuilder = this.getFollowQuery({ kakaoId });
+  async getFollowings({ kakaoId, loggedUser }) {
+    const queryBuilder = this.getFollowQuery({ kakaoId, loggedUser });
     const followings = await queryBuilder
       .innerJoin('follow.to_user', 'user')
       .andWhere('follow.fromUserKakaoId = :kakaoId')
@@ -48,7 +48,7 @@ export class FollowsRepository extends Repository<Follow> {
     }));
   }
 
-  getFollowQuery({ kakaoId }) {
+  getFollowQuery({ kakaoId, loggedUser }) {
     const queryBuilder = this.createQueryBuilder('follow')
       .where('user.date_deleted IS NULL')
       .select([
@@ -62,9 +62,9 @@ export class FollowsRepository extends Repository<Follow> {
         'user.background_image AS background_image',
         'user.date_created AS date_created',
         'user.date_deleted AS date_deleted',
-        'CASE WHEN follow.fromUserKakaoId = :kakaoId THEN true ELSE false END AS isFollowing',
+        'CASE WHEN follow.fromUserKakaoId = :loggedUser THEN true ELSE false END AS isFollowing',
       ])
-      .setParameters({ kakaoId });
+      .setParameters({ kakaoId, loggedUser });
 
     return queryBuilder;
   }

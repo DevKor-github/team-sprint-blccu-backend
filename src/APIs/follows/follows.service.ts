@@ -75,13 +75,25 @@ export class FollowsService {
     return this.followsRepository.delete({ from_user, to_user });
   }
 
-  async getFollows({ kakaoId }): Promise<UserResponseDtoWithFollowing[]> {
-    const follows = await this.followsRepository.getFollowings({ kakaoId });
+  async getFollows({
+    kakaoId,
+    loggedUser,
+  }): Promise<UserResponseDtoWithFollowing[]> {
+    const follows = await this.followsRepository.getFollowings({
+      kakaoId,
+      loggedUser,
+    });
     return follows;
   }
 
-  async getFollowers({ kakaoId }): Promise<UserResponseDtoWithFollowing[]> {
-    const follows = await this.followsRepository.getFollowers({ kakaoId });
+  async getFollowers({
+    kakaoId,
+    loggedUser,
+  }): Promise<UserResponseDtoWithFollowing[]> {
+    const follows = await this.followsRepository.getFollowers({
+      kakaoId,
+      loggedUser,
+    });
     return follows;
   }
 }

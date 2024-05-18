@@ -112,9 +112,11 @@ export class FollowsController {
   @HttpCode(200)
   @Get(':userId/followers')
   getFollowers(
+    @Req() req: Request,
     @Param('userId') kakaoId: number,
   ): Promise<UserResponseDtoWithFollowing[]> {
-    return this.followsService.getFollowers({ kakaoId });
+    const loggedUser = req.user.userId;
+    return this.followsService.getFollowers({ kakaoId, loggedUser });
   }
 
   @ApiOperation({
@@ -128,8 +130,10 @@ export class FollowsController {
   @HttpCode(200)
   @Get(':userId/followings')
   getFollows(
+    @Req() req: Request,
     @Param('userId') kakaoId: number,
   ): Promise<UserResponseDtoWithFollowing[]> {
-    return this.followsService.getFollows({ kakaoId });
+    const loggedUser = req.user.userId;
+    return this.followsService.getFollows({ kakaoId, loggedUser });
   }
 }
