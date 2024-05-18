@@ -52,6 +52,7 @@ export class FollowsService {
     }
     return true;
   }
+
   async followUser({ from_user, to_user }): Promise<FollowUserDto> {
     const isExist = await this.isExist({ from_user, to_user });
     if (isExist) {

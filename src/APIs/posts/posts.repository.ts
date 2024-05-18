@@ -93,6 +93,7 @@ export class PostsRepository extends Repository<Posts> {
       .leftJoinAndSelect('p.postBackground', 'postBackground')
       .leftJoinAndSelect('p.postCategory', 'postCategory')
       .addSelect([
+        'user.handle',
         'user.kakaoId',
         'user.description',
         'user.profile_image',
