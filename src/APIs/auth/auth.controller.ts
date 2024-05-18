@@ -40,9 +40,30 @@ export class AuthController {
     const { accessToken, refreshToken } = await this.authService.getJWT({
       kakaoId: req.user.kakaoId,
     });
-    res.cookie('accessToken', accessToken, { httpOnly: true });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true });
-    res.cookie('isLoggedIn', true, { httpOnly: false });
+
+    // 클라이언트 도메인 설정
+    const clientHost = req.headers.host;
+    let clientDomain;
+    if (clientHost.includes('localhost')) {
+      clientDomain = 'localhost';
+    } else {
+      clientDomain = process.env.CLIENT_URL;
+    }
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      domain: clientDomain,
+      sameSite: 'lax',
+      secure: true,
+    });
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      domain: clientDomain,
+      sameSite: 'lax',
+      secure: true,
+    });
+    res.cookie('isLoggedIn', true, { httpOnly: false, domain: clientDomain });
+
     return res.redirect(process.env.CLIENT_URL);
   }
 

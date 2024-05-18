@@ -55,11 +55,11 @@ export class StickerCategoriesService {
       .execute();
   }
 
-  async fetchStickersByCategoryName({ name }) {
-    await this.existCheckByName({ name });
+  async fetchStickersByCategoryId({ id }) {
+    await this.existCheckById({ id });
     return await this.stickerCategoryMappersRepository.find({
       relations: { sticker: true, stickerCategory: true },
-      where: { stickerCategory: { name }, sticker: { isDefault: true } },
+      where: { stickerCategory: { id }, sticker: { isDefault: true } },
     });
   }
 }

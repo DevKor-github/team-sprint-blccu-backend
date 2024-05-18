@@ -95,6 +95,10 @@ export class Posts {
   @Column('longtext')
   content: string;
 
+  @ApiProperty({ description: '게시글 설명(html 태그 제외)', type: String })
+  @Column()
+  main_description: string;
+
   @ApiProperty({ description: '게시글 캡쳐 이미지 url', type: String })
   @Column()
   image_url: string;
