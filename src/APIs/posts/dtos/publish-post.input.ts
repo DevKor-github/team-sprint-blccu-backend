@@ -11,9 +11,9 @@ export class PublishPostInput {
   @IsString()
   postCategoryId: string;
 
-  // @ApiProperty({ description: '연결된 내지 fk', type: String })
-  // @IsString()
-  // postBackgroundId: string;
+  @ApiProperty({ description: '연결된 내지 fk', type: String })
+  @IsString()
+  postBackgroundId: string;
 
   @ApiProperty({
     description: '제목(최대 100자)',
@@ -41,6 +41,9 @@ export class PublishPostInput {
   @ApiProperty({ description: '게시글 내용', type: String })
   @IsString()
   content: string;
+
+  @ApiProperty({ description: '게시글 설명(html 태그 제외)', type: String })
+  main_description: string;
 
   @ApiProperty({ description: '게시글 캡쳐 이미지 url', type: String })
   @IsString()

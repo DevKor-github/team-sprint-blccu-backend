@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   Param,
@@ -26,7 +25,6 @@ import { ImageUploadDto } from 'src/common/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { Sticker } from './entities/sticker.entity';
-import { FindStickerInput } from './dtos/find-sticker.dto';
 import { UpdateStickerInput } from './dtos/update-sticker.dto';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 
