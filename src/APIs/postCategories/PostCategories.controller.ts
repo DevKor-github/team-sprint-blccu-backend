@@ -41,7 +41,7 @@ export class PostCategoriesController {
   @ApiOkResponse({
     type: [FetchPostCategoriesDto],
   })
-  @Get(':userId/categories/list')
+  @Get(':userId/categories')
   @HttpCode(200)
   async fetchPostCategories(
     @Req() req: Request,
@@ -52,6 +52,19 @@ export class PostCategoriesController {
       kakaoId,
       targetKakaoId,
     });
+  }
+
+  @ApiOperation({
+    summary: '특정 카테고리 조회',
+    description: 'id에 해당하는 카테고리를 조회한다.',
+  })
+  @ApiOkResponse({ type: FetchPostCategoryDto })
+  @Get('categories/:categoryId')
+  async fetchMyCategory(
+    @Req() req: Request,
+    @Param('categoryId') id: string,
+  ): Promise<FetchPostCategoryDto> {
+    return await this.postCategoriesService.findWithId({ id });
   }
 
   @ApiOperation({
@@ -75,43 +88,27 @@ export class PostCategoriesController {
     return await this.postCategoriesService.create({ kakaoId, name });
   }
 
-  @ApiOperation({
-    summary: '로그인된 유저의 카테고리 전체 조회',
-    description:
-      '로그인된 유저가 생성한 카테고리의 이름과 id, 게시글 개수를 조회한다.',
-  })
-  @ApiCookieAuth()
-  @ApiOkResponse({
-    type: [FetchPostCategoriesDto],
-  })
-  @UseGuards(AuthGuardV2)
-  @Get('me/categories')
-  async fetchMyCategories(
-    @Req() req: Request,
-  ): Promise<FetchPostCategoriesDto[]> {
-    const kakaoId = req.user.userId;
-    console.log('kakaoId: ', kakaoId);
-    return await this.postCategoriesService.fetchAll({
-      kakaoId,
-      targetKakaoId: kakaoId,
-    });
-  }
-
-  @ApiOperation({
-    summary: '로그인된 유저의 특정 카테고리 조회',
-    description: '로그인된 유저가 생성한, id에 해당하는 카테고리를 조회한다.',
-  })
-  @ApiCookieAuth()
-  @ApiOkResponse({ type: FetchPostCategoryDto })
-  @UseGuards(AuthGuardV2)
-  @Get('me/categories/:categoryId')
-  async fetchMyCategory(
-    @Req() req: Request,
-    @Param('categoryId') id: string,
-  ): Promise<FetchPostCategoryDto> {
-    const kakaoId = req.user.userId;
-    return await this.postCategoriesService.findWithId({ kakaoId, id });
-  }
+  // @ApiOperation({
+  //   summary: '로그인된 유저의 카테고리 전체 조회',
+  //   description:
+  //     '로그인된 유저가 생성한 카테고리의 이름과 id, 게시글 개수를 조회한다.',
+  // })
+  // @ApiCookieAuth()
+  // @ApiOkResponse({
+  //   type: [FetchPostCategoriesDto],
+  // })
+  // @UseGuards(AuthGuardV2)
+  // @Get('me/categories')
+  // async fetchMyCategories(
+  //   @Req() req: Request,
+  // ): Promise<FetchPostCategoriesDto[]> {
+  //   const kakaoId = req.user.userId;
+  //   console.log('kakaoId: ', kakaoId);
+  //   return await this.postCategoriesService.fetchAll({
+  //     kakaoId,
+  //     targetKakaoId: kakaoId,
+  //   });
+  // }
 
   @ApiOperation({ summary: '로그인된 유저의 특정 카테고리 수정' })
   @ApiCookieAuth()

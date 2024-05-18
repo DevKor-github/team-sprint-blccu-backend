@@ -38,7 +38,7 @@ export class PostCategoriesService {
   }
 
   async patch({ kakaoId, id, name }): Promise<FetchPostCategoryDto> {
-    const data = await this.findWithId({ kakaoId, id });
+    const data = await this.findWithId({ id });
     if (!data) throw new NotFoundException('카테고리를 찾을 수 없습니다.');
     if (data.userKakaoId != kakaoId)
       throw new ForbiddenException('카테고리를 수정할 권한이 없습니다.');
@@ -46,9 +46,9 @@ export class PostCategoriesService {
     return await this.postCategoriesRepository.save(data);
   }
 
-  async findWithId({ kakaoId, id }): Promise<FetchPostCategoryDto> {
+  async findWithId({ id }): Promise<FetchPostCategoryDto> {
     return await this.postCategoriesRepository.findOne({
-      where: { user: { kakaoId }, id },
+      where: { id },
     });
   }
 
