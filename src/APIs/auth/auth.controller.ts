@@ -42,13 +42,7 @@ export class AuthController {
     });
 
     // 클라이언트 도메인 설정
-    const clientHost = req.headers.host;
-    let clientDomain;
-    if (clientHost.includes('localhost')) {
-      clientDomain = 'localhost';
-    } else {
-      clientDomain = process.env.CLIENT_URL;
-    }
+    const clientDomain = process.env.CLIENT_URL;
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
