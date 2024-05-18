@@ -26,6 +26,15 @@ export class User {
   @ApiProperty({ description: '어드민 유저 여부', type: Boolean })
   isAdmin: boolean;
 
+  @Column({ default: 0 })
+  @ApiProperty({
+    description: '팔로우 수',
+    type: Number,
+    required: false,
+    default: 0,
+  })
+  follow_count: number;
+
   @Column({ unique: true })
   @ApiProperty({ description: '유저 이름', type: String })
   username: string;

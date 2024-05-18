@@ -6,6 +6,7 @@ export const USER_SELECT_OPTION = {
   handle: true,
   isAdmin: true,
   username: true,
+  follow_count: true,
   description: true,
   profile_image: true,
   background_image: true,
