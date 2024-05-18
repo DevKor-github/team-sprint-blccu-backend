@@ -21,6 +21,7 @@ import { AuthTokenMiddleware } from './common/middlewares/auth-token.middleware'
 import { JwtModule } from '@nestjs/jwt';
 import { AgreementsModule } from './APIs/agreements/agreements.module';
 import { FeedbacksModule } from './APIs/feedbacks/feedbacks.module';
+import { parseBoolean } from './common/validators/isBoolean';
 
 @Module({
   imports: [
@@ -60,7 +61,7 @@ import { FeedbacksModule } from './APIs/feedbacks/feedbacks.module';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_DATABASE,
       entities: [__dirname + '/APIs/**/*.entity.*'],
-      synchronize: false,
+      synchronize: parseBoolean(process.env.DATABASE_SYNCHRO),
       logging: true,
     }),
   ],

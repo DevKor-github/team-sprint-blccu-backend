@@ -2,6 +2,10 @@ import { applyDecorators } from '@nestjs/common';
 import { Transform } from 'class-transformer';
 import { IsBoolean as OriginalIsBoolean } from 'class-validator';
 
+export function parseBoolean(value: string): boolean {
+  return value.toLowerCase() === 'true';
+}
+
 export function IsBoolean() {
   return applyDecorators(ToBoolean(), OriginalIsBoolean());
 }

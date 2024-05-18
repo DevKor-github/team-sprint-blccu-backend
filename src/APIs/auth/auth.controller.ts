@@ -49,13 +49,18 @@ export class AuthController {
     } else {
       clientDomain = process.env.CLIENT_URL;
     }
+
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       domain: clientDomain,
+      sameSite: 'lax',
+      secure: true,
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       domain: clientDomain,
+      sameSite: 'lax',
+      secure: true,
     });
     res.cookie('isLoggedIn', true, { httpOnly: false, domain: clientDomain });
 
