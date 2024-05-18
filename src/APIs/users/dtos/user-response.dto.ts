@@ -1,4 +1,4 @@
-import { OmitType, PickType } from '@nestjs/swagger';
+import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
 import { User } from '../entities/user.entity';
 
 export const USER_SELECT_OPTION = {
@@ -43,4 +43,9 @@ export class UserResponseDto extends OmitType(User, ['current_refresh_token']) {
   // date_created: Date;
   // @ApiProperty({ description: '삭제된 날짜', type: Date })
   // date_deleted: Date;
+}
+
+export class UserResponseDtoWithFollowing extends UserResponseDto {
+  @ApiProperty({ type: Boolean, description: '팔로잉 유무' })
+  isFollowing: boolean;
 }

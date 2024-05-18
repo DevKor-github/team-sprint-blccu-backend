@@ -1,18 +1,14 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
-import { FromUserResponseDto } from './dtos/from-user-response.dto';
-import { ToUserResponseDto } from './dtos/to-user-response.dto';
+import { DataSource } from 'typeorm';
 import { FollowUserDto } from './dtos/follow-user.dto';
-import { USER_SELECT_OPTION } from '../users/dtos/user-response.dto';
 import { OpenScope } from 'src/common/enums/open-scope.enum';
-import { Follow } from './entities/follow.entity';
+import { FollowsRepository } from './follows.repository';
+import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
 
 @Injectable()
 export class FollowsService {
   constructor(
-    @InjectRepository(Follow)
-    private readonly followsRepository: Repository<Follow>,
+    private readonly followsRepository: FollowsRepository,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -79,34 +75,13 @@ export class FollowsService {
     return this.followsRepository.delete({ from_user, to_user });
   }
 
-  async getFollows({ kakaoId }): Promise<ToUserResponseDto[]> {
-    const follows = await this.followsRepository.find({
-      select: {
-        from_user: USER_SELECT_OPTION,
-        to_user: USER_SELECT_OPTION,
-      },
-      where: {
-        from_user: { kakaoId: kakaoId },
-      },
-      relations: {
-        to_user: true,
-      },
-    });
+  async getFollows({ kakaoId }): Promise<UserResponseDtoWithFollowing[]> {
+    const follows = await this.followsRepository.getFollowings({ kakaoId });
     return follows;
   }
 
-  async getFollowers({ kakaoId }): Promise<FromUserResponseDto[]> {
-    const follows = await this.followsRepository.find({
-      select: {
-        from_user: USER_SELECT_OPTION,
-      },
-      where: {
-        to_user: { kakaoId: kakaoId },
-      },
-      relations: {
-        from_user: true,
-      },
-    });
+  async getFollowers({ kakaoId }): Promise<UserResponseDtoWithFollowing[]> {
+    const follows = await this.followsRepository.getFollowers({ kakaoId });
     return follows;
   }
 }

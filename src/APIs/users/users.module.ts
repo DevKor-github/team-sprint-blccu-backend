@@ -5,10 +5,11 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
+import { UsersRepository } from './users.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
-  providers: [UsersService, AwsService, UtilsService],
+  providers: [UsersService, UsersRepository, AwsService, UtilsService],
   controllers: [UsersController],
   exports: [UsersService],
 })

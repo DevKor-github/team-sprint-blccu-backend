@@ -22,7 +22,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { UserResponseDto } from './dtos/user-response.dto';
+import {
+  UserResponseDto,
+  UserResponseDtoWithFollowing,
+} from './dtos/user-response.dto';
 import { PatchUserInput } from './dtos/patch-user.input';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { ImageUploadDto } from 'src/common/dto/image-upload.dto';
@@ -49,13 +52,18 @@ export class UsersController {
     summary: '이름이 포함된 유저 검색',
     description: '이름에 username이 포함된 유저를 검색한다.',
   })
-  @ApiOkResponse({ description: '조회 성공', type: [UserResponseDto] })
+  @ApiOkResponse({
+    description: '조회 성공',
+    type: [UserResponseDtoWithFollowing],
+  })
   @HttpCode(200)
   @Get('username/:username')
   async findUsersByName(
+    @Req() req: Request,
     @Param('username') username: string,
-  ): Promise<UserResponseDto[]> {
-    return await this.usersService.findUsersByName({ username });
+  ): Promise<UserResponseDtoWithFollowing[]> {
+    const kakaoId = req.user.userId;
+    return await this.usersService.findUsersByName({ kakaoId, username });
   }
 
   @ApiOperation({

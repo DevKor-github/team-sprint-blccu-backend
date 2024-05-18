@@ -4,25 +4,26 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
-import { User } from './entities/user.entity';
 import {
   IUsersServiceCreate,
   IUsersServiceFindUserByHandle,
   IUsersServiceFindUserByKakaoId,
 } from './interfaces/users.service.interface';
-import { USER_SELECT_OPTION, UserResponseDto } from './dtos/user-response.dto';
+import {
+  USER_SELECT_OPTION,
+  UserResponseDto,
+  UserResponseDtoWithFollowing,
+} from './dtos/user-response.dto';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { UploadImageDto } from './dtos/upload-image.dto';
+import { UsersRepository } from './users.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
+    private readonly usersRepository: UsersRepository,
     private readonly awsService: AwsService,
     private readonly utilsService: UtilsService,
   ) {}
@@ -118,12 +119,13 @@ export class UsersService {
     }
   }
 
-  async findUsersByName({ username }): Promise<UserResponseDto[]> {
-    const users = await this.usersRepository.find({
-      select: USER_SELECT_OPTION,
-      where: {
-        username: ILike(`%${username}%`),
-      },
+  async findUsersByName({
+    kakaoId,
+    username,
+  }): Promise<UserResponseDtoWithFollowing[]> {
+    const users = await this.usersRepository.fetchUsersWithNameAndFollowing({
+      kakaoId,
+      username,
     });
     return users;
   }

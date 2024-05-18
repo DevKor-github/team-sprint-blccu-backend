@@ -19,10 +19,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { Likes } from './entities/like.entity';
-import { FetchLikesResponseDto } from './dtos/fetch-likes-response.dto';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { FetchLikeResponseDto } from './dtos/fetch-likes.dto';
+import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
 
 @ApiTags('게시글 API')
 @Controller('posts/:postId')
@@ -91,10 +90,17 @@ export class LikesController {
     summary: '좋아요 누른 대상 조회하기',
     description: '게시글에 좋아요를 누른 사람들을 확인한다.',
   })
-  @ApiOkResponse({ description: '조회 성공', type: [FetchLikesResponseDto] })
+  @ApiOkResponse({
+    description: '조회 성공',
+    type: [UserResponseDtoWithFollowing],
+  })
   @HttpCode(200)
   @Get('like-users')
-  async fetchLikes(@Param('postId') id: number): Promise<Likes[]> {
-    return await this.likesService.fetchLikes({ id });
+  async fetchLikes(
+    @Param('postId') postsId: number,
+    @Req() req: Request,
+  ): Promise<UserResponseDtoWithFollowing[]> {
+    const kakaoId = req.user.userId;
+    return await this.likesService.fetchLikes({ postsId, kakaoId });
   }
 }

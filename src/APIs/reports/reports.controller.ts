@@ -56,12 +56,11 @@ export class ReportsController {
   @ApiCookieAuth()
   @ApiCreatedResponse({ type: FetchReportResponse })
   @UseGuards(AuthGuardV2)
-  @Post('posts/:postId/comments/:commentId/report')
+  @Post('posts/comments/:commentId/report')
   @HttpCode(201)
   async reportComment(
     @Req() req: Request,
     @Body() body: CreateReportInput,
-    @Param('postId') postId: number,
     @Param('commentId') targetId: number,
   ): Promise<FetchReportResponse> {
     const userKakaoId = req.user.userId;

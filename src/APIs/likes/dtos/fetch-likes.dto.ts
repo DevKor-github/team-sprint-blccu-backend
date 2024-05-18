@@ -4,7 +4,7 @@ import { Posts } from 'src/APIs/posts/entities/posts.entity';
 
 export class FetchLikesDto {
   @ApiProperty({ type: Number, description: 'post_id' })
-  id: number;
+  postsId: number;
 }
 
 export class FetchLikeResponseDto extends PickType(Likes, ['id', 'postsId']) {

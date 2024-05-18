@@ -19,11 +19,10 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { FromUserResponseDto } from './dtos/from-user-response.dto';
-import { ToUserResponseDto } from './dtos/to-user-response.dto';
 import { FollowUserDto } from './dtos/follow-user.dto';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { FollowsService } from './follows.service';
+import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
 
 @ApiTags('유저 API')
 @Controller('users')
@@ -108,13 +107,13 @@ export class FollowsController {
   })
   @ApiOkResponse({
     description: '팔로워 목록 조회 성공',
-    type: [FromUserResponseDto],
+    type: [UserResponseDtoWithFollowing],
   })
   @HttpCode(200)
   @Get(':userId/followers')
   getFollowers(
     @Param('userId') kakaoId: number,
-  ): Promise<FromUserResponseDto[]> {
+  ): Promise<UserResponseDtoWithFollowing[]> {
     return this.followsService.getFollowers({ kakaoId });
   }
 
@@ -124,11 +123,13 @@ export class FollowsController {
   })
   @ApiOkResponse({
     description: '팔로잉 목록 조회 성공',
-    type: [ToUserResponseDto],
+    type: [UserResponseDtoWithFollowing],
   })
   @HttpCode(200)
   @Get(':userId/followings')
-  getFollows(@Param('userId') kakaoId: number): Promise<ToUserResponseDto[]> {
+  getFollows(
+    @Param('userId') kakaoId: number,
+  ): Promise<UserResponseDtoWithFollowing[]> {
     return this.followsService.getFollows({ kakaoId });
   }
 }

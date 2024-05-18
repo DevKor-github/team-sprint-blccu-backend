@@ -3,19 +3,18 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { Likes } from './entities/like.entity';
 import { Posts } from '../posts/entities/posts.entity';
 import { ToggleLikeResponseDto } from './dtos/toggle-like-response.dto';
-import { FetchLikeResponseDto, FetchLikesDto } from './dtos/fetch-likes.dto';
-import { USER_SELECT_OPTION } from '../users/dtos/user-response.dto';
+import { FetchLikeResponseDto } from './dtos/fetch-likes.dto';
+import { LikesRepository } from './likes.repository';
+import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
 
 @Injectable()
 export class LikesService {
   constructor(
-    @InjectRepository(Likes)
-    private readonly likesRepository: Repository<Likes>,
+    private readonly likesRepository: LikesRepository,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -129,11 +128,10 @@ export class LikesService {
     }
   }
 
-  async fetchLikes({ id }: FetchLikesDto): Promise<Likes[]> {
-    return await this.likesRepository.find({
-      select: { user: USER_SELECT_OPTION, id: true },
-      relations: { user: true },
-      where: { posts: { id } },
-    });
+  async fetchLikes({
+    postsId,
+    kakaoId,
+  }): Promise<UserResponseDtoWithFollowing[]> {
+    return await this.likesRepository.getLikes({ postsId, kakaoId });
   }
 }
