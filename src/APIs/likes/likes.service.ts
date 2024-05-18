@@ -7,13 +7,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Likes } from './entities/like.entity';
 import { Posts } from '../posts/entities/posts.entity';
-import {
-  FetchLikeDto,
-  ToggleLikeResponseDto,
-} from './dtos/toggle-like-response.dto';
+import { ToggleLikeResponseDto } from './dtos/toggle-like-response.dto';
 import { FetchLikeResponseDto, FetchLikesDto } from './dtos/fetch-likes.dto';
 import { USER_SELECT_OPTION } from '../users/dtos/user-response.dto';
-import { FetchLikesResponseDto } from './dtos/fetch-likes-response.dto';
 
 @Injectable()
 export class LikesService {

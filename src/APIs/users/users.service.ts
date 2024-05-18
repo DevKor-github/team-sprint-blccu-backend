@@ -32,6 +32,7 @@ export class UsersService {
     return this.usersRepository.find();
   }
   // ===========================
+
   async adminCheck({ kakaoId }) {
     const user = await this.findUserByKakaoId({
       kakaoId,

@@ -26,7 +26,7 @@ import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { FollowsService } from './follows.service';
 
 @ApiTags('유저 API')
-@Controller('users/:userId')
+@Controller('users')
 export class FollowsController {
   constructor(private readonly followsService: FollowsService) {}
 
@@ -38,7 +38,7 @@ export class FollowsController {
   @ApiCreatedResponse({ description: '이웃 추가 성공', type: FollowUserDto })
   @ApiConflictResponse({ description: '이미 팔로우한 상태이다.' })
   @UseGuards(AuthGuardV2)
-  @Post('follow')
+  @Post(':userId/follow')
   @HttpCode(201)
   async followUser(
     @Req() req: Request,
@@ -59,7 +59,7 @@ export class FollowsController {
   @ApiNoContentResponse({ description: '언팔로우 성공' })
   @ApiNotFoundResponse({ description: '존재하지 않는 이웃 정보이다.' })
   @UseGuards(AuthGuardV2)
-  @Delete('follow')
+  @Delete(':userId/follow')
   @HttpCode(204)
   unfollowUser(@Req() req: Request, @Param('userId') to_user: number) {
     const kakaoId = parseInt(req.user.userId);
@@ -70,6 +70,39 @@ export class FollowsController {
   }
 
   @ApiOperation({
+    summary: '팔로워 유무 조회',
+    description: '나와 팔로우되었는지 유무 체크를 한다.',
+  })
+  @ApiCookieAuth()
+  @ApiOkResponse({ type: Boolean })
+  @UseGuards(AuthGuardV2)
+  @HttpCode(200)
+  @Get('me/follower/:userId')
+  async checkFollower(
+    @Req() req: Request,
+    @Param('userId') to_user: number,
+  ): Promise<boolean> {
+    const from_user = req.user.userId;
+    return await this.followsService.isExist({ from_user, to_user });
+  }
+
+  @ApiOperation({
+    summary: '팔로잉 유무 조회',
+    description: '나의 팔로잉인지 유무 체크를 한다.',
+  })
+  @ApiCookieAuth()
+  @ApiOkResponse({ type: Boolean })
+  @UseGuards(AuthGuardV2)
+  @HttpCode(200)
+  @Get('me/following/:userId')
+  async checkFollowing(
+    @Req() req: Request,
+    @Param('userId') from_user: number,
+  ): Promise<boolean> {
+    const to_user = req.user.userId;
+    return await this.followsService.isExist({ from_user, to_user });
+  }
+  @ApiOperation({
     summary: '팔로워 목록 조회',
     description: 'userId의 팔로워 목록을 조회한다.',
   })
@@ -78,7 +111,7 @@ export class FollowsController {
     type: [FromUserResponseDto],
   })
   @HttpCode(200)
-  @Get('followers')
+  @Get(':userId/followers')
   getFollowers(
     @Param('userId') kakaoId: number,
   ): Promise<FromUserResponseDto[]> {
@@ -94,7 +127,7 @@ export class FollowsController {
     type: [ToUserResponseDto],
   })
   @HttpCode(200)
-  @Get('following')
+  @Get(':userId/followings')
   getFollows(@Param('userId') kakaoId: number): Promise<ToUserResponseDto[]> {
     return this.followsService.getFollows({ kakaoId });
   }

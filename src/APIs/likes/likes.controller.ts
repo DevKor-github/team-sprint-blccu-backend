@@ -19,14 +19,13 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { FetchLikeDto } from './dtos/toggle-like-response.dto';
 import { Likes } from './entities/like.entity';
 import { FetchLikesResponseDto } from './dtos/fetch-likes-response.dto';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { FetchLikeResponseDto } from './dtos/fetch-likes.dto';
 
 @ApiTags('게시글 API')
-@Controller('posts/:postId/like')
+@Controller('posts/:postId')
 export class LikesController {
   constructor(private readonly likesService: LikesService) {}
 
@@ -42,7 +41,7 @@ export class LikesController {
   @ApiNotFoundResponse({ description: '게시글을 찾을 수 없는 경우' })
   @UseGuards(AuthGuardV2)
   @HttpCode(201)
-  @Post()
+  @Post('like')
   async like(
     @Param('postId') id: number,
     @Req() req: Request,
@@ -62,7 +61,7 @@ export class LikesController {
   @ApiNotFoundResponse({ description: '게시글을 찾을 수 없는 경우' })
   @UseGuards(AuthGuardV2)
   @HttpCode(204)
-  @Delete()
+  @Delete('like')
   async deleteLike(
     @Param('postId') id: number,
     @Req() req: Request,
@@ -79,7 +78,7 @@ export class LikesController {
   @ApiCookieAuth()
   @ApiOkResponse({ type: Boolean })
   @UseGuards(AuthGuardV2)
-  @Get()
+  @Get('like')
   async fetchIfLiked(
     @Param('postId') id: number,
     @Req() req: Request,
