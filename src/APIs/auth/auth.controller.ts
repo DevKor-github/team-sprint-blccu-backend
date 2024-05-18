@@ -53,13 +53,13 @@ export class AuthController {
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       domain: clientDomain,
-      sameSite: 'lax',
+      sameSite: 'none',
       secure: true,
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       domain: clientDomain,
-      sameSite: 'lax',
+      sameSite: 'none',
       secure: true,
     });
     res.cookie('isLoggedIn', true, { httpOnly: false, domain: clientDomain });
