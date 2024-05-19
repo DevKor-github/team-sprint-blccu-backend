@@ -28,12 +28,21 @@ export class User {
 
   @Column({ default: 0 })
   @ApiProperty({
-    description: '팔로우 수',
+    description: '팔로잉 수',
     type: Number,
     required: false,
     default: 0,
   })
-  follow_count: number;
+  following_count: number;
+
+  @Column({ default: 0 })
+  @ApiProperty({
+    description: '팔로워 수',
+    type: Number,
+    required: false,
+    default: 0,
+  })
+  follower_count: number;
 
   @Column({ unique: true })
   @ApiProperty({ description: '유저 이름', type: String })
