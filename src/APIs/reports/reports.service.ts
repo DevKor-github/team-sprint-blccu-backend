@@ -23,7 +23,6 @@ export class ReportsService {
   ) {}
 
   async create(dto: CreateReportDto): Promise<FetchReportResponse> {
-    await this.usersService.existCheck({ kakaoId: dto.targetUserKakaoId });
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();

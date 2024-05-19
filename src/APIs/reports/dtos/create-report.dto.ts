@@ -4,7 +4,6 @@ import { Report } from '../entities/report.entity';
 export class CreateReportDto extends OmitType(Report, [
   'id',
   'user',
-  'targetUser',
   'post',
   'postId',
   'comment',

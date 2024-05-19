@@ -38,15 +38,6 @@ export class Report {
   @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
   user: User;
 
-  @ApiProperty({ type: Number, description: '신고당한 유저 id' })
-  @Column()
-  @RelationId((report: Report) => report.targetUser)
-  targetUserKakaoId;
-
-  @JoinColumn()
-  @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
-  targetUser: User;
-
   @IsEnum(ReportType)
   @ApiProperty({ type: 'enum', enum: ReportType, description: '신고 유형' })
   @Column()
