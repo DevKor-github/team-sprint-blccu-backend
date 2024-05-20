@@ -61,8 +61,8 @@ export class AnnouncementsController {
     @Req() req: Request,
     @Body() body: PatchAnnouncementInput,
     @Param('id') id: number,
-  ) {
-    const kakaoId = req.body.userId;
+  ): Promise<AnnouncementResponseDto[]> {
+    const kakaoId = req.user.userId;
     return await this.announcementsService.patch({ ...body, id, kakaoId });
   }
 

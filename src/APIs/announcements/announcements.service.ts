@@ -31,13 +31,19 @@ export class AnnouncementsService {
     return await this.annoucementsRepository.find();
   }
 
-  async patch({ kakaoId, id, title, content }: IAnnouncementsSercicePatch) {
+  async patch({
+    kakaoId,
+    id,
+    title,
+    content,
+  }: IAnnouncementsSercicePatch): Promise<AnnouncementResponseDto[]> {
     await this.usersService.adminCheck({ kakaoId });
     const anmt = await this.annoucementsRepository.findOne({ where: { id } });
     if (!anmt) throw new NotFoundException('공지를 찾을 수 없습니다.');
     if (title) anmt.title = title;
     if (content) anmt.content = content;
-    return await this.annoucementsRepository.save(anmt);
+    await this.annoucementsRepository.save(anmt);
+    return await this.annoucementsRepository.find({ where: { id: anmt.id } });
   }
 
   async remove({
