@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { FeedbacksRepository } from './feedbacks.repository';
-import { IFeedbacksServiceCreate } from './interfaces/feedbacks.service.interface';
+import {
+  IFeedbacksServiceCreate,
+  IFeedbacksServiceKakaoId,
+} from './interfaces/feedbacks.service.interface';
 import { FetchFeedbackDto } from './dtos/fetch-feedback.dto';
 import { UsersService } from '../users/users.service';
 
@@ -21,7 +24,9 @@ export class FeedbacksService {
     });
   }
 
-  async fetchAll({ kakaoId }): Promise<FetchFeedbackDto[]> {
+  async fetchAll({
+    kakaoId,
+  }: IFeedbacksServiceKakaoId): Promise<FetchFeedbackDto[]> {
     await this.usersService.adminCheck({ kakaoId });
     return await this.feedbacksRepository.find();
   }
