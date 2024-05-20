@@ -7,7 +7,7 @@ import {
 import { CreateCommentDto } from './dtos/create-comment.dto';
 import { UsersService } from '../users/users.service';
 import { CommentsRepository } from './comments.repository';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { Posts } from '../posts/entities/posts.entity';
 import {
   ChildrenComment,
@@ -15,6 +15,14 @@ import {
   FetchCommentsDto,
 } from './dtos/fetch-comments.dto';
 import { USER_PRIMARY_SELECT_OPTION } from '../users/dtos/user-response.dto';
+import {
+  ICommentsServiceDelete,
+  ICommentsServiceFetch,
+  ICommentsServiceId,
+  ICommentsServicePatch,
+  ICommentsServicePostsIdValidCheck,
+} from './interfaces/comments.service.interface';
+import { Comment } from './entities/comment.entity';
 
 @Injectable()
 export class CommentsService {
@@ -24,7 +32,10 @@ export class CommentsService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async postsIdValidCheck({ parentId, postsId }) {
+  async postsIdValidCheck({
+    parentId,
+    postsId,
+  }: ICommentsServicePostsIdValidCheck): Promise<void> {
     const parent = await this.existCheck({ id: parentId });
     if (parent.postsId != postsId)
       throw new BadRequestException(
@@ -33,7 +44,8 @@ export class CommentsService {
     if (parent.parentId)
       throw new BadRequestException('부모 댓글이 루트 댓글이 아닙니다.');
   }
-  async existCheck({ id }) {
+
+  async existCheck({ id }: ICommentsServiceId): Promise<Comment> {
     const comment = await this.commentsRepository.findOne({ where: { id } });
     if (!comment) {
       throw new NotFoundException(
@@ -42,6 +54,7 @@ export class CommentsService {
     }
     return comment;
   }
+
   async insert(createCommentDto: CreateCommentDto): Promise<ChildrenComment> {
     if (createCommentDto.parentId)
       await this.postsIdValidCheck({
@@ -52,7 +65,7 @@ export class CommentsService {
       comment_count: () => 'comment_count +1',
     });
 
-    const commentData = await this.commentsRepository.upsertComment({
+    const commentData = await this.commentsRepository.insertComment({
       createCommentDto,
     });
     const id = commentData.identifiers[0];
@@ -70,7 +83,7 @@ export class CommentsService {
     postsId,
     id,
     content,
-  }): Promise<FetchCommentDto> {
+  }: ICommentsServicePatch): Promise<FetchCommentDto> {
     const commentData = await this.existCheck({ id });
     if (!commentData) throw new NotFoundException('댓글을 찾을 수 없습니다.');
     if (commentData.postsId != postsId)
@@ -81,25 +94,31 @@ export class CommentsService {
     return await this.commentsRepository.save(commentData);
   }
 
-  async fetchComments({ postsId }): Promise<FetchCommentsDto[]> {
+  async fetchComments({
+    postsId,
+  }: ICommentsServiceFetch): Promise<FetchCommentsDto[]> {
     return await this.commentsRepository.fetchComments({ postsId });
   }
 
-  async delete({ id, userKakaoId, postsId }): Promise<void> {
-    try {
+  async delete({
+    id,
+    userKakaoId,
+    postsId,
+  }: ICommentsServiceDelete): Promise<void> {
+    await this.dataSource.transaction(async (manager: EntityManager) => {
       const data = await this.existCheck({ id });
-      if (!(data.postsId == postsId))
+      if (data.postsId !== postsId) {
         throw new NotFoundException('게시글을 찾을 수 없습니다.');
-      //transaction 거는 것 고려해볼 것
-      const deletedComment = await this.commentsRepository.softRemove({
+      }
+
+      await manager.softRemove(Comment, {
         user: { kakaoId: userKakaoId },
         id,
       });
-      await this.dataSource.manager.update(Posts, data.postsId, {
-        comment_count: () => 'comment_count -1',
+
+      await manager.update(Posts, data.postsId, {
+        comment_count: () => 'comment_count - 1',
       });
-    } catch (e) {
-      throw e;
-    }
+    });
   }
 }

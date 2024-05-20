@@ -65,7 +65,7 @@ export class Comment {
   @ApiProperty({ type: Number, description: '루트 댓글 아이디' })
   @Column({ nullable: true })
   @RelationId((comment: Comment) => comment.parent)
-  parentId: Comment;
+  parentId: number;
 
   @ApiProperty({ type: [Comment], description: '자식 댓글 정보' })
   @OneToMany(() => Comment, (comment) => comment.parent)

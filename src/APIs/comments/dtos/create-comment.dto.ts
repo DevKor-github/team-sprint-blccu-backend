@@ -20,7 +20,7 @@ export class CreateCommentDto {
   })
   parentId?: number;
 
-  userKakaoId: string;
+  userKakaoId: number;
 }
 
 export class CreateCommentInput extends OmitType(CreateCommentDto, [

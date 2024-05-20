@@ -1,14 +1,20 @@
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, InsertResult, Repository } from 'typeorm';
 import { Comment } from './entities/comment.entity';
 import { Injectable } from '@nestjs/common';
 import { FetchCommentsDto } from './dtos/fetch-comments.dto';
+import {
+  ICommentsRepositoryInsertComment,
+  ICommentsRepositoryfetchComments,
+} from './interfaces/comments.repository.interface';
 
 @Injectable()
 export class CommentsRepository extends Repository<Comment> {
   constructor(private dataSource: DataSource) {
     super(Comment, dataSource.createEntityManager());
   }
-  async upsertComment({ createCommentDto }) {
+  async insertComment({
+    createCommentDto,
+  }: ICommentsRepositoryInsertComment): Promise<InsertResult> {
     console.log(createCommentDto);
     return await this.createQueryBuilder('c')
       .insert()
@@ -17,7 +23,9 @@ export class CommentsRepository extends Repository<Comment> {
       .execute();
   }
 
-  async fetchComments({ postsId }): Promise<FetchCommentsDto[]> {
+  async fetchComments({
+    postsId,
+  }: ICommentsRepositoryfetchComments): Promise<FetchCommentsDto[]> {
     return await this.createQueryBuilder('c')
       .withDeleted()
       .innerJoin('c.user', 'u')
