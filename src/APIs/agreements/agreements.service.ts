@@ -6,6 +6,9 @@ import {
 import { AgreementsRepository } from './agreements.repository';
 import {
   IAgreementsServiceCreate,
+  IAgreementsServiceFetchContract,
+  IAgreementsServiceId,
+  IAgreementsServiceKakaoId,
   IAgreementsServicePatch,
 } from './interfaces/agreements.service.interface';
 import { FetchAgreementDto } from './dtos/fetch-agreement.dto';
@@ -20,7 +23,7 @@ export class AgreementsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async adminCheck({ kakaoId }) {
+  async adminCheck({ kakaoId }: IAgreementsServiceKakaoId): Promise<void> {
     await this.usersService.adminCheck({ kakaoId });
   }
 
@@ -36,7 +39,7 @@ export class AgreementsService {
     });
   }
 
-  async fetchContract({ agreementType }) {
+  async fetchContract({ agreementType }: IAgreementsServiceFetchContract) {
     const fileName = agreementType + '.txt';
     const rootPath = process.cwd();
     const filePath = path.join(rootPath, 'src', 'assets', 'terms', fileName);
@@ -44,12 +47,16 @@ export class AgreementsService {
     return data;
   }
 
-  async fetchOne({ id }): Promise<FetchAgreementDto> {
+  async fetchOne({ id }: IAgreementsServiceId): Promise<FetchAgreementDto> {
     return await this.agreementsRepository.findOne({ where: { id } });
   }
 
-  async fetchAll({ kakaoId }): Promise<FetchAgreementDto[]> {
-    return await this.agreementsRepository.find({ where: { user: kakaoId } });
+  async fetchAll({
+    kakaoId,
+  }: IAgreementsServiceKakaoId): Promise<FetchAgreementDto[]> {
+    return await this.agreementsRepository.find({
+      where: { user: { kakaoId } },
+    });
   }
 
   async patch({

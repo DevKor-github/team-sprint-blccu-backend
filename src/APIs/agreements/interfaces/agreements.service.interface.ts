@@ -1,3 +1,4 @@
+import { AgreementType } from 'src/common/enums/agreement-type.enum';
 import { Agreement } from '../entities/agreement.entity';
 
 export interface IAgreementsServiceCreate
@@ -15,3 +16,15 @@ export interface IAgreementsServiceCreate
 
 export interface IAgreementsServicePatch
   extends Pick<Agreement, 'id' | 'isAgreed' | 'userKakaoId'> {}
+
+export interface IAgreementsServiceKakaoId {
+  kakaoId: number;
+}
+
+export interface IAgreementsServiceId {
+  id: number;
+}
+
+export interface IAgreementsServiceFetchContract {
+  agreementType: AgreementType;
+}
