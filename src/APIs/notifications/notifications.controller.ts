@@ -91,14 +91,14 @@ export class NotificationsController {
     return await this.notificationsService.toggle({ id, targetUserKakaoId });
   }
 
-  @ApiOperation({
-    summary: 'userId에게 알림 생성',
-    description:
-      'userId에게 알림을 보낸다. sse로 연결되어 있을 경우 실시간으로 fetch된다.',
-  })
-  @Post('send/:userId')
-  async sendNoti(@Req() req: Request, @Body() body: EmitNotiInput) {
-    const userKakaoId = req.user.userId;
-    return await this.notificationsService.emitAlarm({ userKakaoId, ...body });
-  }
+  // @ApiOperation({
+  //   summary: 'userId에게 알림 생성',
+  //   description:
+  //     'userId에게 알림을 보낸다. sse로 연결되어 있을 경우 실시간으로 fetch된다.',
+  // })
+  // @Post('send/:userId')
+  // async sendNoti(@Req() req: Request, @Body() body: EmitNotiInput) {
+  //   const userKakaoId = req.user.userId;
+  //   return await this.notificationsService.emitAlarm({ userKakaoId, ...body });
+  // }
 }
