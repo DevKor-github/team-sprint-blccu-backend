@@ -14,5 +14,5 @@ export class FetchLikeResponseDto extends PickType(Likes, ['id', 'postsId']) {
   posts: Omit<Posts, 'user' | 'postCategory' | 'postBackground'>;
 
   @ApiProperty({ type: Number })
-  user: number;
+  userKakaoId: number;
 }

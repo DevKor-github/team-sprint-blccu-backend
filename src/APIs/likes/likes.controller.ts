@@ -97,10 +97,10 @@ export class LikesController {
   @HttpCode(200)
   @Get('like-users')
   async fetchLikes(
-    @Param('postId') postsId: number,
+    @Param('postId') id: number,
     @Req() req: Request,
   ): Promise<UserResponseDtoWithFollowing[]> {
     const kakaoId = req.user.userId;
-    return await this.likesService.fetchLikes({ postsId, kakaoId });
+    return await this.likesService.fetchLikes({ id, kakaoId });
   }
 }

@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Posts } from 'src/APIs/posts/entities/posts.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
 import {
+  Column,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -21,6 +22,8 @@ export class Likes {
   @ManyToOne(() => User, { onUpdate: 'NO ACTION', onDelete: 'CASCADE' })
   user: User;
 
+  @ApiProperty({ description: '유저 아이디', type: Number })
+  @Column()
   @RelationId((like: Likes) => like.user)
   userKakaoId: number;
 
@@ -40,6 +43,7 @@ export class Likes {
     type: Number,
     description: '게시글 아이디',
   })
+  @Column()
   @RelationId((like: Likes) => like.posts)
   postsId: number;
 }
