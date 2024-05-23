@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Get,
   HttpCode,
@@ -19,7 +18,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { EmitNotiInput } from './dtos/emit-noti.dto';
 
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { FetchNotiInput, FetchNotiResponse } from './dtos/fetch-noti.dto';
@@ -45,12 +43,11 @@ export class NotificationsController {
   @ApiProduces('text/event-stream')
   @UseGuards(AuthGuardV2)
   @Sse('subscribe')
-  sendClientAlarm(
-    @Req() req: Request,
-    // @Param('kakaoId') userKakaoId,
-  ) {
-    const userKakaoId = req.user.userId;
-    const sseStream = this.notificationsService.connectUser(userKakaoId);
+  connectUser(@Req() req: Request) {
+    const targetUserKakaoId = req.user.userId;
+    const sseStream = this.notificationsService.connectUser({
+      targetUserKakaoId,
+    });
     return sseStream;
   }
 
@@ -83,22 +80,11 @@ export class NotificationsController {
   @ApiOkResponse({ type: FetchNotiResponse })
   @HttpCode(200)
   @Post(':id/read')
-  async toggleNoti(
+  async readNoti(
     @Req() req: Request,
     @Param('id') id: number,
   ): Promise<FetchNotiResponse> {
     const targetUserKakaoId = req.user.userId;
-    return await this.notificationsService.toggle({ id, targetUserKakaoId });
+    return await this.notificationsService.read({ id, targetUserKakaoId });
   }
-
-  // @ApiOperation({
-  //   summary: 'userId에게 알림 생성',
-  //   description:
-  //     'userId에게 알림을 보낸다. sse로 연결되어 있을 경우 실시간으로 fetch된다.',
-  // })
-  // @Post('send/:userId')
-  // async sendNoti(@Req() req: Request, @Body() body: EmitNotiInput) {
-  //   const userKakaoId = req.user.userId;
-  //   return await this.notificationsService.emitAlarm({ userKakaoId, ...body });
-  // }
 }

@@ -1,10 +1,14 @@
 import { BadRequestException, Injectable, MessageEvent } from '@nestjs/common';
 import { NotificationsRepository } from './notifications.repository';
-import { Subject, filter, map } from 'rxjs';
+import { Observable, Subject, filter, map } from 'rxjs';
 import { Notification } from './entities/notification.entity';
 import { EmitNotiDto } from './dtos/emit-noti.dto';
 import { FetchNotiDto, FetchNotiResponse } from './dtos/fetch-noti.dto';
 import { DateOption } from 'src/common/enums/date-option';
+import {
+  INotificationsServiceConnectUser,
+  INotificationsServiceRead,
+} from './interfaces/notifications.service.interface';
 
 @Injectable()
 export class NotificationsService {
@@ -14,7 +18,9 @@ export class NotificationsService {
   private notis$: Subject<Notification> = new Subject();
   private observer = this.notis$.asObservable();
 
-  async connectUser(targetUserKakaoId) {
+  connectUser({
+    targetUserKakaoId,
+  }: INotificationsServiceConnectUser): Observable<MessageEvent> {
     console.log('connected: ' + targetUserKakaoId);
     const pipe = this.observer.pipe(
       filter((noti) => noti.targetUserKakaoId == targetUserKakaoId),
@@ -29,7 +35,7 @@ export class NotificationsService {
     return pipe;
   }
 
-  async emitAlarm(emitNotiDto: EmitNotiDto) {
+  async emitAlarm(emitNotiDto: EmitNotiDto): Promise<FetchNotiResponse> {
     try {
       const executeResult =
         await this.notificationsRepository.createOne(emitNotiDto);
@@ -45,7 +51,11 @@ export class NotificationsService {
     }
   }
 
-  async fetch({ is_checked, kakaoId, date_created }: FetchNotiDto) {
+  async fetch({
+    is_checked,
+    kakaoId,
+    date_created,
+  }: FetchNotiDto): Promise<FetchNotiResponse[]> {
     let currentDate = new Date();
 
     switch (date_created) {
@@ -68,11 +78,14 @@ export class NotificationsService {
     });
   }
 
-  async toggle({ id, targetUserKakaoId }): Promise<FetchNotiResponse> {
+  async read({
+    id,
+    targetUserKakaoId,
+  }: INotificationsServiceRead): Promise<FetchNotiResponse> {
     const updateResult = await this.notificationsRepository.update(
       { id, targetUserKakaoId },
       {
-        is_checked: () => '!is_checked',
+        is_checked: true,
       },
     );
     if (updateResult.affected < 1) {
