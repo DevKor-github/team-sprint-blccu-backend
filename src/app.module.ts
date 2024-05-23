@@ -22,6 +22,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { AgreementsModule } from './APIs/agreements/agreements.module';
 import { FeedbacksModule } from './APIs/feedbacks/feedbacks.module';
 import { parseBoolean } from './common/validators/isBoolean';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-store';
 
 @Module({
   imports: [
@@ -41,6 +43,12 @@ import { parseBoolean } from './common/validators/isBoolean';
     NotificationsModule,
     PostBackgroundsModule,
     ReportsModule,
+    CacheModule.register({
+      store: redisStore,
+      host: 'localhost',
+      port: 6379,
+      ttl: 600,
+    }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
