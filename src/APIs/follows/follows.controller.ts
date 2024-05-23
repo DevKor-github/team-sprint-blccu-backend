@@ -60,7 +60,10 @@ export class FollowsController {
   @UseGuards(AuthGuardV2)
   @Delete(':userId/follow')
   @HttpCode(204)
-  unfollowUser(@Req() req: Request, @Param('userId') to_user: number) {
+  unfollowUser(
+    @Req() req: Request,
+    @Param('userId') to_user: number,
+  ): Promise<void> {
     const kakaoId = parseInt(req.user.userId);
     return this.followsService.unfollowUser({
       from_user: kakaoId,

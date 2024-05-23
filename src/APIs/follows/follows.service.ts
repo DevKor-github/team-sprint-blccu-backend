@@ -104,7 +104,10 @@ export class FollowsService {
     }
   }
 
-  async unfollowUser({ from_user, to_user }: IFollowsServiceUsers) {
+  async unfollowUser({
+    from_user,
+    to_user,
+  }: IFollowsServiceUsers): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
