@@ -1,11 +1,11 @@
-import { OmitType } from '@nestjs/swagger';
+import { OmitType, PickType } from '@nestjs/swagger';
 import { Notification } from '../entities/notification.entity';
-export class EmitNotiDto extends OmitType(Notification, [
-  'user',
-  'id',
-  'targetUser',
-  'date_created',
-  'date_deleted',
+export class EmitNotiDto extends PickType(Notification, [
+  'userKakaoId',
+  'targetUserKakaoId',
+  'type',
+  'url',
+  'message',
 ]) {}
 
 export class EmitNotiInput extends OmitType(EmitNotiDto, ['userKakaoId']) {}

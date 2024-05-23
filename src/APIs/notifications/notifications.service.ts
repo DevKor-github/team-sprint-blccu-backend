@@ -9,14 +9,29 @@ import {
   INotificationsServiceConnectUser,
   INotificationsServiceRead,
 } from './interfaces/notifications.service.interface';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class NotificationsService {
   constructor(
+    @InjectQueue('audio') private redisQueue: Queue,
     private readonly notificationsRepository: NotificationsRepository,
   ) {}
   private notis$: Subject<Notification> = new Subject();
   private observer = this.notis$.asObservable();
+  private readonly queueName = 'audio';
+
+  onModuleInit() {
+    this.redisQueue.process(this.queueName, async (job) => {
+      const data = job.data;
+      this.notis$.next(data);
+    });
+  }
+
+  onModuleDestroy() {
+    this.redisQueue.close();
+  }
 
   connectUser({
     targetUserKakaoId,
@@ -30,21 +45,30 @@ export class NotificationsService {
         } as MessageEvent;
       }),
     );
-    // const data = { id: 1, targetUserKakaoId: 3388766789, };
-    // this.users$.next(data);
     return pipe;
   }
 
-  async emitAlarm(emitNotiDto: EmitNotiDto): Promise<FetchNotiResponse> {
+  async emitAlarm({
+    userKakaoId,
+    targetUserKakaoId,
+    url,
+    type,
+    message,
+  }: EmitNotiDto): Promise<FetchNotiResponse> {
     try {
-      const executeResult =
-        await this.notificationsRepository.createOne(emitNotiDto);
+      const executeResult = await this.notificationsRepository.createOne({
+        userKakaoId,
+        targetUserKakaoId,
+        url,
+        type,
+        message,
+      });
       const id = executeResult.identifiers[0].id;
       const data = await this.notificationsRepository.findOne({
         where: { id },
       });
-      // next를 통해 이벤트를 생성
-      this.notis$.next(data);
+      // Redis 큐에 이벤트를 전송
+      await this.redisQueue.add(this.queueName, data);
       return data;
     } catch (e) {
       throw new BadRequestException('대상을 찾을 수 없습니다.');

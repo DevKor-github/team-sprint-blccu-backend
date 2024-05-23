@@ -25,6 +25,7 @@ import { parseBoolean } from './common/validators/isBoolean';
 import { RedisClientOptions } from 'redis';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -44,11 +45,15 @@ import { redisStore } from 'cache-manager-redis-yet';
     NotificationsModule,
     PostBackgroundsModule,
     ReportsModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     CacheModule.registerAsync<RedisClientOptions>({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         store: await redisStore({
+          database: parseInt(configService.get<string>('REDIS_CACHE_DB')),
           ttl: parseInt(configService.get<string>('REDIS_TTL')),
           socket: {
             host: configService.get<string>('REDIS_HOST'),
@@ -58,28 +63,43 @@ import { redisStore } from 'cache-manager-redis-yet';
       }),
       isGlobal: true,
     }),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        redis: {
+          host: configService.get<string>('REDIS_HOST'),
+          port: parseInt(configService.get<string>('REDIS_PORT')),
+          db: parseInt(configService.get<string>('REDIS_QUEUE_DB')),
+        },
+        isGlobal: true,
+      }),
+    }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
+      inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: { expiresIn: configService.get<string>('JWT_EXPIRES_IN') },
       }),
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
       inject: [ConfigService],
-    }),
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    TypeOrmModule.forRoot({
-      bigNumberStrings: false,
-      type: process.env.DATABASE_TYPE as 'mysql',
-      host: process.env.DATABASE_HOST,
-      port: Number(process.env.DATABASE_PORT),
-      username: process.env.DATABASE_USERNAME,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_DATABASE,
-      entities: [__dirname + '/APIs/**/*.entity.*'],
-      synchronize: parseBoolean(process.env.DATABASE_SYNCHRO),
-      logging: true,
+      useFactory: async (configService: ConfigService) => ({
+        bigNumberStrings: false,
+        type: configService.get<string>('DATABASE_TYPE') as 'mysql',
+        host: configService.get<string>('DATABASE_HOST'),
+        port: parseInt(configService.get<string>('DATABASE_PORT')),
+        username: configService.get<string>('DATABASE_USERNAME'),
+        password: configService.get<string>('DATABASE_PASSWORD'),
+        database: configService.get<string>('DATABASE_DATABASE'),
+        entities: [__dirname + '/APIs/**/*.entity.*'],
+        synchronize: parseBoolean(
+          configService.get<string>('DATABASE_SYNCHRO'),
+        ),
+        logging: true,
+      }),
     }),
   ],
   controllers: [AppController],
