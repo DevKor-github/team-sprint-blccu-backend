@@ -5,6 +5,10 @@ import { OpenScope } from 'src/common/enums/open-scope.enum';
 import { FollowsRepository } from './follows.repository';
 import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
 import { User } from '../users/entities/user.entity';
+import {
+  IFollowsServiceGetList,
+  IFollowsServiceUsers,
+} from './interfaces/follows.service.interface';
 
 @Injectable()
 export class FollowsService {
@@ -13,19 +17,25 @@ export class FollowsService {
     private readonly dataSource: DataSource,
   ) {}
 
-  isSame({ from_user, to_user }): boolean {
+  isSame({ from_user, to_user }: IFollowsServiceUsers): boolean {
     if (from_user == to_user) {
       return true;
     }
     return false;
   }
 
-  async getScope({ from_user, to_user }) {
+  async getScope({
+    from_user,
+    to_user,
+  }: IFollowsServiceUsers): Promise<OpenScope[]> {
     if (from_user === to_user)
       return [OpenScope.PUBLIC, OpenScope.PROTECTED, OpenScope.PRIVATE];
     if (from_user !== null && to_user !== null) {
       const follow = await this.followsRepository.findOne({
-        where: { from_user, to_user },
+        where: {
+          from_user: { kakaoId: from_user },
+          to_user: { kakaoId: to_user },
+        },
       });
       if (follow) {
         return [OpenScope.PUBLIC, OpenScope.PROTECTED];
@@ -35,8 +45,10 @@ export class FollowsService {
     return [OpenScope.PUBLIC];
   }
 
-  async isExist({ from_user, to_user }): Promise<boolean> {
-    console.log(from_user, to_user);
+  async isExist({
+    from_user,
+    to_user,
+  }: IFollowsServiceUsers): Promise<boolean> {
     const follow = await this.followsRepository.findOne({
       where: {
         from_user: { kakaoId: from_user },
@@ -50,7 +62,10 @@ export class FollowsService {
     return true;
   }
 
-  async followUser({ from_user, to_user }): Promise<FollowUserDto> {
+  async followUser({
+    from_user,
+    to_user,
+  }: IFollowsServiceUsers): Promise<FollowUserDto> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -70,8 +85,8 @@ export class FollowsService {
         throw new ConflictException('you cannot follow yourself!');
       }
       const follow = await this.followsRepository.save({
-        from_user,
-        to_user,
+        from_user: { kakaoId: from_user },
+        to_user: { kakaoId: to_user },
       });
       await queryRunner.manager.update(User, fromUserData.kakaoId, {
         following_count: () => 'following_count +1',
@@ -80,7 +95,7 @@ export class FollowsService {
         follower_count: () => 'follower_count +1',
       });
       await queryRunner.commitTransaction();
-      return follow;
+      return await this.followsRepository.findOne({ where: { id: follow.id } });
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw e;
@@ -89,7 +104,7 @@ export class FollowsService {
     }
   }
 
-  async unfollowUser({ from_user, to_user }) {
+  async unfollowUser({ from_user, to_user }: IFollowsServiceUsers) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -117,8 +132,12 @@ export class FollowsService {
       await queryRunner.manager.update(User, toUserData.kakaoId, {
         follower_count: () => 'follower_count -1',
       });
+      await this.followsRepository.delete({
+        from_user: { kakaoId: from_user },
+        to_user: { kakaoId: to_user },
+      });
       await queryRunner.commitTransaction();
-      return this.followsRepository.delete({ from_user, to_user });
+      return;
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw e;
@@ -130,7 +149,7 @@ export class FollowsService {
   async getFollows({
     kakaoId,
     loggedUser,
-  }): Promise<UserResponseDtoWithFollowing[]> {
+  }: IFollowsServiceGetList): Promise<UserResponseDtoWithFollowing[]> {
     const follows = await this.followsRepository.getFollowings({
       kakaoId,
       loggedUser,
@@ -141,7 +160,7 @@ export class FollowsService {
   async getFollowers({
     kakaoId,
     loggedUser,
-  }): Promise<UserResponseDtoWithFollowing[]> {
+  }: IFollowsServiceGetList): Promise<UserResponseDtoWithFollowing[]> {
     const follows = await this.followsRepository.getFollowers({
       kakaoId,
       loggedUser,

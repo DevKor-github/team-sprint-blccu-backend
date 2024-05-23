@@ -30,7 +30,7 @@ export class FollowsController {
   constructor(private readonly followsService: FollowsService) {}
 
   @ApiOperation({
-    summary: '이웃 추가하기',
+    summary: '팔로우 추가하기',
     description: '로그인된 유저가 userId를 팔로우한다.',
   })
   @ApiCookieAuth()
@@ -51,7 +51,7 @@ export class FollowsController {
   }
 
   @ApiOperation({
-    summary: '이웃 삭제하기',
+    summary: '팔로우 삭제하기',
     description: '로그인된 유저가 userId를 언팔로우 한다.',
   })
   @ApiCookieAuth()

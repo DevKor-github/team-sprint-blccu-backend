@@ -1,12 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { OmitType } from '@nestjs/swagger';
+import { Follow } from '../entities/follow.entity';
 
-export class FollowUserDto {
-  @ApiProperty({ type: String, description: 'PK: uuid' })
-  id: string;
-
-  @ApiProperty({ type: Number, description: 'FK: kakaoId' })
-  to_user: string;
-
-  @ApiProperty({ type: Number, description: 'FK: kakaoId' })
-  from_user: string;
-}
+export class FollowUserDto extends OmitType(Follow, ['from_user', 'to_user']) {}
