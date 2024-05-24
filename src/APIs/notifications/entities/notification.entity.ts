@@ -50,10 +50,6 @@ export class Notification {
   @Column()
   url: string;
 
-  @ApiProperty({ description: '알림 메시지' })
-  @Column()
-  message: string;
-
   @ApiProperty({ description: '생성된 날짜', type: Date })
   @CreateDateColumn()
   date_created: Date;

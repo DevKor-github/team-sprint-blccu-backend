@@ -9,11 +9,13 @@ import {
   IFollowsServiceGetList,
   IFollowsServiceUsers,
 } from './interfaces/follows.service.interface';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class FollowsService {
   constructor(
     private readonly followsRepository: FollowsRepository,
+    private readonly notificationsService: NotificationsService,
     private readonly dataSource: DataSource,
   ) {}
 

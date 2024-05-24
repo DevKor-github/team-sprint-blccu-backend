@@ -53,7 +53,6 @@ export class NotificationsService {
     targetUserKakaoId,
     url,
     type,
-    message,
   }: EmitNotiDto): Promise<FetchNotiResponse> {
     try {
       const executeResult = await this.notificationsRepository.createOne({
@@ -61,7 +60,6 @@ export class NotificationsService {
         targetUserKakaoId,
         url,
         type,
-        message,
       });
       const id = executeResult.identifiers[0].id;
       const data = await this.notificationsRepository.findOne({
