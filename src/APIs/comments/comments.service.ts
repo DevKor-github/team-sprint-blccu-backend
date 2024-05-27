@@ -69,7 +69,6 @@ export class CommentsService {
       createCommentDto,
     });
     const { id } = commentData.identifiers[0];
-    console.log(id);
     const { posts, parent, ...result } =
       await this.commentsRepository.fetchCommentWithNotiInfo({ id });
 

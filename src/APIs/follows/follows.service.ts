@@ -10,6 +10,7 @@ import {
   IFollowsServiceUsers,
 } from './interfaces/follows.service.interface';
 import { NotificationsService } from '../notifications/notifications.service';
+import { NotType } from 'src/common/enums/not-type.enum';
 
 @Injectable()
 export class FollowsService {
@@ -103,6 +104,11 @@ export class FollowsService {
       });
       await queryRunner.manager.update(User, toUserData.kakaoId, {
         follower_count: () => 'follower_count +1',
+      });
+      await this.notificationsService.emitAlarm({
+        userKakaoId: from_user,
+        targetUserKakaoId: to_user,
+        type: NotType.FOLLOW,
       });
       await queryRunner.commitTransaction();
       return await this.followsRepository.findOne({ where: { id: follow.id } });
