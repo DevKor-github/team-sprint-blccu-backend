@@ -33,15 +33,23 @@ export class FollowsService {
     if (from_user === to_user)
       return [OpenScope.PUBLIC, OpenScope.PROTECTED, OpenScope.PRIVATE];
     if (from_user !== null && to_user !== null) {
-      const follow = await this.followsRepository.findOne({
+      const following = await this.followsRepository.findOne({
         where: {
           from_user: { kakaoId: from_user },
           to_user: { kakaoId: to_user },
         },
       });
-      if (follow) {
+      const follower = await this.followsRepository.findOne({
+        where: {
+          from_user: { kakaoId: to_user },
+          to_user: { kakaoId: from_user },
+        },
+      });
+      if (following && follower) {
         return [OpenScope.PUBLIC, OpenScope.PROTECTED];
       }
+      if (following) return [OpenScope.PUBLIC];
+      if (follower) return [OpenScope.PUBLIC];
     }
 
     return [OpenScope.PUBLIC];
