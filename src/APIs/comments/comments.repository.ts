@@ -3,6 +3,7 @@ import { Comment } from './entities/comment.entity';
 import { Injectable } from '@nestjs/common';
 import { FetchCommentsDto } from './dtos/fetch-comments.dto';
 import {
+  ICommentsRepositoryId,
   ICommentsRepositoryInsertComment,
   ICommentsRepositoryfetchComments,
 } from './interfaces/comments.repository.interface';
@@ -22,7 +23,9 @@ export class CommentsRepository extends Repository<Comment> {
       .execute();
   }
 
-  async fetchCommentWithNotiInfo({ id }) {
+  async fetchCommentWithNotiInfo({
+    id,
+  }: ICommentsRepositoryId): Promise<Comment> {
     return await this.createQueryBuilder('c')
       .leftJoinAndSelect('c.user', 'user')
       .leftJoinAndSelect('c.posts', 'posts')

@@ -7,3 +7,7 @@ export interface ICommentsRepositoryInsertComment {
 export interface ICommentsRepositoryfetchComments {
   postsId: number;
 }
+
+export interface ICommentsRepositoryId {
+  id: number;
+}
