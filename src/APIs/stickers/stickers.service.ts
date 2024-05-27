@@ -7,7 +7,6 @@ import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { UsersService } from '../users/users.service';
-import { removeBackground } from '@imgly/background-removal-node';
 import { FindStickerDto } from './dtos/find-sticker.dto';
 import { UpdateStickerDto } from './dtos/update-sticker.dto';
 
@@ -93,21 +92,6 @@ export class StickersService {
     return await this.stickersRepository.find({
       where: { isDefault: true },
     });
-  }
-
-  async removeBg({ url }): Promise<ImageUploadResponseDto> {
-    const blobData = await removeBackground(url);
-    const arrayBuffer = await blobData.arrayBuffer();
-    const bufferData = Buffer.from(arrayBuffer);
-
-    const imageName = this.utilsService.getUUID();
-
-    const image_url = await this.awsService.imageUploadToS3Buffer(
-      imageName,
-      bufferData,
-      'png',
-    );
-    return { image_url };
   }
 
   async updateSticker({
