@@ -101,7 +101,7 @@ export class PostsRepository extends Repository<Posts> {
       ])
       .where(`p.userKakaoId = any(${subQuery})`)
       .andWhere('p.scope IN (:...scopes)', {
-        scopes: [OpenScope.PUBLIC, OpenScope.PROTECTED],
+        scopes: [OpenScope.PUBLIC],
       }) //sql injection 방지를 위해 만드시 enum 거칠 것
       .andWhere(`${PostsFilterOption[page.filter]} LIKE :search`, {
         search: `%${page.search}%`,
@@ -198,7 +198,7 @@ export class PostsRepository extends Repository<Posts> {
     queryBuilder
       .andWhere(`p.userKakaoId = any(${subQuery})`)
       .andWhere('p.scope IN (:...scopes)', {
-        scopes: [OpenScope.PUBLIC, OpenScope.PROTECTED],
+        scopes: [OpenScope.PUBLIC],
       }); //sql injection 방지를 위해 만드시 enum 거칠 것
 
     if (date_filter) {

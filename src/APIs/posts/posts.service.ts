@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -18,7 +19,6 @@ import { User } from '../users/entities/user.entity';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { StickerBlocksService } from '../stickerBlocks/stickerBlocks.service';
 import { PostsRepository } from './posts.repository';
-import { CommentsService } from '../comments/comments.service';
 import { PostResponseDto } from './dtos/post-response.dto';
 import {
   FetchPostForUpdateDto,
@@ -26,7 +26,10 @@ import {
 } from './dtos/fetch-post-for-update.dto';
 import { CustomCursorPageMetaDto } from 'src/utils/cursor-pages/dtos/cursor-page-meta.dto';
 import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
-import { PostsOrderOption } from 'src/common/enums/posts-order-option';
+import {
+  PostsOrderOption,
+  PostsOrderOptionWrap,
+} from 'src/common/enums/posts-order-option';
 import { FollowsService } from '../follows/follows.service';
 import { DateOption } from 'src/common/enums/date-option';
 import { Follow } from '../follows/entities/follow.entity';
@@ -40,6 +43,9 @@ import {
   IPostsServicePostId,
   IPostsServicePostUserIdPair,
 } from './interfaces/posts.service.interface';
+import { SortOption } from 'src/common/enums/sort-option';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class PostsService {
@@ -48,9 +54,9 @@ export class PostsService {
     private readonly utilsService: UtilsService,
     private readonly dataSource: DataSource,
     private readonly stickerBlocksService: StickerBlocksService,
-    private readonly commentsService: CommentsService,
     private readonly postsRepository: PostsRepository,
     private readonly followsService: FollowsService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
   async saveImage(file: Express.Multer.File) {
     return await this.imageUpload(file);
@@ -246,6 +252,23 @@ export class PostsService {
   }: IPostsServiceFetchPostsCursor): Promise<
     CustomCursorPageDto<PostResponseDto>
   > {
+    const useCache =
+      cursorOption.order === PostsOrderOptionWrap.VIEW &&
+      cursorOption.take === 10 &&
+      cursorOption.date_created === DateOption.WEEK &&
+      cursorOption.sort === SortOption.DESC;
+    const cacheKey = `fetchPostsCursor_${JSON.stringify(cursorOption)}`;
+
+    if (useCache) {
+      const cachedPosts =
+        await this.cacheManager.get<CustomCursorPageDto<PostResponseDto>>(
+          cacheKey,
+        );
+      if (cachedPosts) {
+        return cachedPosts;
+      }
+    }
+
     let date_filter: Date;
     if (cursorOption.date_created)
       date_filter = this.getDate(cursorOption.date_created);
@@ -253,7 +276,10 @@ export class PostsService {
       cursorOption,
       date_filter,
     });
-    return await this.createCursorResponse({ posts, cursorOption });
+    const result = await this.createCursorResponse({ posts, cursorOption });
+    if (useCache) {
+      await this.cacheManager.set(cacheKey, result, 1800);
+    }
   }
 
   async fetchFriendsPostsCursor({
