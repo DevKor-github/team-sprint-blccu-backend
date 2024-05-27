@@ -24,8 +24,11 @@ import { FeedbacksModule } from './APIs/feedbacks/feedbacks.module';
 import { parseBoolean } from './common/validators/isBoolean';
 import { RedisClientOptions } from 'redis';
 import { CacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-redis-yet';
+// import * as redisStore from 'cache-manager-redis-store';
 import { BullModule } from '@nestjs/bull';
+import { redisStore } from 'cache-manager-redis-yet';
+import { TerminusModule } from '@nestjs/terminus';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -45,35 +48,10 @@ import { BullModule } from '@nestjs/bull';
     NotificationsModule,
     PostBackgroundsModule,
     ReportsModule,
+    TerminusModule,
+    HttpModule,
     ConfigModule.forRoot({
       isGlobal: true,
-    }),
-    CacheModule.registerAsync<RedisClientOptions>({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        store: await redisStore({
-          database: parseInt(configService.get<string>('REDIS_CACHE_DB')),
-          ttl: parseInt(configService.get<string>('REDIS_TTL')),
-          socket: {
-            host: configService.get<string>('REDIS_HOST'),
-            port: parseInt(configService.get<string>('REDIS_PORT')),
-          },
-        }),
-      }),
-      isGlobal: true,
-    }),
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        redis: {
-          host: configService.get<string>('REDIS_HOST'),
-          port: parseInt(configService.get<string>('REDIS_PORT')),
-          db: parseInt(configService.get<string>('REDIS_QUEUE_DB')),
-        },
-        isGlobal: true,
-      }),
     }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -99,6 +77,35 @@ import { BullModule } from '@nestjs/bull';
           configService.get<string>('DATABASE_SYNCHRO'),
         ),
         logging: true,
+      }),
+    }),
+
+    CacheModule.registerAsync<RedisClientOptions>({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        store: await redisStore({
+          database: parseInt(configService.get<string>('REDIS_CACHE_DB')),
+          ttl: parseInt(configService.get<string>('REDIS_TTL')),
+          socket: {
+            host: configService.get<string>('REDIS_HOST'),
+            port: parseInt(configService.get<string>('REDIS_PORT')),
+          },
+        }),
+      }),
+      isGlobal: true,
+    }),
+
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        redis: {
+          host: configService.get<string>('REDIS_HOST'),
+          port: parseInt(configService.get<string>('REDIS_PORT')),
+          db: parseInt(configService.get<string>('REDIS_QUEUE_DB')),
+        },
+        isGlobal: true,
       }),
     }),
   ],

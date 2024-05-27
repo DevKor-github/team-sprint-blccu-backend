@@ -25,6 +25,8 @@ GREEN_PORT="3001"
 
 # docker push (aws ecr)
 echo -e "\n## Docker build & push ##\n"
+
+
 npm run build
 docker buildx build --platform linux/amd64 -t $SERVICE_NAME . --load
 docker tag $SERVICE_NAME:$DOCKER_TAG $ECR_URL/$SERVICE_NAME:$DOCKER_TAG
@@ -52,8 +54,27 @@ OLD_SERVICE_NAME=$SERVICE_NAME-$CURRENT_PORT
 # docker pull & run
 echo -e "\n## new docker pull & run ##\n"
 ssh -i $PEM_PATH $SERVER "docker pull $ECR_URL/$SERVICE_NAME:$DOCKER_TAG"
-ssh -i $PEM_PATH $SERVER "docker run -d --memory="512m" --cpus="0.5" -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul $ECR_URL/$SERVICE_NAME"
+ssh -i $PEM_PATH $SERVER "docker run  --env-file .env.prod -d --memory="512m" --cpus="0.5" -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul $ECR_URL/$SERVICE_NAME"
 # memory랑 cpu 사용량 조절
+
+# 헬스체크 수행
+echo -e "\n## 헬스체크 수행 ##\n"
+for i in {1..20}; do
+    HEALTH_CHECK=$(ssh -i $PEM_PATH $SERVER "curl -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health")
+    if [ "$HEALTH_CHECK" -eq 200 ]; then
+        echo -e "\n 헬스체크 성공 \n"
+        break
+    fi
+    echo -e "\n 헬스체크 시도 $i/20 실패. 5초 후 재시도... \n"
+    sleep 5
+done
+
+if [ "$HEALTH_CHECK" -ne 200 ]; then
+    echo -e "\n 헬스체크 실패. 배포 중단 \n"
+    ssh -i $PEM_PATH $SERVER "docker stop $NEW_SERVICE_NAME && docker rm $NEW_SERVICE_NAME"
+    exit 1
+fi
+
 # NGINX 설정 파일 수정
 echo -e "\n## Nginx 설정 수정 & restart ##\n"
 ssh -i $PEM_PATH $SERVER "sudo sed -i 's/server localhost:$CURRENT_PORT;/server localhost:$NEW_PORT;/g' $NGINX_CONFIG"
@@ -63,7 +84,8 @@ ssh -i $PEM_PATH $SERVER "sudo systemctl restart nginx"
 echo -e "\n## old docker 제거 ##\n"
 ssh -i $PEM_PATH $SERVER "sudo docker stop $OLD_SERVICE_NAME"
 ssh -i $PEM_PATH $SERVER "sudo docker rm $OLD_SERVICE_NAME"
-ssh -i $PEM_PATH $SERVER "sudo docker rmi $OLD_SERVICE_NAME:$DOCKER_TAG"
+echo -e "$ECR_URL/$SERVICE_NAME:$DOCKER_TAG"
+ssh -i $PEM_PATH $SERVER "docker images --format "{{.ID}} {{.Repository}}:{{.Tag}}" | grep -v ':latest' | awk '{print $1}' | xargs -r docker rmi"
 # yes | ssh -i $PEM_PATH $SERVER "sudo docker system prune -a"
 
 echo -e "\n## 배포 완료. $NEW_SERVICE_NAME ##\n"

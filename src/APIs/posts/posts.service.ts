@@ -14,7 +14,6 @@ import { FetchPostsDto } from './dtos/fetch-posts.dto';
 import { PagePostResponseDto } from './dtos/page-post-response.dto';
 import { FetchFriendsPostsDto } from './dtos/fetch-friends-posts.dto';
 import { PostCategory } from '../postCategories/entities/postCategory.entity';
-// import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
 import { User } from '../users/entities/user.entity';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { StickerBlocksService } from '../stickerBlocks/stickerBlocks.service';
@@ -26,10 +25,7 @@ import {
 } from './dtos/fetch-post-for-update.dto';
 import { CustomCursorPageMetaDto } from 'src/utils/cursor-pages/dtos/cursor-page-meta.dto';
 import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
-import {
-  PostsOrderOption,
-  PostsOrderOptionWrap,
-} from 'src/common/enums/posts-order-option';
+import { PostsOrderOption } from 'src/common/enums/posts-order-option';
 import { FollowsService } from '../follows/follows.service';
 import { DateOption } from 'src/common/enums/date-option';
 import { Follow } from '../follows/entities/follow.entity';
@@ -252,22 +248,22 @@ export class PostsService {
   }: IPostsServiceFetchPostsCursor): Promise<
     CustomCursorPageDto<PostResponseDto>
   > {
-    const useCache =
-      cursorOption.order === PostsOrderOptionWrap.VIEW &&
-      cursorOption.take === 10 &&
-      cursorOption.date_created === DateOption.WEEK &&
-      cursorOption.sort === SortOption.DESC;
+    // const useCache =
+    //   cursorOption.order === PostsOrderOptionWrap.VIEW &&
+    //   cursorOption.take === 10 &&
+    //   cursorOption.date_created === DateOption.WEEK &&
+    //   cursorOption.sort === SortOption.DESC;
     const cacheKey = `fetchPostsCursor_${JSON.stringify(cursorOption)}`;
 
-    if (useCache) {
-      const cachedPosts =
-        await this.cacheManager.get<CustomCursorPageDto<PostResponseDto>>(
-          cacheKey,
-        );
-      if (cachedPosts) {
-        return cachedPosts;
-      }
+    // if (useCache) {
+    const cachedPosts =
+      await this.cacheManager.get<CustomCursorPageDto<PostResponseDto>>(
+        cacheKey,
+      );
+    if (cachedPosts) {
+      return cachedPosts;
     }
+    // }
 
     let date_filter: Date;
     if (cursorOption.date_created)
@@ -277,9 +273,10 @@ export class PostsService {
       date_filter,
     });
     const result = await this.createCursorResponse({ posts, cursorOption });
-    if (useCache) {
-      await this.cacheManager.set(cacheKey, result, 1800);
-    }
+    // if (useCache) {
+    await this.cacheManager.set(cacheKey, result, 180000);
+    // }
+    return result;
   }
 
   async fetchFriendsPostsCursor({
