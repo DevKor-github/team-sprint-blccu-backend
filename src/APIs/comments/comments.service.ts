@@ -5,7 +5,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateCommentDto } from './dtos/create-comment.dto';
-import { UsersService } from '../users/users.service';
 import { CommentsRepository } from './comments.repository';
 import { DataSource, EntityManager } from 'typeorm';
 import { Posts } from '../posts/entities/posts.entity';
@@ -14,7 +13,6 @@ import {
   FetchCommentDto,
   FetchCommentsDto,
 } from './dtos/fetch-comments.dto';
-import { USER_PRIMARY_SELECT_OPTION } from '../users/dtos/user-response.dto';
 import {
   ICommentsServiceDelete,
   ICommentsServiceFetch,
@@ -23,13 +21,15 @@ import {
   ICommentsServicePostsIdValidCheck,
 } from './interfaces/comments.service.interface';
 import { Comment } from './entities/comment.entity';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotType } from 'src/common/enums/not-type.enum';
 
 @Injectable()
 export class CommentsService {
   constructor(
     private readonly commentsRepository: CommentsRepository,
-    private readonly usersService: UsersService,
     private readonly dataSource: DataSource,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async postsIdValidCheck({
@@ -68,14 +68,24 @@ export class CommentsService {
     const commentData = await this.commentsRepository.insertComment({
       createCommentDto,
     });
-    const id = commentData.identifiers[0];
-    return await this.commentsRepository.findOne({
-      select: {
-        user: USER_PRIMARY_SELECT_OPTION,
-      },
-      relations: { user: true },
-      where: { ...id },
+    const { id } = commentData.identifiers[0];
+    console.log(id);
+    const { posts, parent, ...result } =
+      await this.commentsRepository.fetchCommentWithNotiInfo({ id });
+
+    await this.notificationsService.emitAlarm({
+      userKakaoId: result.userKakaoId,
+      targetUserKakaoId: posts.userKakaoId,
+      type: NotType.COMMENT,
     });
+    if (result.parentId) {
+      await this.notificationsService.emitAlarm({
+        userKakaoId: result.userKakaoId,
+        targetUserKakaoId: parent.userKakaoId,
+        type: NotType.REPLY,
+      });
+    }
+    return result;
   }
 
   async patchComment({

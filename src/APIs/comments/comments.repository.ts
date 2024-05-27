@@ -15,12 +15,20 @@ export class CommentsRepository extends Repository<Comment> {
   async insertComment({
     createCommentDto,
   }: ICommentsRepositoryInsertComment): Promise<InsertResult> {
-    console.log(createCommentDto);
     return await this.createQueryBuilder('c')
       .insert()
       .into(Comment, Object.keys(createCommentDto))
       .values(createCommentDto)
       .execute();
+  }
+
+  async fetchCommentWithNotiInfo({ id }) {
+    return await this.createQueryBuilder('c')
+      .leftJoinAndSelect('c.user', 'user')
+      .leftJoinAndSelect('c.posts', 'posts')
+      .leftJoinAndSelect('c.parent', 'parent')
+      .where('c.id = :id', { id })
+      .getOne();
   }
 
   async fetchComments({

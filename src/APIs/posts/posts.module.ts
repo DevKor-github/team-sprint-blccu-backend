@@ -10,7 +10,6 @@ import { PostBackground } from '../postBackgrounds/entities/postBackground.entit
 import { PostCategory } from '../postCategories/entities/postCategory.entity';
 import { StickerBlocksModule } from '../stickerBlocks/stickerBlocks.module';
 import { PostsRepository } from './posts.repository';
-import { CommentsModule } from '../comments/comments.module';
 import { FollowsModule } from '../follows/follows.module';
 
 @Module({
@@ -20,7 +19,6 @@ import { FollowsModule } from '../follows/follows.module';
     AwsModule,
     FollowsModule,
     StickerBlocksModule,
-    CommentsModule,
   ],
   providers: [PostsService, PostsRepository],
   controllers: [PostsController],

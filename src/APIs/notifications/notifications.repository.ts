@@ -23,9 +23,12 @@ export class NotificationsRepository extends Repository<Notification> {
     date_created,
     is_checked,
   }): Promise<FetchNotiResponse[]> {
-    const query = this.createQueryBuilder('').where('userKakaoId = :kakaoId', {
-      kakaoId,
-    });
+    const query = this.createQueryBuilder('').where(
+      'targetUserKakaoId = :kakaoId',
+      {
+        kakaoId,
+      },
+    );
     if (!is_checked) {
       query.andWhere('is_checked = true');
     }

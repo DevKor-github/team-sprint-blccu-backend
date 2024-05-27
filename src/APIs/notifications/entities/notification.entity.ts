@@ -46,10 +46,6 @@ export class Notification {
   @Column({ default: false })
   is_checked: boolean;
 
-  @ApiProperty({ description: '리다이렉션 url', type: String })
-  @Column()
-  url: string;
-
   @ApiProperty({ description: '생성된 날짜', type: Date })
   @CreateDateColumn()
   date_created: Date;

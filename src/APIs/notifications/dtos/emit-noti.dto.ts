@@ -4,7 +4,6 @@ export class EmitNotiDto extends PickType(Notification, [
   'userKakaoId',
   'targetUserKakaoId',
   'type',
-  'url',
 ]) {}
 
 export class EmitNotiInput extends OmitType(EmitNotiDto, ['userKakaoId']) {}

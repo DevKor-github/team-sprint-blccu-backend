@@ -3,7 +3,6 @@ export enum NotType {
   REPLY = 'REPLY',
   LIKE = 'LIKE',
   FOLLOW = 'FOLLOW',
-  FOLLOW_POST = 'FOLLOW_POST',
   ANNOUNCEMENT = 'ANNOUNCEMENT',
   REPORT = 'REPORT',
 }

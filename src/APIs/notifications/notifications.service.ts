@@ -51,14 +51,12 @@ export class NotificationsService {
   async emitAlarm({
     userKakaoId,
     targetUserKakaoId,
-    url,
     type,
   }: EmitNotiDto): Promise<FetchNotiResponse> {
     try {
       const executeResult = await this.notificationsRepository.createOne({
         userKakaoId,
         targetUserKakaoId,
-        url,
         type,
       });
       const id = executeResult.identifiers[0].id;
