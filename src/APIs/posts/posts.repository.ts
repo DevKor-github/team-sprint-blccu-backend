@@ -196,7 +196,7 @@ export class PostsRepository extends Repository<Posts> {
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
 
     queryBuilder
-      .andWhere(`p.userKakaoId = any(${subQuery})`)
+      .andWhere(`p.userKakaoId = any(${subQuery})`) // 만약 서로이웃으로 scope하려면, 정반대 옵션으로 subQuery2를 만들고 andWhere()하나 추가하면 될듯
       .andWhere('p.scope IN (:...scopes)', {
         scopes: [OpenScope.PUBLIC],
       }); //sql injection 방지를 위해 만드시 enum 거칠 것
