@@ -6,12 +6,15 @@ import { FetchLikeResponseDto } from './dtos/fetch-likes.dto';
 import { LikesRepository } from './likes.repository';
 import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
 import { ILikesServiceIds } from './interfaces/likes.service.interface';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotType } from 'src/common/enums/not-type.enum';
 
 @Injectable()
 export class LikesService {
   constructor(
     private readonly likesRepository: LikesRepository,
     private readonly dataSource: DataSource,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async fetchIfLiked({ kakaoId, id }: ILikesServiceIds): Promise<boolean> {
@@ -43,7 +46,12 @@ export class LikesService {
         await queryRunner.manager.update(Posts, postData.id, {
           like_count: () => 'like_count +1',
         });
-        await queryRunner.commitTransaction();
+        await await queryRunner.commitTransaction();
+        await this.notificationsService.emitAlarm({
+          userKakaoId: kakaoId,
+          targetUserKakaoId: postData.userKakaoId,
+          type: NotType.LIKE,
+        });
         return likeData;
       }
     } catch (e) {
