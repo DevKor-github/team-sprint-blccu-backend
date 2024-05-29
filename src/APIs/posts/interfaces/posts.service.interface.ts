@@ -1,6 +1,7 @@
 import { CreatePostInput } from '../dtos/create-post.input';
 import { CursorFetchPosts } from '../dtos/cursor-fetch-posts.dto';
 import { FetchUserPostsInput } from '../dtos/fetch-user-posts.input';
+import { PatchPostInput } from '../dtos/patch-post.dto';
 import { Posts } from '../entities/posts.entity';
 
 export interface IPostsServicePostId extends Pick<Posts, 'id'> {}
@@ -39,4 +40,9 @@ export interface IPostsServiceFetchUserPostsCursor {
   cursorOption: FetchUserPostsInput;
   targetKakaoId: number;
   kakaoId: number;
+}
+
+export interface IPostsServicePatchPost extends PatchPostInput {
+  kakaoId: number;
+  id: number;
 }

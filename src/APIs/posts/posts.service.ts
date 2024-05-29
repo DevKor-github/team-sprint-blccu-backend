@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -18,7 +19,7 @@ import { User } from '../users/entities/user.entity';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { StickerBlocksService } from '../stickerBlocks/stickerBlocks.service';
 import { PostsRepository } from './posts.repository';
-import { PostResponseDto } from './dtos/post-response.dto';
+import { PostOnlyResponseDto, PostResponseDto } from './dtos/post-response.dto';
 import {
   FetchPostForUpdateDto,
   PostResponseDtoExceptCategory,
@@ -36,10 +37,10 @@ import {
   IPostsServiceFetchPostForUpdate,
   IPostsServiceFetchPostsCursor,
   IPostsServiceFetchUserPostsCursor,
+  IPostsServicePatchPost,
   IPostsServicePostId,
   IPostsServicePostUserIdPair,
 } from './interfaces/posts.service.interface';
-import { SortOption } from 'src/common/enums/sort-option';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 
@@ -113,7 +114,7 @@ export class PostsService {
     try {
       Object.keys(createPostDto).map((el) => {
         const value = createPostDto[el];
-        if (createPostDto[el]) {
+        if (createPostDto[el] != null) {
           post[el] = value;
         }
       });
@@ -126,9 +127,6 @@ export class PostsService {
         .insert()
         .into(Posts, Object.keys(post))
         .values(post)
-        .orUpdate(Object.keys(post), ['id'], {
-          skipUpdateIfNoValuesChanged: true,
-        })
         .execute();
       await queryRunner.commitTransaction();
       const result = this.postsRepository.findOne({
@@ -141,6 +139,21 @@ export class PostsService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async patchPost({
+    kakaoId,
+    id,
+    ...rest
+  }: IPostsServicePatchPost): Promise<PostOnlyResponseDto> {
+    const postData = await this.existCheck({ id });
+    if (postData.userKakaoId != kakaoId)
+      throw new ForbiddenException('게시글 작성자가 아닙니다.');
+    Object.keys(rest).forEach((value) => {
+      if (rest[value] != null) postData[value] = rest[value];
+    });
+    await this.fkValidCheck({ posts: postData, passNonEssentail: false });
+    return await this.postsRepository.save(postData);
   }
 
   async fetchPosts(page: FetchPostsDto): Promise<PagePostResponseDto> {

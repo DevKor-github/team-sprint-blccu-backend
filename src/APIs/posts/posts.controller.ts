@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -33,7 +34,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { FetchUserPostsInput } from './dtos/fetch-user-posts.input';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
-import { PostResponseDto } from './dtos/post-response.dto';
+import { PostOnlyResponseDto, PostResponseDto } from './dtos/post-response.dto';
 import {
   FetchPostForUpdateDto,
   PostResponseDtoExceptCategory,
@@ -42,6 +43,7 @@ import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto
 import { SortOption } from 'src/common/enums/sort-option';
 import { CursorFetchPosts } from './dtos/cursor-fetch-posts.dto';
 import { CursorPagePostResponseDto } from './dtos/cursor-page-post-response.dto';
+import { PatchPostInput } from './dtos/patch-post.dto';
 
 @ApiTags('게시글 API')
 @Controller('posts')
@@ -89,6 +91,21 @@ export class PostsController {
     const kakaoId = req.user.userId;
     const dto = { ...body, userKakaoId: kakaoId, isPublished: false };
     return await this.postsService.save(dto);
+  }
+
+  @ApiOperation({ summary: '게시글 patch' })
+  @ApiCookieAuth()
+  @ApiOkResponse({ type: PostOnlyResponseDto })
+  @UseGuards(AuthGuardV2)
+  @Patch(':postId')
+  @HttpCode(200)
+  async patchPost(
+    @Req() req: Request,
+    @Body() body: PatchPostInput,
+    @Param('postId') id: number,
+  ): Promise<PostOnlyResponseDto> {
+    const kakaoId = req.user.userId;
+    return await this.postsService.patchPost({ ...body, id, kakaoId });
   }
 
   @ApiOperation({
