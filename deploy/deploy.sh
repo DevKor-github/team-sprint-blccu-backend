@@ -28,6 +28,7 @@ echo -e "\n## Docker build & push ##\n"
 
 
 npm run build
+aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 637423583546.dkr.ecr.ap-northeast-2.amazonaws.com
 docker buildx build --platform linux/amd64 -t $SERVICE_NAME . --load
 docker tag $SERVICE_NAME:$DOCKER_TAG $ECR_URL/$SERVICE_NAME:$DOCKER_TAG
 docker push $ECR_URL/$SERVICE_NAME:$DOCKER_TAG
@@ -53,6 +54,7 @@ OLD_SERVICE_NAME=$SERVICE_NAME-$CURRENT_PORT
 
 # docker pull & run
 echo -e "\n## new docker pull & run ##\n"
+ssh -i $PEM_PATH $SERVER "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 637423583546.dkr.ecr.ap-northeast-2.amazonaws.com"
 ssh -i $PEM_PATH $SERVER "docker pull $ECR_URL/$SERVICE_NAME:$DOCKER_TAG"
 ssh -i $PEM_PATH $SERVER "docker run  --env-file .env.prod -d --memory="512m" --cpus="0.5" -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul $ECR_URL/$SERVICE_NAME"
 # memory랑 cpu 사용량 조절
