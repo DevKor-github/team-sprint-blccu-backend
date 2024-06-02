@@ -187,8 +187,7 @@ export class UsersService {
     file: Express.Multer.File,
   ): Promise<ImageUploadResponseDto> {
     const imageName = this.utilsService.getUUID();
-    const ext = file.originalname.split('.').pop();
-
+    const ext = 'jpg';
     const image_url = await this.awsService.imageUploadToS3(
       `${imageName}.${ext}`,
       file,
