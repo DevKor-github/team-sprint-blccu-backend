@@ -73,6 +73,11 @@ import { HttpModule } from '@nestjs/axios';
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_DATABASE'),
         entities: [__dirname + '/APIs/**/*.entity.*'],
+        migrations: ['dist/migrations/*{.ts,.js}'], // migration 수행할 파일
+        cli: {
+          migrationsDir: 'src/migrations', // migration 파일을 생성할 디렉토리
+        },
+        migrationsTableName: 'migrations', // migration 내용이 기록될 테이블명(default = migration),
         synchronize: parseBoolean(
           configService.get<string>('DATABASE_SYNCHRO'),
         ),
