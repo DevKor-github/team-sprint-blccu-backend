@@ -18,6 +18,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 
 @ApiTags('인증 API')
 @Controller('auth')
@@ -109,6 +110,8 @@ export class AuthController {
     summary: '로그아웃(clear cookie)',
     description: '클라이언트의 로그인 관련 쿠키를 초기화한다.',
   })
+  @ApiCookieAuth()
+  @UseGuards(AuthGuardV2)
   @Get('logout')
   @HttpCode(204)
   async logout(@Res() res: Response) {

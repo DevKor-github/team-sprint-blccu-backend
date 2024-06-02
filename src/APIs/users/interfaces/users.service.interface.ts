@@ -8,6 +8,10 @@ export interface IUsersServiceFindUserByKakaoId {
   kakaoId: number;
 }
 
+export interface IUsersServiceDelete {
+  kakaoId: number;
+}
+
 export interface IUsersServiceFindUserByHandle extends Pick<User, 'handle'> {}
 
 export interface IUsersServiceFindUser {

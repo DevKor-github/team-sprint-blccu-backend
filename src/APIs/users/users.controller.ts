@@ -1,12 +1,14 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
   Patch,
   Post,
   Req,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -17,11 +19,12 @@ import {
   ApiConsumes,
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import {
   UserResponseDto,
   UserResponseDtoWithFollowing,
@@ -185,5 +188,34 @@ export class UsersController {
       userKakaoId,
       file,
     });
+  }
+
+  @ApiOperation({
+    summary: '회원 탈퇴(soft delete)',
+    description: '회원을 탈퇴하고 연동된 게시글과 댓글을 soft delete한다.',
+  })
+  @ApiCookieAuth()
+  @UseGuards(AuthGuardV2)
+  @ApiNoContentResponse()
+  @HttpCode(204)
+  @Delete('me')
+  async deleteUser(@Req() req: Request, @Res() res: Response) {
+    const kakaoId = req.user.userId;
+    const clientDomain = process.env.CLIENT_DOMAIN;
+    await this.usersService.delete({ kakaoId });
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      domain: clientDomain,
+      sameSite: 'none',
+      secure: true,
+    });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      domain: clientDomain,
+      sameSite: 'none',
+      secure: true,
+    });
+    res.clearCookie('isLoggedIn', { httpOnly: false, domain: clientDomain });
+    return res.send();
   }
 }

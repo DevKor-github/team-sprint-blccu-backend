@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import {
   IUsersServiceCreate,
+  IUsersServiceDelete,
   IUsersServiceFindUserByHandle,
   IUsersServiceFindUserByKakaoId,
 } from './interfaces/users.service.interface';
@@ -19,6 +20,11 @@ import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { UploadImageDto } from './dtos/upload-image.dto';
 import { UsersRepository } from './users.repository';
+import { DataSource, UpdateResult } from 'typeorm';
+import { Posts } from '../posts/entities/posts.entity';
+import { Follow } from '../follows/entities/follow.entity';
+import { User } from './entities/user.entity';
+import { Comment } from '../comments/entities/comment.entity';
 
 @Injectable()
 export class UsersService {
@@ -26,6 +32,7 @@ export class UsersService {
     private readonly usersRepository: UsersRepository,
     private readonly awsService: AwsService,
     private readonly utilsService: UtilsService,
+    private readonly dataSource: DataSource,
   ) {}
 
   // 배포 때 삭제 !!!!
@@ -66,6 +73,24 @@ export class UsersService {
       where: { kakaoId: kakaoId },
     });
     return result;
+  }
+
+  async findUserByKakaoIdWithDelete({
+    kakaoId,
+  }: IUsersServiceFindUserByKakaoId): Promise<UserResponseDto> {
+    const result = await this.usersRepository.findOne({
+      select: USER_SELECT_OPTION,
+      where: { kakaoId: kakaoId },
+      withDeleted: true, // 소프트 삭제된 사용자도 포함
+    });
+    return result;
+  }
+
+  async activateUser({ kakaoId }): Promise<UpdateResult> {
+    return await this.usersRepository.update(
+      { kakaoId: kakaoId },
+      { date_deleted: null },
+    );
   }
 
   async findUserByHandle({
@@ -169,5 +194,59 @@ export class UsersService {
       ext,
     );
     return { image_url };
+  }
+
+  async delete({ kakaoId }: IUsersServiceDelete): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      // 연동된 게시글 soft delete
+      await queryRunner.manager.softDelete(Posts, { userKakaoId: kakaoId });
+      // 연동된 댓글 soft delete
+      await queryRunner.manager.softDelete(Comment, { userKakaoId: kakaoId });
+      // 팔로우 일괄 취소
+      const followingsToDelete = await queryRunner.manager.find(Follow, {
+        where: { fromUserKakaoId: kakaoId },
+      });
+      await queryRunner.manager.delete(Follow, { fromUserKakaoId: kakaoId });
+      await queryRunner.manager.update(
+        User,
+        { kakaoId },
+        {
+          following_count: 0,
+          follower_count: 0,
+        },
+      );
+      for (const following of followingsToDelete) {
+        await queryRunner.manager.decrement(
+          User,
+          { kakaoId: following.toUserKakaoId },
+          'follower_count',
+          1,
+        );
+      }
+      // 팔로잉 일괄 취소
+      const followersToDelete = await queryRunner.manager.find(Follow, {
+        where: { toUserKakaoId: kakaoId },
+      });
+      await queryRunner.manager.delete(Follow, { toUserKakaoId: kakaoId });
+      for (const following of followersToDelete) {
+        await queryRunner.manager.decrement(
+          User,
+          { kakaoId: following.fromUserKakaoId },
+          'following_count',
+          1,
+        );
+      }
+      await queryRunner.manager.softDelete(User, { kakaoId });
+      await queryRunner.commitTransaction();
+      return;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

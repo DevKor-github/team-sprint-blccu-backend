@@ -21,10 +21,14 @@ export class AuthService {
   }
 
   async kakaoValidateUser(kakaoUserDto: KakaoUserDto) {
-    let user = await this.usersService.findUserByKakaoId(kakaoUserDto); // 유저 조회
+    let user =
+      await this.usersService.findUserByKakaoIdWithDelete(kakaoUserDto); // 유저 조회
     if (!user) {
       // 회원 가입 로직
       user = await this.usersService.create(kakaoUserDto);
+    }
+    if (user.date_deleted != null) {
+      await this.usersService.activateUser({ kakaoId: kakaoUserDto.kakaoId });
     }
     return user;
   }

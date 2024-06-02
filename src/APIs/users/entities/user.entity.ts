@@ -1,9 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Agreement } from 'src/APIs/agreements/entities/agreement.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   // PrimaryColumn,
   // PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -67,4 +69,7 @@ export class User {
   @DeleteDateColumn()
   @ApiProperty({ description: '삭제된 날짜', type: Date })
   date_deleted: Date;
+
+  // @OneToMany(() => Agreement, (agreement) => agreement.user)
+  // agreements: Agreement[];
 }
