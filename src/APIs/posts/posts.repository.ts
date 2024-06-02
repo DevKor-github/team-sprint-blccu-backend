@@ -41,6 +41,7 @@ export class PostsRepository extends Repository<Posts> {
         ])
         .where('p.isPublished = true')
         .andWhere('p.scope IN (:...scopes)', { scopes: [OpenScope.PUBLIC] })
+        .andWhere('p.date_deleted IS NULL')
         //sql injection 방지를 위해 반드시 enum 거칠 것
         .andWhere(`${PostsFilterOption[page.filter]} LIKE :search`, {
           search: `%${page.search}%`,
@@ -69,6 +70,7 @@ export class PostsRepository extends Repository<Posts> {
       ])
       .where('p.id = :id', { id })
       .andWhere('p.scope IN (:scope)', { scope })
+      .andWhere('p.date_deleted IS NULL')
       .getOne();
   }
   async fetchPostForUpdate(id) {
@@ -84,6 +86,7 @@ export class PostsRepository extends Repository<Posts> {
         'user.username',
       ])
       .where('p.id = :id', { id })
+      .andWhere('p.date_deleted IS NULL')
       .getOne();
   }
 
@@ -100,6 +103,7 @@ export class PostsRepository extends Repository<Posts> {
         'user.username',
       ])
       .where(`p.userKakaoId = any(${subQuery})`)
+      .andWhere('p.date_deleted IS NULL')
       .andWhere('p.scope IN (:...scopes)', {
         scopes: [OpenScope.PUBLIC],
       }) //sql injection 방지를 위해 만드시 enum 거칠 것
@@ -130,6 +134,7 @@ export class PostsRepository extends Repository<Posts> {
       ])
       .where('p.userKakaoId = :kakaoId', { kakaoId })
       .andWhere(`p.isPublished = false`)
+      .andWhere('p.date_deleted IS NULL')
       .orderBy('p.id', 'DESC')
       .getMany();
   }
@@ -159,6 +164,7 @@ export class PostsRepository extends Repository<Posts> {
       .andWhere(queryByOrderSort, {
         customCursor: cursor,
       })
+      .andWhere('p.date_deleted IS NULL')
       .orderBy(`p.${_order}`, sort as any)
       .addOrderBy('p.id', sort as any);
 
