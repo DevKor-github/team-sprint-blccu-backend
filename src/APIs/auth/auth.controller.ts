@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Post,
   Req,
   Res,
   UnauthorizedException,
@@ -112,7 +113,7 @@ export class AuthController {
   })
   @ApiCookieAuth()
   @UseGuards(AuthGuardV2)
-  @Get('logout')
+  @Post('logout')
   @HttpCode(204)
   async logout(@Res() res: Response) {
     const clientDomain = process.env.CLIENT_DOMAIN;

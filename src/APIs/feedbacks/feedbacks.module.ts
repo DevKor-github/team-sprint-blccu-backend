@@ -10,6 +10,6 @@ import { UsersModule } from '../users/users.module';
   imports: [TypeOrmModule.forFeature([Feedback]), UsersModule],
   controllers: [FeedbacksController],
   providers: [FeedbacksService, FeedbacksRepository],
-  exports: [],
+  exports: [FeedbacksService],
 })
 export class FeedbacksModule {}

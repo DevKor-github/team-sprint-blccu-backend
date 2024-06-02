@@ -25,6 +25,7 @@ import { Posts } from '../posts/entities/posts.entity';
 import { Follow } from '../follows/entities/follow.entity';
 import { User } from './entities/user.entity';
 import { Comment } from '../comments/entities/comment.entity';
+import { Feedback } from '../feedbacks/entities/feedback.entity';
 
 @Injectable()
 export class UsersService {
@@ -196,12 +197,17 @@ export class UsersService {
     return { image_url };
   }
 
-  async delete({ kakaoId }: IUsersServiceDelete): Promise<void> {
+  async delete({ kakaoId, type, content }: IUsersServiceDelete): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      // 연동된 게시글 soft delete
+      // 피드백 생성
+      await queryRunner.manager.save(Feedback, {
+        type,
+        content,
+        userKakaoId: kakaoId,
+      });
       await queryRunner.manager.softDelete(Posts, { userKakaoId: kakaoId });
       // 연동된 댓글 soft delete
       await queryRunner.manager.softDelete(Comment, { userKakaoId: kakaoId });

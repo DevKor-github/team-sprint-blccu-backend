@@ -1,3 +1,4 @@
+import { FeedbackType } from 'src/common/enums/feedback-type.enum';
 import { User } from '../entities/user.entity';
 
 export interface IUsersServiceCreate {
@@ -9,6 +10,8 @@ export interface IUsersServiceFindUserByKakaoId {
 }
 
 export interface IUsersServiceDelete {
+  type: FeedbackType;
+  content: string;
   kakaoId: number;
 }
 

@@ -11,6 +11,7 @@ import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { CreateFeedbackInput } from './dtos/create-feedback.dto';
 import { Request } from 'express';
 import { FetchFeedbackDto } from './dtos/fetch-feedback.dto';
+import { FeedbackType } from 'src/common/enums/feedback-type.enum';
 
 @ApiTags('유저 API')
 @Controller('users')
@@ -27,7 +28,11 @@ export class FeedbacksController {
     @Req() req: Request,
   ): Promise<FetchFeedbackDto> {
     const kakaoId = req.user.userId;
-    return await this.feedbacksService.create({ ...body, kakaoId });
+    return await this.feedbacksService.create({
+      ...body,
+      kakaoId,
+      type: FeedbackType.GENERAL_FEEDBACK,
+    });
   }
 
   @ApiTags('어드민 API')

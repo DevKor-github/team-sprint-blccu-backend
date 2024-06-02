@@ -34,6 +34,7 @@ import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto
 import { ImageUploadDto } from 'src/common/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
+import { DeleteUserInput } from './dtos/delete-user.dto';
 
 @ApiTags('유저 API')
 @Controller('users')
@@ -199,10 +200,14 @@ export class UsersController {
   @ApiNoContentResponse()
   @HttpCode(204)
   @Delete('me')
-  async deleteUser(@Req() req: Request, @Res() res: Response) {
+  async deleteUser(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: DeleteUserInput,
+  ) {
     const kakaoId = req.user.userId;
     const clientDomain = process.env.CLIENT_DOMAIN;
-    await this.usersService.delete({ kakaoId });
+    await this.usersService.delete({ kakaoId, ...body });
     res.clearCookie('accessToken', {
       httpOnly: true,
       domain: clientDomain,

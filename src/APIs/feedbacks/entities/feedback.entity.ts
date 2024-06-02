@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsString } from 'class-validator';
 import { User } from 'src/APIs/users/entities/user.entity';
+import { FeedbackType } from 'src/common/enums/feedback-type.enum';
 import {
   Column,
   CreateDateColumn,
@@ -32,6 +33,11 @@ export class Feedback {
     onDelete: 'SET NULL',
   })
   user: User;
+
+  @ApiProperty({ description: '피드백 종류', type: 'enum', enum: FeedbackType })
+  @IsEnum(FeedbackType)
+  @Column()
+  type: FeedbackType;
 
   @IsNumber()
   @ApiProperty({
