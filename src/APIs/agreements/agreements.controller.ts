@@ -30,8 +30,6 @@ export class AgreementsController {
   constructor(private readonly agreementsService: AgreementsService) {}
 
   @ApiOperation({ summary: 'contract fetch' })
-  @ApiCookieAuth()
-  @UseGuards(AuthGuardV2)
   @Get('contracts')
   async fetchContract(@Query() query: FetchContractDto) {
     const data = await this.agreementsService.fetchContract({ ...query });
