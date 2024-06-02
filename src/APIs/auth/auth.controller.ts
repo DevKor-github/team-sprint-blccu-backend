@@ -85,9 +85,22 @@ export class AuthController {
       });
       return res.send();
     } catch (e) {
-      res.clearCookie('accessToken');
-      res.clearCookie('refreshToken');
-      res.clearCookie('isLoggedIn');
+      const clientDomain = process.env.CLIENT_DOMAIN;
+
+      res.clearCookie('accessToken', {
+        httpOnly: true,
+        domain: clientDomain,
+        sameSite: 'none',
+        secure: true,
+      });
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        domain: clientDomain,
+        sameSite: 'none',
+        secure: true,
+      });
+      res.clearCookie('isLoggedIn', { httpOnly: false, domain: clientDomain });
+
       throw new UnauthorizedException(e.message);
     }
   }
@@ -99,9 +112,21 @@ export class AuthController {
   @Get('logout')
   @HttpCode(204)
   async logout(@Res() res: Response) {
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
-    res.clearCookie('isLoggedIn');
+    const clientDomain = process.env.CLIENT_DOMAIN;
+
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      domain: clientDomain,
+      sameSite: 'none',
+      secure: true,
+    });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      domain: clientDomain,
+      sameSite: 'none',
+      secure: true,
+    });
+    res.clearCookie('isLoggedIn', { httpOnly: false, domain: clientDomain });
     return res.send();
   }
 }

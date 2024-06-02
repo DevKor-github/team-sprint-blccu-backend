@@ -54,15 +54,12 @@ export class NotificationsService {
     type,
   }: EmitNotiDto): Promise<FetchNotiResponse> {
     try {
-      const executeResult = await this.notificationsRepository.createOne({
+      const data = await this.notificationsRepository.save({
         userKakaoId,
         targetUserKakaoId,
         type,
       });
-      const id = executeResult.identifiers[0].id;
-      const data = await this.notificationsRepository.findOne({
-        where: { id },
-      });
+      console.log(data);
       // Redis 큐에 이벤트를 전송
       await this.redisQueue.add(this.queueName, data);
       return data;
