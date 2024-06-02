@@ -45,12 +45,14 @@ export class CommentsRepository extends Repository<Comment> {
         'u.username',
         'u.description',
         'u.profile_image',
+        'u.handle',
       ])
       .addSelect([
         'childrenUser.kakaoId',
         'childrenUser.username',
         'childrenUser.description',
         'childrenUser.profile_image',
+        'childrenUser.handle',
       ])
       .leftJoinAndSelect('c.children', 'children')
       .leftJoin('children.user', 'childrenUser')

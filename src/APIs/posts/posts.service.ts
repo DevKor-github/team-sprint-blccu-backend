@@ -261,14 +261,8 @@ export class PostsService {
   }: IPostsServiceFetchPostsCursor): Promise<
     CustomCursorPageDto<PostResponseDto>
   > {
-    // const useCache =
-    //   cursorOption.order === PostsOrderOptionWrap.VIEW &&
-    //   cursorOption.take === 10 &&
-    //   cursorOption.date_created === DateOption.WEEK &&
-    //   cursorOption.sort === SortOption.DESC;
     const cacheKey = `fetchPostsCursor_${JSON.stringify(cursorOption)}`;
 
-    // if (useCache) {
     const cachedPosts =
       await this.cacheManager.get<CustomCursorPageDto<PostResponseDto>>(
         cacheKey,
@@ -276,7 +270,6 @@ export class PostsService {
     if (cachedPosts) {
       return cachedPosts;
     }
-    // }
 
     let date_filter: Date;
     if (cursorOption.date_created)
@@ -286,9 +279,7 @@ export class PostsService {
       date_filter,
     });
     const result = await this.createCursorResponse({ posts, cursorOption });
-    // if (useCache) {
     await this.cacheManager.set(cacheKey, result, 180000);
-    // }
     return result;
   }
 
