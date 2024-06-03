@@ -1,5 +1,5 @@
 // aws.service.ts
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   DeleteObjectCommand,
@@ -12,7 +12,10 @@ import sharp from 'sharp';
 export class AwsService {
   s3Client: S3Client;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private readonly logger = new Logger(AwsService.name),
+  ) {
     // AWS S3 클라이언트 초기화. 환경 설정 정보를 사용하여 AWS 리전, Access Key, Secret Key를 설정.
     this.s3Client = new S3Client({
       region: this.configService.get('AWS_REGION'), // AWS Region
@@ -49,7 +52,7 @@ export class AwsService {
       const command = new DeleteObjectCommand(deleteParams);
       return await this.s3Client.send(command);
     } catch (e) {
-      throw new BadRequestException('존재하지 않거나 적합하지 않은 url입니다.');
+      this.logger.error('Error deleting object from S3', e.stack);
     }
   }
 
@@ -58,7 +61,7 @@ export class AwsService {
     file: Express.Multer.File, // 업로드할 파일
     ext: string, // 파일 확장자
   ) {
-    const resizedImageBuffer = await this.resizeImage(file.buffer, 800);
+    const resizedImageBuffer = await this.resizeImage(file.buffer, 1200);
     // AWS S3에 이미지 업로드 명령을 생성합니다. 파일 이름, 파일 버퍼, 파일 접근 권한, 파일 타입 등을 설정합니다.
     const command = new PutObjectCommand({
       Bucket: this.configService.get('AWS_S3_BUCKET_NAME'), // S3 버킷 이름
