@@ -165,6 +165,7 @@ export class UsersService {
     });
     const { image_url } = await this.saveImage(file);
     await this.usersRepository.save({ ...user, profile_image: image_url });
+    await this.awsService.deleteImageFromS3({ url: user.profile_image });
     return { image_url };
   }
   async saveImage(file: Express.Multer.File): Promise<ImageUploadResponseDto> {
@@ -180,6 +181,7 @@ export class UsersService {
     });
     const { image_url } = await this.saveImage(file);
     await this.usersRepository.save({ ...user, background_image: image_url });
+    await this.awsService.deleteImageFromS3({ url: user.background_image });
     return { image_url };
   }
 

@@ -11,11 +11,9 @@ import sharp from 'sharp';
 @Injectable()
 export class AwsService {
   s3Client: S3Client;
+  private readonly logger = new Logger(AwsService.name);
 
-  constructor(
-    private configService: ConfigService,
-    private readonly logger = new Logger(AwsService.name),
-  ) {
+  constructor(private configService: ConfigService) {
     // AWS S3 클라이언트 초기화. 환경 설정 정보를 사용하여 AWS 리전, Access Key, Secret Key를 설정.
     this.s3Client = new S3Client({
       region: this.configService.get('AWS_REGION'), // AWS Region
