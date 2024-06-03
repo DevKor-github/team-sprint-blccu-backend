@@ -28,9 +28,7 @@ export class StickersService {
     const data = await this.findStickerById({ id });
     if (!data) throw new NotFoundException('스티커를 찾을 수 없습니다.');
   }
-  async saveImage(file: Express.Multer.File): Promise<ImageUploadResponseDto> {
-    return await this.imageUpload(file);
-  }
+
   async imageUpload(
     file: Express.Multer.File,
   ): Promise<ImageUploadResponseDto> {
@@ -41,6 +39,7 @@ export class StickersService {
       `${imageName}.${ext}`,
       file,
       ext,
+      1600,
     );
     return { image_url };
   }
@@ -48,7 +47,7 @@ export class StickersService {
     userKakaoId,
     file,
   }: CreateStickerDto): Promise<Sticker> {
-    const { image_url } = await this.saveImage(file);
+    const { image_url } = await this.imageUpload(file);
     const insertData = await this.stickersRepository
       .createQueryBuilder()
       .insert()
@@ -67,7 +66,7 @@ export class StickersService {
     file,
   }: CreateStickerDto): Promise<Sticker> {
     await this.usersService.adminCheck({ kakaoId: userKakaoId });
-    const { image_url } = await this.saveImage(file);
+    const { image_url } = await this.imageUpload(file);
     const insertData = await this.stickersRepository
       .createQueryBuilder()
       .insert()

@@ -146,7 +146,7 @@ export class PostsController {
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<ImageUploadResponseDto> {
-    return await this.postsService.saveImage(file);
+    return await this.postsService.imageUpload(file);
   }
 
   // @ApiOperation({

@@ -9,6 +9,7 @@ import {
   IUsersServiceDelete,
   IUsersServiceFindUserByHandle,
   IUsersServiceFindUserByKakaoId,
+  IUsersServiceImageUpload,
 } from './interfaces/users.service.interface';
 import {
   USER_SELECT_OPTION,
@@ -163,13 +164,10 @@ export class UsersService {
     const user = await this.findUserByKakaoIdWithToken({
       kakaoId: userKakaoId,
     });
-    const { image_url } = await this.saveImage(file);
+    const { image_url } = await this.imageUpload({ file, resize: 800 });
     await this.usersRepository.save({ ...user, profile_image: image_url });
     await this.awsService.deleteImageFromS3({ url: user.profile_image });
     return { image_url };
-  }
-  async saveImage(file: Express.Multer.File): Promise<ImageUploadResponseDto> {
-    return await this.imageUpload(file);
   }
 
   async uploadBackgroundImage({
@@ -179,21 +177,23 @@ export class UsersService {
     const user = await this.findUserByKakaoIdWithToken({
       kakaoId: userKakaoId,
     });
-    const { image_url } = await this.saveImage(file);
+    const { image_url } = await this.imageUpload({ file, resize: 1600 });
     await this.usersRepository.save({ ...user, background_image: image_url });
     await this.awsService.deleteImageFromS3({ url: user.background_image });
     return { image_url };
   }
 
-  async imageUpload(
-    file: Express.Multer.File,
-  ): Promise<ImageUploadResponseDto> {
+  async imageUpload({
+    file,
+    resize,
+  }: IUsersServiceImageUpload): Promise<ImageUploadResponseDto> {
     const imageName = this.utilsService.getUUID();
     const ext = 'jpg';
     const image_url = await this.awsService.imageUploadToS3(
       `${imageName}.${ext}`,
       file,
       ext,
+      resize,
     );
     return { image_url };
   }

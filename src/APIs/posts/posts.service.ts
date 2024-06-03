@@ -55,9 +55,6 @@ export class PostsService {
     private readonly followsService: FollowsService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
-  async saveImage(file: Express.Multer.File) {
-    return await this.imageUpload(file);
-  }
 
   async imageUpload(
     file: Express.Multer.File,
@@ -69,6 +66,7 @@ export class PostsService {
       `${imageName}.${ext}`,
       file,
       ext,
+      1200,
     );
 
     return { image_url };

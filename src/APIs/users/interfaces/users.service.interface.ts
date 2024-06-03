@@ -20,3 +20,8 @@ export interface IUsersServiceFindUserByHandle extends Pick<User, 'handle'> {}
 export interface IUsersServiceFindUser {
   id: string;
 }
+
+export interface IUsersServiceImageUpload {
+  file: Express.Multer.File;
+  resize: number;
+}

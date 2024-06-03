@@ -28,6 +28,7 @@ export class PostBackgroundsService {
       `${imageName}.${ext}`,
       file,
       ext,
+      2000,
     );
     await this.postBackgroundsRepository.save({ image_url });
     return { image_url };
