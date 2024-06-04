@@ -116,7 +116,7 @@ export class CommentsService {
   }: ICommentsServiceDelete): Promise<void> {
     await this.dataSource.transaction(async (manager: EntityManager) => {
       const data = await this.existCheck({ id });
-      let childrenData = null;
+      let childrenData = [];
       if (data.postsId !== postsId) {
         throw new NotFoundException('게시글을 찾을 수 없습니다.');
       }
@@ -124,7 +124,7 @@ export class CommentsService {
         childrenData = await manager.find(Comment, {
           where: { parentId: data.id },
         });
-      if (childrenData != null) {
+      if (childrenData.length == 0) {
         await manager.delete(Comment, { user: { kakaoId: userKakaoId }, id });
         await manager.update(Posts, data.postsId, {
           comment_count: () => 'comment_count - 1',
