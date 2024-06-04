@@ -118,7 +118,7 @@ export class StickersService {
     }
   }
 
-  async delete({ id, kakaoId }) {
+  async delete({ id, kakaoId }): Promise<void> {
     const sticker = await this.stickersRepository.findOne({
       where: { id, user: { kakaoId } },
     });
@@ -129,6 +129,7 @@ export class StickersService {
     await this.awsService.deleteImageFromS3({
       url: sticker.image_url,
     });
-    return await this.stickersRepository.remove(sticker);
+    await this.stickersRepository.remove(sticker);
+    return;
   }
 }

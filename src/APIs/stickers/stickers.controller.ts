@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -17,6 +18,7 @@ import {
   ApiConsumes,
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -139,5 +141,18 @@ export class StickersController {
       userKakaoId,
       file,
     });
+  }
+
+  @ApiOperation({ summary: '스티커 삭제', description: '스티커를 삭제한다.' })
+  @UseGuards(AuthGuardV2)
+  @ApiCookieAuth()
+  @ApiNoContentResponse({ description: '삭제 성공' })
+  @Delete('stickers/:id')
+  async deleteSticker(
+    @Req() req: Request,
+    @Param('id') id: number,
+  ): Promise<void> {
+    const kakaoId = req.user.userId;
+    return await this.stickersService.delete({ id, kakaoId });
   }
 }
