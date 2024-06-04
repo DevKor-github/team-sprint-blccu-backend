@@ -40,7 +40,7 @@ export class AgreementsService {
   }
 
   async fetchContract({ agreementType }: IAgreementsServiceFetchContract) {
-    const fileName = agreementType + '.txt';
+    const fileName = agreementType + '.html';
     const rootPath = process.cwd();
     const filePath = path.join(rootPath, 'src', 'assets', 'terms', fileName);
     const data = await fs.promises.readFile(filePath, 'utf8');
