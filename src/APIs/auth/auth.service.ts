@@ -14,7 +14,6 @@ export class AuthService {
   ) {}
   async getJWT(kakaoUserDto: KakaoUserDto) {
     const user = await this.kakaoValidateUser(kakaoUserDto); // 카카오 정보 검증 및 회원가입 로직
-    // console.log('[AUTHSERVICE] user:', user);
     const accessToken = this.generateAccessToken(user); // AccessToken 생성
     const refreshToken = await this.generateRefreshToken(user); // refreshToken 생성
     return { accessToken, refreshToken };
@@ -46,11 +45,11 @@ export class AuthService {
     });
     const saltOrRounds = 10;
     const current_refresh_token = await bcrypt.hash(refreshToken, saltOrRounds);
-
-    await this.usersService.setCurrentRefreshToken({
+    const user = await this.usersService.setCurrentRefreshToken({
       kakaoId: payload.userId,
       current_refresh_token,
     });
+    console.log(user);
     return refreshToken;
   }
   async refresh(refreshToken: string): Promise<string> {
@@ -62,8 +61,9 @@ export class AuthService {
       const kakaoId = decodedRefreshToken.userId;
 
       // 데이터베이스에서 User 객체 가져오기
-      const user = await this.usersService.findUserByKakaoIdWithToken(kakaoId);
-
+      const user = await this.usersService.findUserByKakaoIdWithToken({
+        kakaoId,
+      });
       // 2차 검증
       const isRefreshTokenMatching = await bcrypt.compare(
         refreshToken,

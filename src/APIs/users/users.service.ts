@@ -116,7 +116,7 @@ export class UsersService {
 
   async setCurrentRefreshToken({ kakaoId, current_refresh_token }) {
     const user = await this.findUserByKakaoId({ kakaoId });
-    this.usersRepository.save({
+    return await this.usersRepository.save({
       ...user,
       current_refresh_token,
     });

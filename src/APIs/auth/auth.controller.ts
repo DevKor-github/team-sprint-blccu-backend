@@ -38,7 +38,6 @@ export class AuthController {
   @UseGuards(AuthGuard('kakao')) // kakao.strategy를 실행시켜 줍니다.
   @HttpCode(301)
   async kakaoLogin(@Req() req: Request, @Res() res: Response) {
-    // console.log(req.user);
     const { accessToken, refreshToken } = await this.authService.getJWT({
       kakaoId: req.user.kakaoId,
     });
