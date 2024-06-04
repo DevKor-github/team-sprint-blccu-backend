@@ -45,10 +45,12 @@ export class UsersRepository extends Repository<User> {
   async fetchUsersWithNameAndFollowing({ kakaoId, username }) {
     const queryBuilder = this.getFollowQuery({ kakaoId });
     const users = await queryBuilder
-      .andWhere('LOWER(user.username) LIKE LOWER(:username)', {
-        username: `%${username}%`,
+      .andWhere('MATCH(user.username) AGAINST (:username IN BOOLEAN MODE)', {
+        username: `*${username}*`,
       })
-      .setParameters({ username: `%${username}%` })
+      // .andWhere('LOWER(user.username) LIKE LOWER(:username)', {
+      //   username: `%${username}%`,
+      // })
       .getRawMany();
 
     return users.map((user) => ({

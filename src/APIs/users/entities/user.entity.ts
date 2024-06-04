@@ -1,11 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Agreement } from 'src/APIs/agreements/entities/agreement.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  OneToMany,
+  Index,
   // PrimaryColumn,
   // PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -46,6 +45,7 @@ export class User {
   })
   follower_count: number;
 
+  @Index({ fulltext: true, parser: 'ngram' })
   @Column({ unique: true })
   @ApiProperty({ description: '유저 이름', type: String })
   username: string;
