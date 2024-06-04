@@ -42,25 +42,21 @@ export class StickerBlock {
   })
   posts: Posts;
 
-  @ApiProperty({ description: '스티커의 width', type: Number })
+  @ApiProperty({ description: '스티커의 posX', type: Number })
   @Column({ type: 'float' })
-  width: number;
+  posX: number;
 
-  @ApiProperty({ description: '스티커의 top', type: Number })
+  @ApiProperty({ description: '스티커의 posY', type: Number })
   @Column({ type: 'float' })
-  top: number;
-
-  @ApiProperty({ description: '스티커의 left', type: Number })
-  @Column({ type: 'float' })
-  left: number;
-
-  @ApiProperty({ description: '스티커의 rotate', type: Number })
-  @Column({ type: 'float' })
-  rotate: number;
+  posY: number;
 
   @ApiProperty({ description: '스티커의 scale', type: Number })
   @Column({ type: 'float' })
   scale: number;
+
+  @ApiProperty({ description: '스티커의 angle', type: Number })
+  @Column({ type: 'float' })
+  angle: number;
 
   @ApiProperty({ description: '스티커의 zindex', type: Number })
   @Column({ type: 'float' })

@@ -7,7 +7,6 @@ import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { UsersService } from '../users/users.service';
-import { FindStickerDto } from './dtos/find-sticker.dto';
 import { UpdateStickerDto } from './dtos/update-sticker.dto';
 
 @Injectable()
@@ -107,33 +106,29 @@ export class StickersService {
         throw new NotFoundException(
           '스티커가 존재하지 않거나 제작자 본인이 아닙니다.',
         );
-      const data = await this.stickersRepository.findOne({ where: { id } });
-      if (isReusable) data.isReusable = isReusable;
+      if (isReusable) sticker.isReusable = isReusable;
       if (image_url) {
-        await this.removeFromS3({ id, kakaoId });
-        data.image_url = image_url;
+        await this.awsService.deleteImageFromS3({ url: sticker.image_url });
+        sticker.image_url = image_url;
       }
-      const result = await this.stickersRepository.save(data);
+      const result = await this.stickersRepository.save(sticker);
       return result;
     } catch (e) {
       throw e;
     }
   }
 
-  async removeFromS3({ id, kakaoId }: FindStickerDto) {
-    try {
-      const sticker = await this.stickersRepository.findOne({
-        where: { id, user: { kakaoId } },
-      });
-      if (!sticker)
-        throw new NotFoundException(
-          '스티커가 존재하지 않거나 제작자 본인이 아닙니다.',
-        );
-      return await this.awsService.deleteImageFromS3({
-        url: sticker.image_url,
-      });
-    } catch (e) {
-      throw e;
-    }
+  async delete({ id, kakaoId }) {
+    const sticker = await this.stickersRepository.findOne({
+      where: { id, user: { kakaoId } },
+    });
+    if (!sticker)
+      throw new NotFoundException(
+        '스티커가 존재하지 않거나 제작자 본인이 아닙니다.',
+      );
+    await this.awsService.deleteImageFromS3({
+      url: sticker.image_url,
+    });
+    return await this.stickersRepository.remove(sticker);
   }
 }

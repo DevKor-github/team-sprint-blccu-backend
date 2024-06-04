@@ -212,10 +212,26 @@ export class PostsService {
   }
 
   async softDelete({ kakaoId, id }: IPostsServicePostUserIdPair) {
+    const data = await this.postsRepository.findOne({
+      where: { user: { kakaoId }, id },
+    });
+    if (data) {
+      await this.awsService.deleteImageFromS3({ url: data.image_url });
+      await this.awsService.deleteImageFromS3({ url: data.main_image_url });
+      await this.stickerBlocksService.deleteBlocks({ kakaoId, postsId: id });
+    }
     return await this.postsRepository.softDelete({ user: { kakaoId }, id });
   }
 
   async hardDelete({ kakaoId, id }: IPostsServicePostUserIdPair) {
+    const data = await this.postsRepository.findOne({
+      where: { user: { kakaoId }, id },
+    });
+    if (data) {
+      await this.awsService.deleteImageFromS3({ url: data.image_url });
+      await this.awsService.deleteImageFromS3({ url: data.main_image_url });
+      await this.stickerBlocksService.deleteBlocks({ kakaoId, postsId: id });
+    }
     return await this.postsRepository.delete({ user: { kakaoId }, id });
   }
 
