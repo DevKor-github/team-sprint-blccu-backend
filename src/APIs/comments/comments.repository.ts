@@ -54,7 +54,11 @@ export class CommentsRepository extends Repository<Comment> {
         'childrenUser.profile_image',
         'childrenUser.handle',
       ])
-      .leftJoinAndSelect('c.children', 'children')
+      .leftJoinAndSelect(
+        'c.children',
+        'children',
+        'children.date_deleted IS NOT NULL',
+      )
       .leftJoin('children.user', 'childrenUser')
       .where('c.postsId = :postsId', { postsId })
       .andWhere('c.parentId IS NULL')
