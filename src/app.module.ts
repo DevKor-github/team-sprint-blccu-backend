@@ -29,9 +29,11 @@ import { BullModule } from '@nestjs/bull';
 import { redisStore } from 'cache-manager-redis-yet';
 import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
+import { MetricsModule } from './modules/metrics/metrics.module';
 
 @Module({
   imports: [
+    MetricsModule,
     AnnouncementsModule,
     AgreementsModule,
     FeedbacksModule,

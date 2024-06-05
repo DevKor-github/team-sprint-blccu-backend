@@ -3,7 +3,6 @@ import { Repository } from 'typeorm';
 import { Sticker } from './entities/sticker.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateStickerDto } from './dtos/create-sticker.dto';
-import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { UsersService } from '../users/users.service';
@@ -13,6 +12,7 @@ import {
   IStickersServiceFetchUserStickers,
   IStickersServiceId,
 } from './interfaces/stickers.service.interface';
+import { AwsService } from 'src/modules/aws/aws.service';
 
 @Injectable()
 export class StickersService {

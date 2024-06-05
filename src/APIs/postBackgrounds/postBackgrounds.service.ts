@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AwsService } from 'src/utils/aws/aws.service';
+
 import { UtilsService } from 'src/utils/utils.service';
 import { PostBackground } from './entities/postBackground.entity';
 import { Repository } from 'typeorm';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
+import { AwsService } from 'src/modules/aws/aws.service';
 
 @Injectable()
 export class PostBackgroundsService {

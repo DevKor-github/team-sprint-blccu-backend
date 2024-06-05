@@ -6,7 +6,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AwsService } from 'src/utils/aws/aws.service';
+
 import { UtilsService } from 'src/utils/utils.service';
 import { DataSource } from 'typeorm';
 import { Posts } from './entities/posts.entity';
@@ -43,6 +43,7 @@ import {
 } from './interfaces/posts.service.interface';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { AwsService } from 'src/modules/aws/aws.service';
 
 @Injectable()
 export class PostsService {

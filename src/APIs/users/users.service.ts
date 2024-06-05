@@ -17,7 +17,6 @@ import {
   UserResponseDtoWithFollowing,
 } from './dtos/user-response.dto';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
-import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { UploadImageDto } from './dtos/upload-image.dto';
 import { UsersRepository } from './users.repository';
@@ -27,6 +26,7 @@ import { Follow } from '../follows/entities/follow.entity';
 import { User } from './entities/user.entity';
 import { Comment } from '../comments/entities/comment.entity';
 import { Feedback } from '../feedbacks/entities/feedback.entity';
+import { AwsService } from 'src/modules/aws/aws.service';
 
 @Injectable()
 export class UsersService {

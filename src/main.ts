@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser';
 import { HttpExceptionFilter } from './common/filter/http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
 import expressBasicAuth from 'express-basic-auth';
+import { PrometheusInterceptor } from './common/interceptors/prometheus.interceptor';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 // import * as expressBasicAuth from 'express-basic-auth';
 
 async function bootstrap() {
@@ -33,6 +35,8 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
+  // app.useGlobalInterceptors(new ResponseInterceptor());
+  app.useGlobalInterceptors(new PrometheusInterceptor());
 
   // wooserk.tistory.com/105
   const config = new DocumentBuilder()
