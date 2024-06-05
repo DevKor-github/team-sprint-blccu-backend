@@ -8,6 +8,11 @@ import { UtilsService } from 'src/utils/utils.service';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { UsersService } from '../users/users.service';
 import { UpdateStickerDto } from './dtos/update-sticker.dto';
+import {
+  IStickersServiceDelete,
+  IStickersServiceFetchUserStickers,
+  IStickersServiceId,
+} from './interfaces/stickers.service.interface';
 
 @Injectable()
 export class StickersService {
@@ -19,11 +24,11 @@ export class StickersService {
     private readonly usersService: UsersService,
   ) {}
 
-  async findStickerById({ id }) {
+  async findStickerById({ id }: IStickersServiceId): Promise<Sticker> {
     return await this.stickersRepository.findOne({ where: { id } });
   }
 
-  async existCheck({ id }) {
+  async existCheck({ id }: IStickersServiceId): Promise<void> {
     const data = await this.findStickerById({ id });
     if (!data) throw new NotFoundException('스티커를 찾을 수 없습니다.');
   }
@@ -80,13 +85,15 @@ export class StickersService {
     return data;
   }
 
-  async fetchUserStickers({ userKakaoId }): Promise<Sticker[]> {
+  async fetchUserStickers({
+    userKakaoId,
+  }: IStickersServiceFetchUserStickers): Promise<Sticker[]> {
     return await this.stickersRepository.find({
       where: { userKakaoId, isReusable: true, isDefault: false },
     });
   }
 
-  async fetchPublicStickers() {
+  async fetchPublicStickers(): Promise<Sticker[]> {
     return await this.stickersRepository.find({
       where: { isDefault: true },
     });
@@ -118,7 +125,7 @@ export class StickersService {
     }
   }
 
-  async delete({ id, kakaoId }): Promise<void> {
+  async delete({ id, kakaoId }: IStickersServiceDelete): Promise<void> {
     const sticker = await this.stickersRepository.findOne({
       where: { id, user: { kakaoId } },
     });

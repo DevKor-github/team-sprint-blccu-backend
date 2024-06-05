@@ -87,12 +87,13 @@ export class StickersController {
   @Patch('stickers/:id')
   @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
+  @ApiOkResponse({ type: Sticker })
   @HttpCode(200)
-  async toggleReusable(
+  async patchSticker(
     @Req() req: Request,
     @Param('id') id: number,
     @Body() body: UpdateStickerInput,
-  ) {
+  ): Promise<Sticker> {
     const kakaoId = req.user.userId;
     return await this.stickersService.updateSticker({
       kakaoId,
