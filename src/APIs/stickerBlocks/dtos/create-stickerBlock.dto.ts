@@ -12,4 +12,5 @@ export class CreateStickerBlockInput extends OmitType(StickerBlock, [
 export class CreateStickerBlockDto extends CreateStickerBlockInput {
   postsId: number;
   stickerId: number;
+  kakaoId: number;
 }

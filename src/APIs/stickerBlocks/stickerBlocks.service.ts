@@ -4,6 +4,7 @@ import { StickerBlock } from './entities/stickerblock.entity';
 import { Repository } from 'typeorm';
 import { CreateStickerBlockDto } from './dtos/create-stickerBlock.dto';
 import { StickersService } from '../stickers/stickers.service';
+import { CreateStickerBlocksDto } from './dtos/create-stickerBlocks.dto';
 
 @Injectable()
 export class StickerBlocksService {
@@ -30,6 +31,18 @@ export class StickerBlocksService {
     } catch (e) {
       throw new NotFoundException('게시글을 찾을 수 없습니다.');
     }
+  }
+
+  async bulkInsert({
+    stickerBlocks,
+    postsId,
+    kakaoId,
+  }: CreateStickerBlocksDto) {
+    const stickerBlocksToInsert = stickerBlocks.map((stickerBlock) => ({
+      ...stickerBlock,
+      postsId,
+    }));
+    return await this.stickerBlocksRepository.save(stickerBlocksToInsert);
   }
 
   async fetchBlocks({ postsId }) {

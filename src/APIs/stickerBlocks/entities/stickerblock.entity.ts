@@ -61,4 +61,8 @@ export class StickerBlock {
   @ApiProperty({ description: '스티커의 zindex', type: Number })
   @Column({ type: 'float' })
   zindex: number;
+
+  @ApiProperty({ description: '스티커의 clientId', type: String })
+  @Column()
+  clientId: string;
 }
