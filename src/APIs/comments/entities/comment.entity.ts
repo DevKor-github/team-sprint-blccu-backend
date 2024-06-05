@@ -80,7 +80,7 @@ export class Comment {
   @UpdateDateColumn()
   date_updated: Date;
 
-  @ApiProperty({ type: Date, description: '논리 삭제 칼럼' })
+  @ApiProperty({ type: Date, description: '논리 삭제 칼럼', nullable: true })
   @DeleteDateColumn()
   date_deleted: Date;
 }

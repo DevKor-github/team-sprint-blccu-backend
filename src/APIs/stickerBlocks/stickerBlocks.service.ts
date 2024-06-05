@@ -42,6 +42,11 @@ export class StickerBlocksService {
       ...stickerBlock,
       postsId,
     }));
+    stickerBlocksToInsert.forEach(async (stickerBlock) => {
+      await this.stickersService.existCheck({
+        id: stickerBlock.stickerId,
+      });
+    });
     return await this.stickerBlocksRepository.save(stickerBlocksToInsert);
   }
 

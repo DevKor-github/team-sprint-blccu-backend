@@ -209,6 +209,30 @@ export class UsersService {
         content,
         userKakaoId: kakaoId,
       });
+      const commentsToDelete = await queryRunner.manager.find(Comment, {
+        where: { userKakaoId: kakaoId },
+      });
+      for (const data of commentsToDelete) {
+        let childrenData = [];
+        if (data.parentId == null)
+          childrenData = await queryRunner.manager.find(Comment, {
+            where: { parentId: data.id },
+          });
+        if (childrenData.length == 0) {
+          await queryRunner.manager.delete(Comment, {
+            id: data.id,
+            user: { kakaoId },
+          });
+          await queryRunner.manager.update(Posts, data.postsId, {
+            comment_count: () => 'comment_count - 1',
+          });
+        } else {
+          await queryRunner.manager.softDelete(Comment, {
+            user: { kakaoId },
+            id: data.id,
+          });
+        }
+      }
       await queryRunner.manager.softDelete(Posts, { userKakaoId: kakaoId });
       // 연동된 댓글 soft delete
       await queryRunner.manager.softDelete(Comment, { userKakaoId: kakaoId });
