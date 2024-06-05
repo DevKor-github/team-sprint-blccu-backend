@@ -61,9 +61,10 @@ export class CommentsRepository extends Repository<Comment> {
       .orderBy('c.date_created', 'ASC')
       .addOrderBy('children.date_created', 'ASC')
       .getMany();
+
     comments.forEach((comment) => {
       comment.children = comment.children.filter(
-        (child) => child.date_deleted !== null,
+        (child) => child.date_deleted === null,
       );
     });
     return comments;

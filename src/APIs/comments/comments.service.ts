@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { CreateCommentDto } from './dtos/create-comment.dto';
 import { CommentsRepository } from './comments.repository';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource, EntityManager, UpdateResult } from 'typeorm';
 import { Posts } from '../posts/entities/posts.entity';
 import {
   ChildrenComment,
@@ -117,6 +117,7 @@ export class CommentsService {
     await this.dataSource.transaction(async (manager: EntityManager) => {
       const data = await this.existCheck({ id });
       let childrenData = [];
+      let deletedResult: UpdateResult;
       if (data.postsId !== postsId) {
         throw new NotFoundException('게시글을 찾을 수 없습니다.');
       }
@@ -130,10 +131,12 @@ export class CommentsService {
           comment_count: () => 'comment_count - 1',
         });
       } else {
-        await manager.softRemove(Comment, {
+        deletedResult = await manager.softDelete(Comment, {
           user: { kakaoId: userKakaoId },
           id,
         });
+        if (deletedResult.affected < 1)
+          throw new NotFoundException('삭제할 댓글이 존재하지 않습니다');
       }
     });
   }
