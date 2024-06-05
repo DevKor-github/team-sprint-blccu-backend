@@ -6,7 +6,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { StickerBlocksService } from './stickerBlocks.service';
-import { CreateStickerBlockInput } from './dtos/create-stickerBlock.dto';
 import {
   CreateStickerBlocksInput,
   CreateStickerBlocksResponseDto,

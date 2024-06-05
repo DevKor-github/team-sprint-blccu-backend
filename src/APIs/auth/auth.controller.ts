@@ -81,8 +81,13 @@ export class AuthController {
       const newAccessToken = await this.authService.refresh(
         req.cookies.refreshToken,
       );
+      const clientDomain = process.env.CLIENT_DOMAIN;
+
       res.cookie('accessToken', newAccessToken, {
         httpOnly: true,
+        domain: clientDomain,
+        sameSite: 'none',
+        secure: true,
       });
       return res.send();
     } catch (e) {
