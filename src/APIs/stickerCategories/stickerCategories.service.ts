@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { StickerCategoryMapper } from './entities/stickerCategoryMapper.entity';
 import { UsersService } from '../users/users.service';
 import { StickersService } from '../stickers/stickers.service';
+import { IStickerCategoriesServiceMapCategory } from './interfaces/stickerCategories.service.interface';
 
 @Injectable()
 export class StickerCategoriesService {
@@ -42,17 +43,13 @@ export class StickerCategoriesService {
     return await this.stickerCategoriesRepository.save({ name });
   }
 
-  async mapCategory({ kakaoId, stickerId, stickerCategoryId }) {
+  async mapCategory({ kakaoId, maps }: IStickerCategoriesServiceMapCategory) {
     await this.usersService.adminCheck({ kakaoId });
-    await this.stickersService.existCheck({ id: stickerId });
-    await this.existCheckById({ id: stickerCategoryId });
-    return await this.stickerCategoryMappersRepository
-      .createQueryBuilder()
-      .insert()
-      .into(StickerCategoryMapper, ['stickerId', 'stickerCategoryId'])
-      .values({ stickerId, stickerCategoryId })
-      .orIgnore()
-      .execute();
+    maps.forEach(async (map) => {
+      await this.existCheckById({ id: map.stickerCategoryId });
+      await this.stickersService.existCheck({ id: map.stickerId });
+    });
+    return await this.stickerCategoryMappersRepository.save(maps);
   }
 
   async fetchStickersByCategoryId({ id }) {

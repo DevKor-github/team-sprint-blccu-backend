@@ -15,7 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { MapCategoryDto } from './dtos/map-category.dto';
+import { BulkMapCategoryDto } from './dtos/map-category.dto';
 import { StickerCategory } from './entities/stickerCategory.entity';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { CreateStickerCategoryInput } from './dtos/create-sticker-category.dto';
@@ -77,7 +77,7 @@ export class StickerCategoriesController {
   @Post('users/admin/stickers/map')
   async mapCategory(
     @Req() req: Request,
-    @Body() mapCategoryDto: MapCategoryDto,
+    @Body() mapCategoryDto: BulkMapCategoryDto,
   ) {
     const kakaoId = req.user.userId;
     return await this.stickerCategoriesService.mapCategory({
