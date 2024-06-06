@@ -56,6 +56,11 @@ export class CommentsService {
   }
 
   async insert(createCommentDto: CreateCommentDto): Promise<ChildrenComment> {
+    const post = await this.dataSource.manager.findOne(Posts, {
+      where: { id: createCommentDto.postsId },
+    });
+    if (post.allow_comment === false)
+      throw new ForbiddenException('댓글이 허용되지 않은 게시물 입니다.');
     if (createCommentDto.parentId)
       await this.postsIdValidCheck({
         parentId: createCommentDto.parentId,
