@@ -52,12 +52,20 @@ export class CreatePostInput {
   @IsString()
   content: string;
 
-  @ApiProperty({ description: '게시글 캡쳐 이미지 url', type: String })
+  @ApiProperty({
+    description: '게시글 캡쳐 이미지 url',
+    type: String,
+    required: false,
+  })
   @IsString()
   @IsOptional()
   image_url?: string;
 
-  @ApiProperty({ description: '게시글 대표 이미지 url', type: String })
+  @ApiProperty({
+    description: '게시글 대표 이미지 url',
+    type: String,
+    required: false,
+  })
   @IsString()
   @IsOptional()
   main_image_url?: string;

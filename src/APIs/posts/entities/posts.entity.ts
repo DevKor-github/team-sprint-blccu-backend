@@ -46,7 +46,7 @@ export class Posts {
   title: string;
 
   @ApiProperty({ description: '수정용 제목', type: String })
-  @Column({ length: 100, default: '' })
+  @Column({ default: '' })
   title_html: string;
 
   @ApiProperty({ description: '임시저장(false), 발행(true)', type: Boolean })
@@ -104,11 +104,11 @@ export class Posts {
   main_description: string;
 
   @ApiProperty({ description: '게시글 캡쳐 이미지 url', type: String })
-  @Column()
+  @Column({ default: '' })
   image_url: string;
 
   @ApiProperty({ description: '게시글 대표 이미지 url', type: String })
-  @Column()
+  @Column({ default: '' })
   main_image_url: string;
 
   @ApiProperty({ description: '연결된 카테고리', type: PostCategory })
