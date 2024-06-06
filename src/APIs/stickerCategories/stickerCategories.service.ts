@@ -23,35 +23,44 @@ export class StickerCategoriesService {
     private readonly stickersService: StickersService,
   ) {}
 
-  async findCategoryByName({ name }: IStickerCategoriesServiceName) {
+  async findCategoryByName({
+    name,
+  }: IStickerCategoriesServiceName): Promise<StickerCategory> {
     return await this.stickerCategoriesRepository.findOne({ where: { name } });
   }
 
-  async findCategoryById({ id }: IStickerCategoriesServiceId) {
+  async findCategoryById({
+    id,
+  }: IStickerCategoriesServiceId): Promise<StickerCategory> {
     return await this.stickerCategoriesRepository.findOne({ where: { id } });
   }
-  async existCheckByName({ name }: IStickerCategoriesServiceName) {
+  async existCheckByName({
+    name,
+  }: IStickerCategoriesServiceName): Promise<void> {
     const data = await this.findCategoryByName({ name });
     if (!data) throw new NotFoundException('스티커 카테고리가 없습니다.');
   }
-  async existCheckById({ id }: IStickerCategoriesServiceId) {
+  async existCheckById({ id }: IStickerCategoriesServiceId): Promise<void> {
     const data = await this.findCategoryById({ id });
     if (!data) throw new NotFoundException('스티커 카테고리가 없습니다.');
   }
 
-  async fetchCategories() {
+  async fetchCategories(): Promise<StickerCategory[]> {
     return await this.stickerCategoriesRepository.find();
   }
 
   async createCategory({
     kakaoId,
     name,
-  }: IStickerCategoriesServiceCreateCategory) {
+  }: IStickerCategoriesServiceCreateCategory): Promise<StickerCategory> {
     await this.usersService.adminCheck({ kakaoId });
     return await this.stickerCategoriesRepository.save({ name });
   }
 
-  async mapCategory({ kakaoId, maps }: IStickerCategoriesServiceMapCategory) {
+  async mapCategory({
+    kakaoId,
+    maps,
+  }: IStickerCategoriesServiceMapCategory): Promise<StickerCategoryMapper[]> {
     await this.usersService.adminCheck({ kakaoId });
     maps.forEach(async (map) => {
       await this.existCheckById({ id: map.stickerCategoryId });
@@ -60,7 +69,9 @@ export class StickerCategoriesService {
     return await this.stickerCategoryMappersRepository.save(maps);
   }
 
-  async fetchStickersByCategoryId({ id }: IStickerCategoriesServiceId) {
+  async fetchStickersByCategoryId({
+    id,
+  }: IStickerCategoriesServiceId): Promise<StickerCategoryMapper[]> {
     await this.existCheckById({ id });
     return await this.stickerCategoryMappersRepository.find({
       relations: { sticker: true, stickerCategory: true },
