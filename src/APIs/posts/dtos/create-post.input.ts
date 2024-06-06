@@ -24,6 +24,10 @@ export class CreatePostInput {
   @IsString()
   title: string;
 
+  @ApiProperty({ description: '수정용 제목', type: String })
+  @IsString()
+  title_html: string;
+
   @ApiProperty({
     description: '댓글 허용 여부(boolean)',
     type: Boolean,

@@ -45,6 +45,10 @@ export class Posts {
   @Column({ length: 100, default: '' })
   title: string;
 
+  @ApiProperty({ description: '수정용 제목', type: String })
+  @Column({ length: 100, default: '' })
+  title_html: string;
+
   @ApiProperty({ description: '임시저장(false), 발행(true)', type: Boolean })
   @Column({ default: false })
   isPublished: boolean;

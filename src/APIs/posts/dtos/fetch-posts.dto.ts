@@ -49,6 +49,7 @@ export const FETCH_POST_OPTION = {
     date_deleted: true,
   },
   title: true,
+  title_html: true,
   content: true,
   main_description: true,
   image_url: true,
