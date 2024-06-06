@@ -67,7 +67,7 @@ export class PostsService {
       `${imageName}.${ext}`,
       file,
       ext,
-      2000,
+      1280,
     );
 
     return { image_url };

@@ -7,9 +7,11 @@ import {
   RelationId,
 } from 'typeorm';
 import { StickerCategory } from './stickerCategory.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class StickerCategoryMapper {
+  @ApiProperty({ type: Number, description: '스티커 아이디' })
   @PrimaryColumn()
   @RelationId(
     (stickerCategoryMapper: StickerCategoryMapper) =>
@@ -24,6 +26,7 @@ export class StickerCategoryMapper {
   })
   sticker: Sticker;
 
+  @ApiProperty({ type: Number, description: '스티커 카테고리 아이디' })
   @PrimaryColumn()
   @RelationId(
     (stickerCategoryMapper: StickerCategoryMapper) =>
