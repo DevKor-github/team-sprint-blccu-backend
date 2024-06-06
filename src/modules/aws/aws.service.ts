@@ -79,7 +79,7 @@ export class AwsService {
 
   async resizeImage(buffer: Buffer, width: number) {
     const resizedImageBuffer = await sharp(buffer, { failOnError: false })
-      .resize({ width })
+      .resize({ width, withoutEnlargement: true })
       .toBuffer();
     return resizedImageBuffer;
   }

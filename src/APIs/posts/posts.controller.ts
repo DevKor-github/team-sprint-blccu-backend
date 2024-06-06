@@ -126,7 +126,8 @@ export class PostsController {
 
   @ApiOperation({
     summary: '이미지 업로드',
-    description: '이미지를 서버에 업로드한다. url을 반환 받는다.',
+    description:
+      '이미지를 서버에 업로드한다. url을 반환 받는다. 게시글 내부 이미지 업로드 및 캡처 이미지 업로드용. ',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
