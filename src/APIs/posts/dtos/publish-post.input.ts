@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { OpenScope } from 'src/common/enums/open-scope.enum';
 import { IsBoolean } from 'src/common/validators/isBoolean';
 
@@ -11,9 +11,15 @@ export class PublishPostInput {
   @IsString()
   postCategoryId: string;
 
-  @ApiProperty({ description: '연결된 내지 fk', type: String })
+  @ApiProperty({
+    description: '연결된 내지 fk',
+    type: String,
+    nullable: true,
+    required: false,
+  })
   @IsString()
-  postBackgroundId: string;
+  @IsOptional()
+  postBackgroundId?: string;
 
   @ApiProperty({
     description: '제목(최대 100자)',

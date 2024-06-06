@@ -44,6 +44,7 @@ import {
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { AwsService } from 'src/modules/aws/aws.service';
+import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
 
 @Injectable()
 export class PostsService {
@@ -90,13 +91,13 @@ export class PostsService {
       .getOne();
     if (!pc && !passNonEssentail)
       throw new BadRequestException('존재하지 않는 post_category입니다.');
-    // const pg = await this.dataSource
-    //   .getRepository(PostBackground)
-    //   .createQueryBuilder('pg')
-    //   .where('pg.id = :id', { id: posts.postBackgroundId })
-    //   .getOne();
-    // if (!pg && !passNonEssentail)
-    //   throw new BadRequestException('존재하지 않는 post_background입니다.');
+    const pg = await this.dataSource
+      .getRepository(PostBackground)
+      .createQueryBuilder('pg')
+      .where('pg.id = :id', { id: posts.postBackgroundId })
+      .getOne();
+    if (!pg && !passNonEssentail)
+      throw new BadRequestException('존재하지 않는 post_background입니다.');
     const us = await this.dataSource
       .getRepository(User)
       .createQueryBuilder('us')
