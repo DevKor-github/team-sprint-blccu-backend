@@ -4,7 +4,14 @@ import { StickerBlock } from './entities/stickerblock.entity';
 import { Repository } from 'typeorm';
 import { CreateStickerBlockDto } from './dtos/create-stickerBlock.dto';
 import { StickersService } from '../stickers/stickers.service';
-import { CreateStickerBlocksDto } from './dtos/create-stickerBlocks.dto';
+import {
+  CreateStickerBlocksDto,
+  CreateStickerBlocksResponseDto,
+} from './dtos/create-stickerBlocks.dto';
+import {
+  IStikcerBlocksServiceDeleteBlocks,
+  IStikcerBlocksServiceFetchBlocks,
+} from './interfaces/stickerBlocks.service.interface';
 
 @Injectable()
 export class StickerBlocksService {
@@ -14,7 +21,9 @@ export class StickerBlocksService {
     private readonly stickerBlocksRepository: Repository<StickerBlock>,
   ) {}
 
-  async create(createStickerBlockDto: CreateStickerBlockDto) {
+  async create(
+    createStickerBlockDto: CreateStickerBlockDto,
+  ): Promise<StickerBlock> {
     // 순환참조 막기 위해 자체 에러 헨들링
     // await this.postsService.existCheck({
     //   id: createStickerBlockDto.postsId,
@@ -37,7 +46,7 @@ export class StickerBlocksService {
     stickerBlocks,
     postsId,
     kakaoId,
-  }: CreateStickerBlocksDto) {
+  }: CreateStickerBlocksDto): Promise<CreateStickerBlocksResponseDto[]> {
     const stickerBlocksToInsert = stickerBlocks.map((stickerBlock) => ({
       ...stickerBlock,
       postsId,
@@ -50,13 +59,18 @@ export class StickerBlocksService {
     return await this.stickerBlocksRepository.save(stickerBlocksToInsert);
   }
 
-  async fetchBlocks({ postsId }) {
+  async fetchBlocks({
+    postsId,
+  }: IStikcerBlocksServiceFetchBlocks): Promise<StickerBlock[]> {
     return await this.stickerBlocksRepository.find({
       where: { postsId },
     });
   }
 
-  async deleteBlocks({ kakaoId, postsId }): Promise<void> {
+  async deleteBlocks({
+    kakaoId,
+    postsId,
+  }: IStikcerBlocksServiceDeleteBlocks): Promise<void> {
     const blocksToDelete = await this.stickerBlocksRepository.find({
       relations: ['sticker'],
       where: { postsId },
