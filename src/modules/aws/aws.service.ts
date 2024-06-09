@@ -35,7 +35,8 @@ export class AwsService {
       ContentType: `image/${ext}`, // 파일 타입,
     });
     await this.s3Client.send(command);
-    return `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET_NAME}/${fileName}`;
+    // return `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET_NAME}/${fileName}`;
+    return `https://${this.configService.get('CLOUDFRONT_DOMAIN_NAME')}/${fileName}`;
   }
 
   async deleteImageFromS3({ url }) {
@@ -74,7 +75,8 @@ export class AwsService {
     await this.s3Client.send(command);
 
     // 업로드된 이미지의 URL을 반환합니다.
-    return `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET_NAME}/${fileName}`;
+    // return `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET_NAME}/${fileName}`;
+    return `https://${this.configService.get('CLOUDFRONT_DOMAIN_NAME')}/${fileName}`;
   }
 
   async resizeImage(buffer: Buffer, width: number) {
