@@ -77,6 +77,9 @@ export class CommentsService {
     const { posts, parent, ...result } =
       await this.commentsRepository.fetchCommentWithNotiInfo({ id });
 
+    // 자신에게 알람 보내는 경우 바로 return
+    if (result.userKakaoId === posts.userKakaoId) return result;
+
     await this.notificationsService.emitAlarm({
       userKakaoId: result.userKakaoId,
       targetUserKakaoId: posts.userKakaoId,

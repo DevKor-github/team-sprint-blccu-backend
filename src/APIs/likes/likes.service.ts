@@ -47,11 +47,13 @@ export class LikesService {
           like_count: () => 'like_count +1',
         });
         await await queryRunner.commitTransaction();
-        await this.notificationsService.emitAlarm({
-          userKakaoId: kakaoId,
-          targetUserKakaoId: postData.userKakaoId,
-          type: NotType.LIKE,
-        });
+        if (kakaoId != postData.userKakaoId) {
+          await this.notificationsService.emitAlarm({
+            userKakaoId: kakaoId,
+            targetUserKakaoId: postData.userKakaoId,
+            type: NotType.LIKE,
+          });
+        }
         return likeData;
       }
     } catch (e) {

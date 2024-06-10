@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, MessageEvent } from '@nestjs/common';
 import { NotificationsRepository } from './notifications.repository';
 import { Observable, Subject, filter, map } from 'rxjs';
-import { Notification } from './entities/notification.entity';
 import { EmitNotiDto } from './dtos/emit-noti.dto';
 import { FetchNotiDto, FetchNotiResponse } from './dtos/fetch-noti.dto';
 import { DateOption } from 'src/common/enums/date-option';

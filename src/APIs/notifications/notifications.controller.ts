@@ -22,6 +22,7 @@ import { Request, Response } from 'express';
 
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { FetchNotiInput, FetchNotiResponse } from './dtos/fetch-noti.dto';
+import { interval, map, merge } from 'rxjs';
 
 @ApiTags('알림 API')
 @Controller('notifications')
@@ -44,12 +45,17 @@ export class NotificationsController {
   @ApiProduces('text/event-stream')
   @UseGuards(AuthGuardV2)
   @Sse('subscribe')
-  connectUser(@Req() req: Request) {
+  connectUser(@Req() req: Request, @Res() res: Response) {
     const targetUserKakaoId = req.user.userId;
+    res.setTimeout(60 * 10000); // 600초로 설정, 필요에 따라 변경 가능 nginx도 함께 변경할 것.
+
     const sseStream = this.notificationsService.connectUser({
       targetUserKakaoId,
     });
-    return sseStream;
+    const pingStream = interval(30000).pipe(
+      map(() => ({ type: 'ping', data: 'keep-alive' })),
+    );
+    return merge(sseStream, pingStream);
   }
 
   @ApiOperation({
@@ -63,14 +69,8 @@ export class NotificationsController {
   @UseGuards(AuthGuardV2)
   async fetchNoti(
     @Req() req: Request,
-    @Res() res: Response,
     @Query() fetchNotiInput: FetchNotiInput,
   ): Promise<FetchNotiResponse[]> {
-    res.setTimeout(60 * 10000); // 600초로 설정, 필요에 따라 변경 가능
-    req.on('close', () => {
-      subscription.unsubscribe();
-      res.end();
-    });
     const kakaoId = req.user.userId;
     return await this.notificationsService.fetch({
       kakaoId,
