@@ -2,6 +2,7 @@ import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { IsEnum, IsOptional } from 'class-validator';
 import { DateOption } from 'src/common/enums/date-option';
 import { Notification } from '../entities/notification.entity';
+import { User } from 'src/APIs/users/entities/user.entity';
 
 export class FetchNotiInput {
   @ApiProperty({
@@ -30,4 +31,6 @@ export class FetchNotiDto extends FetchNotiInput {
 export class FetchNotiResponse extends OmitType(Notification, [
   'targetUser',
   'user',
-]) {}
+]) {
+  user: Pick<User, 'username' | 'profile_image' | 'handle'>;
+}

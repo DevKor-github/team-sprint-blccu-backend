@@ -59,10 +59,12 @@ export class NotificationsService {
         targetUserKakaoId,
         type,
       });
-      console.log(data);
       // Redis 큐에 이벤트를 전송
       await this.redisQueue.add(this.queueName, data);
-      return data;
+      return await this.notificationsRepository.fetchOne({
+        id: data.id,
+        targetUserKakaoId,
+      });
     } catch (e) {
       throw new BadRequestException('대상을 찾을 수 없습니다.');
     }
@@ -108,8 +110,9 @@ export class NotificationsService {
     if (updateResult.affected < 1) {
       throw new BadRequestException('알림을 찾을 수 없거나 권한이 없습니다.');
     }
-    return await this.notificationsRepository.findOne({
-      where: { id, targetUserKakaoId },
+    return await this.notificationsRepository.fetchOne({
+      id,
+      targetUserKakaoId,
     });
   }
 }

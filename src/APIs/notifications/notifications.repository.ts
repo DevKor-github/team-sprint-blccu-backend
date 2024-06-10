@@ -3,6 +3,7 @@ import { Notification } from './entities/notification.entity';
 import { DataSource, Repository } from 'typeorm';
 import { EmitNotiDto } from './dtos/emit-noti.dto';
 import { FetchNotiResponse } from './dtos/fetch-noti.dto';
+import { INotificationsServiceRead } from './interfaces/notifications.service.interface';
 
 @Injectable()
 export class NotificationsRepository extends Repository<Notification> {
@@ -18,26 +19,40 @@ export class NotificationsRepository extends Repository<Notification> {
       .execute();
   }
 
+  async fetchOne({
+    id,
+    targetUserKakaoId,
+  }: INotificationsServiceRead): Promise<FetchNotiResponse> {
+    return await this.createQueryBuilder('n')
+      .leftJoin('n.user', 'user')
+      .addSelect(['user.profile_image', 'user.username', 'user.handle'])
+      .where('n.id = :id', { id })
+      .andWhere('n.targetUserKakaoId = :targetUserKakaoId', {
+        targetUserKakaoId,
+      })
+      .getOne();
+  }
+
   async fetchAll({
     kakaoId,
     date_created,
     is_checked,
   }): Promise<FetchNotiResponse[]> {
-    const query = this.createQueryBuilder('').where(
-      'targetUserKakaoId = :kakaoId',
-      {
+    const query = this.createQueryBuilder('n')
+      .leftJoinAndSelect('n.user', 'user')
+      .addSelect(['user.profile_image', 'user.username', 'user.handle'])
+      .where('n.targetUserKakaoId = :kakaoId', {
         kakaoId,
-      },
-    );
+      });
     if (!is_checked) {
-      query.andWhere('is_checked = true');
+      query.andWhere('n.is_checked = true');
     }
     if (date_created) {
-      query.andWhere('date_created > :date_created', { date_created });
+      query.andWhere('n.date_created > :date_created', { date_created });
     }
     // 열 이름을 별칭으로 지정하여 원래 이름 그대로 출력
     const columnNames = (await this.metadata.columns).map(
-      (column) => `${column.databaseName} AS ${column.propertyName}`,
+      (column) => `n.${column.databaseName} AS ${column.propertyName}`,
     );
     query.select(columnNames);
     return await query.execute();
