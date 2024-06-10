@@ -39,7 +39,7 @@ export class NotificationsRepository extends Repository<Notification> {
     is_checked,
   }): Promise<FetchNotiResponse[]> {
     const query = this.createQueryBuilder('n')
-      .leftJoinAndSelect('n.user', 'user')
+      .leftJoin('n.user', 'user')
       .addSelect(['user.profile_image', 'user.username', 'user.handle'])
       .where('n.targetUserKakaoId = :kakaoId', {
         kakaoId,
@@ -51,10 +51,10 @@ export class NotificationsRepository extends Repository<Notification> {
       query.andWhere('n.date_created > :date_created', { date_created });
     }
     // 열 이름을 별칭으로 지정하여 원래 이름 그대로 출력
-    const columnNames = (await this.metadata.columns).map(
-      (column) => `n.${column.databaseName} AS ${column.propertyName}`,
-    );
-    query.select(columnNames);
-    return await query.execute();
+    // const columnNames = (await this.metadata.columns).map(
+    //   (column) => `n.${column.databaseName} AS ${column.propertyName}`,
+    // );
+    // query.addSelect(columnNames);
+    return await query.getMany();
   }
 }

@@ -96,7 +96,7 @@ export class PostsService {
       .createQueryBuilder('pg')
       .where('pg.id = :id', { id: posts.postBackgroundId })
       .getOne();
-    if (!pg && !passNonEssentail)
+    if (!pg && posts.postBackgroundId && !passNonEssentail)
       throw new BadRequestException('존재하지 않는 post_background입니다.');
     const us = await this.dataSource
       .getRepository(User)

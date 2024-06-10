@@ -1,4 +1,4 @@
-import { ApiProperty, OmitType } from '@nestjs/swagger';
+import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
 import { IsEnum, IsOptional } from 'class-validator';
 import { DateOption } from 'src/common/enums/date-option';
 import { Notification } from '../entities/notification.entity';
@@ -32,5 +32,8 @@ export class FetchNotiResponse extends OmitType(Notification, [
   'targetUser',
   'user',
 ]) {
+  @ApiProperty({
+    type: PickType(User, ['username', 'profile_image', 'handle']),
+  })
   user: Pick<User, 'username' | 'profile_image' | 'handle'>;
 }

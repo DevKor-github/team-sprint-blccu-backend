@@ -18,7 +18,7 @@ export class NotificationsService {
     @InjectQueue('audio') private redisQueue: Queue,
     private readonly notificationsRepository: NotificationsRepository,
   ) {}
-  private notis$: Subject<Notification> = new Subject();
+  private notis$: Subject<FetchNotiResponse> = new Subject();
   private observer = this.notis$.asObservable();
   private readonly queueName = 'audio';
 
@@ -59,12 +59,13 @@ export class NotificationsService {
         targetUserKakaoId,
         type,
       });
-      // Redis 큐에 이벤트를 전송
-      await this.redisQueue.add(this.queueName, data);
-      return await this.notificationsRepository.fetchOne({
+      const response = await this.notificationsRepository.fetchOne({
         id: data.id,
         targetUserKakaoId,
       });
+      // Redis 큐에 이벤트를 전송
+      await this.redisQueue.add(this.queueName, response);
+      return response;
     } catch (e) {
       throw new BadRequestException('대상을 찾을 수 없습니다.');
     }
