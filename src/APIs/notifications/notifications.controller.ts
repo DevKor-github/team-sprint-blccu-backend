@@ -6,6 +6,7 @@ import {
   Post,
   Query,
   Req,
+  Res,
   Sse,
   UseGuards,
 } from '@nestjs/common';
@@ -17,7 +18,7 @@ import {
   ApiProduces,
   ApiTags,
 } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { FetchNotiInput, FetchNotiResponse } from './dtos/fetch-noti.dto';
@@ -62,8 +63,14 @@ export class NotificationsController {
   @UseGuards(AuthGuardV2)
   async fetchNoti(
     @Req() req: Request,
+    @Res() res: Response,
     @Query() fetchNotiInput: FetchNotiInput,
   ): Promise<FetchNotiResponse[]> {
+    res.setTimeout(60 * 10000); // 600초로 설정, 필요에 따라 변경 가능
+    req.on('close', () => {
+      subscription.unsubscribe();
+      res.end();
+    });
     const kakaoId = req.user.userId;
     return await this.notificationsService.fetch({
       kakaoId,
