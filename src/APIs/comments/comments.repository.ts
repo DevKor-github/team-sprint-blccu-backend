@@ -37,7 +37,7 @@ export class CommentsRepository extends Repository<Comment> {
   async fetchComments({
     postsId,
   }: ICommentsRepositoryfetchComments): Promise<FetchCommentsDto[]> {
-    const comments = await this.createQueryBuilder('c')
+    let comments = await this.createQueryBuilder('c')
       .withDeleted()
       .innerJoin('c.user', 'u')
       .addSelect([
@@ -62,11 +62,14 @@ export class CommentsRepository extends Repository<Comment> {
       .addOrderBy('children.date_created', 'ASC')
       .getMany();
 
-    // comments.forEach((comment) => {
-    //   comment.children = comment.children.filter(
-    //     (child) => child.date_deleted === null,
-    //   );
-    // });
+    comments = comments.filter((comment) => {
+      comment.children = comment.children.filter(
+        (child) => child.date_deleted === null,
+      );
+      // comment.children.length가 0이고 comment.date_deleted가 null이 아닌 경우를 제외
+      return !(comment.children.length === 0 && comment.date_deleted !== null);
+    });
+
     return comments;
   }
 }
