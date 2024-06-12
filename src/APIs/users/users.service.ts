@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
@@ -103,7 +102,6 @@ export class UsersService {
       select: USER_SELECT_OPTION,
       where: { handle },
     });
-    if (!result) throw new NotFoundException('유저를 찾을 수 없습니다.');
     return result;
   }
 

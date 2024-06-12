@@ -20,7 +20,6 @@ import {
   ApiCookieAuth,
   ApiCreatedResponse,
   ApiNoContentResponse,
-  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -89,7 +88,6 @@ export class UsersController {
     description: 'handle이 일치하는 유저 프로필을 조회한다.',
   })
   @ApiOkResponse({ description: '조회 성공', type: UserResponseDto })
-  @ApiNotFoundResponse({ description: '핸들에 일치하는 유저가 없습니다' })
   @HttpCode(200)
   @Get('profile/handle/:handle')
   async findUserByHandle(
