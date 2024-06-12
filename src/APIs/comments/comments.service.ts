@@ -77,21 +77,22 @@ export class CommentsService {
     const { posts, parent, ...result } =
       await this.commentsRepository.fetchCommentWithNotiInfo({ id });
 
-    // 자신에게 알람 보내는 경우 바로 return
-    if (result.userKakaoId === posts.userKakaoId) return result;
-
-    await this.notificationsService.emitAlarm({
-      userKakaoId: result.userKakaoId,
-      targetUserKakaoId: posts.userKakaoId,
-      type: NotType.COMMENT,
-    });
-    if (result.parentId) {
+    if (result.parentId && parent.userKakaoId != result.userKakaoId) {
       await this.notificationsService.emitAlarm({
         userKakaoId: result.userKakaoId,
         targetUserKakaoId: parent.userKakaoId,
         type: NotType.REPLY,
       });
     }
+    // 자신에게 알림 보내는 경우 생략
+    if (result.userKakaoId != posts.userKakaoId) {
+      await this.notificationsService.emitAlarm({
+        userKakaoId: result.userKakaoId,
+        targetUserKakaoId: posts.userKakaoId,
+        type: NotType.COMMENT,
+      });
+    }
+
     return result;
   }
 
