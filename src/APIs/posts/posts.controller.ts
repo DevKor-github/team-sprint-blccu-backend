@@ -249,6 +249,8 @@ export class PostsController {
     description:
       '커서 기반으로 게시글을 조회한다. 최초 조회 시 커서 값을 비워서 요청한다. 쿼리 옵션을 변경할 경우 기존의 커서 값을 쓸 수 없다.',
   })
+  @ApiCookieAuth()
+  @UseGuards(AuthGuardV2)
   @Get('cursor/friends')
   @ApiOkResponse({ type: CursorPagePostResponseDto })
   async fetchFriendsCursor(

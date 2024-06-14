@@ -27,6 +27,7 @@ import { User } from './entities/user.entity';
 import { Comment } from '../comments/entities/comment.entity';
 import { Feedback } from '../feedbacks/entities/feedback.entity';
 import { AwsService } from 'src/modules/aws/aws.service';
+import { Agreement } from '../agreements/entities/agreement.entity';
 
 @Injectable()
 export class UsersService {
@@ -270,6 +271,17 @@ export class UsersService {
           1,
         );
       }
+      await queryRunner.manager.delete(Agreement, { userKakaoId: kakaoId });
+      const userData = await queryRunner.manager.findOne(User, {
+        where: { kakaoId },
+      });
+      const userTempName = 'USER' + this.utilsService.getUUID().substring(0, 8);
+      userData.username = userTempName;
+      userData.handle = userTempName;
+      userData.description = '';
+      userData.profile_image = '';
+      userData.background_image = '';
+      await queryRunner.manager.save(User, userData);
       await queryRunner.manager.softDelete(User, { kakaoId });
       await queryRunner.commitTransaction();
       return;
