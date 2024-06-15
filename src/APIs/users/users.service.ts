@@ -234,6 +234,9 @@ export class UsersService {
           });
         }
       }
+      await queryRunner.manager.delete(Notification, {
+        targetUserKakaoId: kakaoId,
+      });
       await queryRunner.manager.softDelete(Posts, { userKakaoId: kakaoId });
       // 연동된 댓글 soft delete
       await queryRunner.manager.softDelete(Comment, { userKakaoId: kakaoId });
