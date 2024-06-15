@@ -112,6 +112,7 @@ export class FollowsService {
         userKakaoId: from_user,
         targetUserKakaoId: to_user,
         type: NotType.FOLLOW,
+        postId: null,
       });
       return await this.followsRepository.findOne({ where: { id: follow.id } });
     } catch (e) {

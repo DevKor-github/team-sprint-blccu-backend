@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Posts } from 'src/APIs/posts/entities/posts.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
 import { NotType } from 'src/common/enums/not-type.enum';
 import {
@@ -53,4 +54,25 @@ export class Notification {
   @ApiProperty({ description: '삭제된 날짜', type: Date })
   @DeleteDateColumn()
   date_deleted: Date;
+
+  @ApiProperty({
+    type: Number,
+    description: '알림이 발생한 게시글 id(nullable)',
+  })
+  @Column({ nullable: true })
+  @RelationId((notification: Notification) => notification.post)
+  postId: number;
+
+  @ApiProperty({
+    type: Posts,
+    description: '알림이 연결된 게시물',
+    nullable: true,
+  })
+  @JoinColumn()
+  @ManyToOne(() => Posts, {
+    nullable: true,
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL',
+  }) // 게시물을 참조하는 경우
+  post: Posts;
 }

@@ -82,6 +82,7 @@ export class CommentsService {
         userKakaoId: result.userKakaoId,
         targetUserKakaoId: parent.userKakaoId,
         type: NotType.REPLY,
+        postId: result.postsId,
       });
     }
     // 자신에게 알림 보내는 경우 생략
@@ -90,6 +91,7 @@ export class CommentsService {
         userKakaoId: result.userKakaoId,
         targetUserKakaoId: posts.userKakaoId,
         type: NotType.COMMENT,
+        postId: result.postsId,
       });
     }
 

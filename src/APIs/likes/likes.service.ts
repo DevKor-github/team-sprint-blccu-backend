@@ -52,6 +52,7 @@ export class LikesService {
             userKakaoId: kakaoId,
             targetUserKakaoId: postData.userKakaoId,
             type: NotType.LIKE,
+            postId: postData.id,
           });
         }
         return likeData;

@@ -31,6 +31,7 @@ export class FetchNotiDto extends FetchNotiInput {
 export class FetchNotiResponse extends OmitType(Notification, [
   'targetUser',
   'user',
+  'post',
 ]) {
   @ApiProperty({
     type: PickType(User, ['username', 'profile_image', 'handle']),

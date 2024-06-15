@@ -60,6 +60,7 @@ export class AuthController {
     res.cookie('isLoggedIn', true, { httpOnly: false, domain: clientDomain });
 
     return res.redirect(process.env.CLIENT_URL);
+    // return res.send();
   }
 
   @ApiOperation({
