@@ -308,14 +308,10 @@ export class PostsService {
     let date_filter: Date;
     if (cursorOption.date_created)
       date_filter = this.getDate(cursorOption.date_created);
-    const subQuery = await this.dataSource
-      .createQueryBuilder(Follow, 'n')
-      .select('n.toUserKakaoId')
-      .where(`n.fromUserKakaoId = ${kakaoId}`)
-      .getQuery();
+
     const { posts } = await this.postsRepository.fetchFriendsPostsCursor({
       cursorOption,
-      subQuery,
+      kakaoId,
       date_filter,
     });
     return await this.createCursorResponse({ posts, cursorOption });

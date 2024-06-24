@@ -22,7 +22,7 @@ export interface IPostsRepoFetchPostsCursor
 export interface IPostsRepoFetchFriendsPostsCursor
   extends Pick<IPostsServiceFetchFriendsPostsCursor, 'cursorOption'> {
   date_filter: Date;
-  subQuery: string;
+  kakaoId: number;
 }
 
 export interface IPostsRepoFetchUserPostsCursor
