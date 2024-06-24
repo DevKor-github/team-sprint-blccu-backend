@@ -65,7 +65,7 @@ export class Notification {
 
   @ApiProperty({
     type: Posts,
-    description: '알림이 연결된 게시물',
+    description: '알림이 발생한 게시물',
     nullable: true,
   })
   @JoinColumn()
