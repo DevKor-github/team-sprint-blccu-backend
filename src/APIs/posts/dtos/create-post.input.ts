@@ -1,23 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { OpenScope } from 'src/commons/enums/open-scope.enum';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
+import { OpenScope } from 'src/common/enums/open-scope.enum';
 
 export class CreatePostInput {
-  @ApiProperty({
-    description: '포스트의 고유 아이디',
-    type: Number,
-    required: false,
-  })
-  @IsNumber()
-  @IsOptional()
-  id?: number;
-
   @ApiProperty({
     description: '연결된 카테고리 fk',
     type: String,
@@ -29,6 +14,7 @@ export class CreatePostInput {
 
   @ApiProperty({ description: '연결된 내지 fk', type: String, required: false })
   @IsString()
+  @IsOptional()
   postBackgroundId?: string;
 
   @ApiProperty({
@@ -37,6 +23,10 @@ export class CreatePostInput {
   })
   @IsString()
   title: string;
+
+  @ApiProperty({ description: '수정용 제목', type: String })
+  @IsString()
+  title_html: string;
 
   @ApiProperty({
     description: '댓글 허용 여부(boolean)',
@@ -55,18 +45,27 @@ export class CreatePostInput {
     required: false,
   })
   @IsEnum(OpenScope)
+  @IsOptional()
   scope?: OpenScope;
 
   @ApiProperty({ description: '게시글 내용', type: String })
   @IsString()
   content: string;
 
-  @ApiProperty({ description: '게시글 캡쳐 이미지 url', type: String })
+  @ApiProperty({
+    description: '게시글 캡쳐 이미지 url',
+    type: String,
+    required: false,
+  })
   @IsString()
   @IsOptional()
   image_url?: string;
 
-  @ApiProperty({ description: '게시글 대표 이미지 url', type: String })
+  @ApiProperty({
+    description: '게시글 대표 이미지 url',
+    type: String,
+    required: false,
+  })
   @IsString()
   @IsOptional()
   main_image_url?: string;

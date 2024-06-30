@@ -1,35 +1,50 @@
 import {
   BadRequestException,
+  ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AwsService } from 'src/utils/aws/aws.service';
+
 import { UtilsService } from 'src/utils/utils.service';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { Posts } from './entities/posts.entity';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Page } from '../../utils/pages/page';
 import { FetchPostsDto } from './dtos/fetch-posts.dto';
 import { PagePostResponseDto } from './dtos/page-post-response.dto';
-import { Neighbor } from '../neighbors/entities/neighbor.entity';
 import { FetchFriendsPostsDto } from './dtos/fetch-friends-posts.dto';
-import { CreatePostDto } from './dtos/create-post.dto';
 import { PostCategory } from '../postCategories/entities/postCategory.entity';
-import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
 import { User } from '../users/entities/user.entity';
-import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
+import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { StickerBlocksService } from '../stickerBlocks/stickerBlocks.service';
 import { PostsRepository } from './posts.repository';
-import { CommentsService } from '../comments/comments.service';
-import { FetchUserPostsDto } from './dtos/fetch-user-posts.dto';
-import { OpenScope } from 'src/commons/enums/open-scope.enum';
-import { PostResponseDto } from './dtos/post-response.dto';
-import { fetchPostDetailDto } from './dtos/fetch-post-detail.dto';
+import { PostOnlyResponseDto, PostResponseDto } from './dtos/post-response.dto';
 import {
   FetchPostForUpdateDto,
   PostResponseDtoExceptCategory,
 } from './dtos/fetch-post-for-update.dto';
+import { CustomCursorPageMetaDto } from 'src/utils/cursor-pages/dtos/cursor-page-meta.dto';
+import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
+import { PostsOrderOption } from 'src/common/enums/posts-order-option';
+import { FollowsService } from '../follows/follows.service';
+import { DateOption } from 'src/common/enums/date-option';
+import { Follow } from '../follows/entities/follow.entity';
+import {
+  IPostsServiceCreate,
+  IPostsServiceCreateCursorResponse,
+  IPostsServiceFetchFriendsPostsCursor,
+  IPostsServiceFetchPostForUpdate,
+  IPostsServiceFetchPostsCursor,
+  IPostsServiceFetchUserPostsCursor,
+  IPostsServicePatchPost,
+  IPostsServicePostId,
+  IPostsServicePostUserIdPair,
+} from './interfaces/posts.service.interface';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { AwsService } from 'src/modules/aws/aws.service';
+import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
 
 @Injectable()
 export class PostsService {
@@ -38,26 +53,10 @@ export class PostsService {
     private readonly utilsService: UtilsService,
     private readonly dataSource: DataSource,
     private readonly stickerBlocksService: StickerBlocksService,
-    private readonly commentsService: CommentsService,
     private readonly postsRepository: PostsRepository,
-    @InjectRepository(Neighbor)
-    private readonly neighborsRepository: Repository<Neighbor>,
+    private readonly followsService: FollowsService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
-  async saveImage(file: Express.Multer.File) {
-    return await this.imageUpload(file);
-  }
-
-  async getScope({ from_user, to_user }) {
-    if (from_user === to_user)
-      return [OpenScope.PUBLIC, OpenScope.PROTECTED, OpenScope.PRIVATE];
-    const neighbor = await this.neighborsRepository.findOne({
-      where: { from_user, to_user },
-    });
-    if (neighbor) {
-      return [OpenScope.PUBLIC, OpenScope.PROTECTED];
-    }
-    return [OpenScope.PUBLIC];
-  }
 
   async imageUpload(
     file: Express.Multer.File,
@@ -69,15 +68,16 @@ export class PostsService {
       `${imageName}.${ext}`,
       file,
       ext,
+      1280,
     );
 
     return { image_url };
   }
-  async findPostsById({ id }) {
+  async findPostsById({ id }: IPostsServicePostId) {
     return await this.postsRepository.findOne({ where: { id } });
   }
 
-  async existCheck({ id }) {
+  async existCheck({ id }: IPostsServicePostId) {
     const data = await this.findPostsById({ id });
     if (!data) throw new NotFoundException('게시글을 찾을 수 없습니다.');
     return data;
@@ -96,7 +96,7 @@ export class PostsService {
       .createQueryBuilder('pg')
       .where('pg.id = :id', { id: posts.postBackgroundId })
       .getOne();
-    if (!pg)
+    if (!pg && posts.postBackgroundId && !passNonEssentail)
       throw new BadRequestException('존재하지 않는 post_background입니다.');
     const us = await this.dataSource
       .getRepository(User)
@@ -106,27 +106,15 @@ export class PostsService {
     if (!us) throw new BadRequestException('존재하지 않는 user입니다.');
   }
 
-  async save(createPostDto: CreatePostDto) {
+  async save(createPostDto: IPostsServiceCreate) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    let post = {};
+    const post = {};
     try {
-      if (createPostDto.id) {
-        post = await queryRunner.manager.findOne(Posts, {
-          where: {
-            id: createPostDto.id,
-            user: { kakaoId: createPostDto.userKakaoId },
-          },
-        });
-        if (!post) {
-          await delete createPostDto.id;
-          post = {};
-        }
-      }
       Object.keys(createPostDto).map((el) => {
         const value = createPostDto[el];
-        if (createPostDto[el]) {
+        if (createPostDto[el] != null) {
           post[el] = value;
         }
       });
@@ -139,12 +127,12 @@ export class PostsService {
         .insert()
         .into(Posts, Object.keys(post))
         .values(post)
-        .orUpdate(Object.keys(post), ['id'], {
-          skipUpdateIfNoValuesChanged: true,
-        })
         .execute();
       await queryRunner.commitTransaction();
-      return data;
+      const result = this.postsRepository.findOne({
+        where: { id: data.identifiers[0].id },
+      });
+      return result;
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw e;
@@ -153,12 +141,30 @@ export class PostsService {
     }
   }
 
+  async patchPost({
+    kakaoId,
+    id,
+    ...rest
+  }: IPostsServicePatchPost): Promise<PostOnlyResponseDto> {
+    const postData = await this.existCheck({ id });
+    if (postData.userKakaoId != kakaoId)
+      throw new ForbiddenException('게시글 작성자가 아닙니다.');
+    Object.keys(rest).forEach((value) => {
+      if (rest[value] != null) postData[value] = rest[value];
+    });
+    await this.fkValidCheck({ posts: postData, passNonEssentail: false });
+    return await this.postsRepository.save(postData);
+  }
+
   async fetchPosts(page: FetchPostsDto): Promise<PagePostResponseDto> {
     const postsAndCounts = await this.postsRepository.fetchPosts(page);
     return new Page<Posts>(postsAndCounts[1], page.pageSize, postsAndCounts[0]);
   }
 
-  async fetchPostForUpdate({ id, kakaoId }): Promise<FetchPostForUpdateDto> {
+  async fetchPostForUpdate({
+    id,
+    kakaoId,
+  }: IPostsServiceFetchPostForUpdate): Promise<FetchPostForUpdateDto> {
     const data = await this.existCheck({ id });
     await this.fkValidCheck({ posts: data, passNonEssentail: true });
     if (data.userKakaoId !== kakaoId)
@@ -174,8 +180,8 @@ export class PostsService {
     kakaoId,
     page,
   }: FetchFriendsPostsDto): Promise<PagePostResponseDto> {
-    const subQuery = await this.neighborsRepository
-      .createQueryBuilder('n')
+    const subQuery = await this.dataSource
+      .createQueryBuilder(Follow, 'n')
       .select('n.toUserKakaoId')
       .where(`n.fromUserKakaoId = ${kakaoId}`)
       .getQuery();
@@ -191,39 +197,185 @@ export class PostsService {
     return await this.postsRepository.fetchTempPosts(kakaoId);
   }
 
-  async fetchDetail({ kakaoId, id }): Promise<fetchPostDetailDto> {
+  async fetchDetail({
+    kakaoId,
+    id,
+  }: IPostsServicePostUserIdPair): Promise<PostResponseDto> {
     const data = await this.existCheck({ id });
     await this.fkValidCheck({ posts: data, passNonEssentail: false });
-    const scope = await this.getScope({
+    const scope = await this.followsService.getScope({
       from_user: data.userKakaoId,
       to_user: kakaoId,
     });
-    const comments = await this.commentsService.fetchComments({ postsId: id });
+    // const comments = await this.commentsService.fetchComments({ postsId: id });
     const post = await this.postsRepository.fetchPostDetail({ id, scope });
-    return { comments, post };
+    console.log(data, post);
+    return post;
   }
 
-  async softDelete({ kakaoId, id }) {
+  async softDelete({ kakaoId, id }: IPostsServicePostUserIdPair) {
+    const data = await this.postsRepository.findOne({
+      where: { user: { kakaoId }, id },
+    });
+    if (data) {
+      await this.awsService.deleteImageFromS3({ url: data.image_url });
+      await this.awsService.deleteImageFromS3({ url: data.main_image_url });
+      await this.stickerBlocksService.deleteBlocks({ kakaoId, postsId: id });
+    }
     return await this.postsRepository.softDelete({ user: { kakaoId }, id });
   }
 
-  async hardDelete({ kakaoId, id }) {
+  async hardDelete({ kakaoId, id }: IPostsServicePostUserIdPair) {
+    const data = await this.postsRepository.findOne({
+      where: { user: { kakaoId }, id },
+    });
+    if (data) {
+      await this.awsService.deleteImageFromS3({ url: data.image_url });
+      await this.awsService.deleteImageFromS3({ url: data.main_image_url });
+      await this.stickerBlocksService.deleteBlocks({ kakaoId, postsId: id });
+    }
     return await this.postsRepository.delete({ user: { kakaoId }, id });
   }
 
-  async fetchUserPosts({
+  //cursor
+  async createCursorResponse({
+    cursorOption,
+    posts,
+  }: IPostsServiceCreateCursorResponse): Promise<
+    CustomCursorPageDto<PostResponseDto>
+  > {
+    const order = PostsOrderOption[cursorOption.order];
+    let hasNextData: boolean = true;
+    let customCursor: string;
+
+    const takePerPage = cursorOption.take;
+    const isLastPage = posts.length <= takePerPage;
+    const responseData = posts.slice(0, takePerPage);
+    const lastDataPerPage = responseData[responseData.length - 1];
+
+    if (isLastPage) {
+      hasNextData = false;
+      customCursor = null;
+    } else {
+      customCursor = await this.createCustomCursor({
+        post: lastDataPerPage,
+        order,
+      });
+    }
+
+    const customCursorPageMetaDto = new CustomCursorPageMetaDto({
+      customCursorPageOptionsDto: cursorOption,
+      hasNextData,
+      customCursor,
+    });
+
+    return new CustomCursorPageDto(responseData, customCursorPageMetaDto);
+  }
+
+  async fetchPostsCursor({
+    cursorOption,
+  }: IPostsServiceFetchPostsCursor): Promise<
+    CustomCursorPageDto<PostResponseDto>
+  > {
+    const cacheKey = `fetchPostsCursor_${JSON.stringify(cursorOption)}`;
+
+    const cachedPosts =
+      await this.cacheManager.get<CustomCursorPageDto<PostResponseDto>>(
+        cacheKey,
+      );
+    if (cachedPosts) {
+      return cachedPosts;
+    }
+
+    let date_filter: Date;
+    if (cursorOption.date_created)
+      date_filter = this.getDate(cursorOption.date_created);
+    const { posts } = await this.postsRepository.fetchPostsCursor({
+      cursorOption,
+      date_filter,
+    });
+    const result = await this.createCursorResponse({ posts, cursorOption });
+    await this.cacheManager.set(cacheKey, result, 180000);
+    return result;
+  }
+
+  async fetchFriendsPostsCursor({
+    cursorOption,
+    kakaoId,
+  }: IPostsServiceFetchFriendsPostsCursor): Promise<
+    CustomCursorPageDto<PostResponseDto>
+  > {
+    let date_filter: Date;
+    if (cursorOption.date_created)
+      date_filter = this.getDate(cursorOption.date_created);
+
+    const { posts } = await this.postsRepository.fetchFriendsPostsCursor({
+      cursorOption,
+      kakaoId,
+      date_filter,
+    });
+    return await this.createCursorResponse({ posts, cursorOption });
+  }
+
+  async fetchUserPostsCursor({
     kakaoId,
     targetKakaoId,
-    postCategoryName,
-  }: FetchUserPostsDto): Promise<PostResponseDto[]> {
-    const scope = await this.getScope({
+    cursorOption,
+  }: IPostsServiceFetchUserPostsCursor): Promise<
+    CustomCursorPageDto<PostResponseDto>
+  > {
+    let date_filter: Date;
+    if (cursorOption.date_created)
+      date_filter = this.getDate(cursorOption.date_created);
+
+    const scope = await this.followsService.getScope({
       from_user: targetKakaoId,
       to_user: kakaoId,
     });
-    return await this.postsRepository.fetchUserPosts({
+    const { posts } = await this.postsRepository.fetchUserPosts({
+      cursorOption,
+      date_filter,
       scope,
       userKakaoId: targetKakaoId,
-      postCategoryName,
     });
+    return await this.createCursorResponse({ posts, cursorOption });
+  }
+
+  async createCustomCursor({ post, order }): Promise<string> {
+    const id = post.id;
+    const _order = post[order];
+    const customCursor: string =
+      String(_order).padStart(7, '0') + String(id).padStart(7, '0');
+
+    return customCursor;
+  }
+
+  createDefaultCursor(
+    digitById: number,
+    digitByTargetColumn: number,
+    initialValue: string,
+  ) {
+    const defaultCustomCursor: string =
+      String().padStart(digitByTargetColumn, `${initialValue}`) +
+      String().padStart(digitById, `${initialValue}`);
+    return defaultCustomCursor;
+  }
+
+  getDate(date_created: DateOption): Date {
+    let currentDate = new Date();
+    switch (date_created) {
+      case DateOption.WEEK:
+        currentDate.setDate(currentDate.getDate() - 7);
+        break;
+      case DateOption.MONTH:
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        break;
+      case DateOption.YEAR:
+        currentDate.setFullYear(currentDate.getFullYear() - 1);
+        break;
+      default:
+        currentDate = null;
+    }
+    return currentDate;
   }
 }

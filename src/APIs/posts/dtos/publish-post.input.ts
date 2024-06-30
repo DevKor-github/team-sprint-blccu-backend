@@ -1,18 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { OpenScope } from 'src/commons/enums/open-scope.enum';
-import { IsBoolean } from 'src/commons/validators/isBoolean';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { OpenScope } from 'src/common/enums/open-scope.enum';
+import { IsBoolean } from 'src/common/validators/isBoolean';
 
 export class PublishPostInput {
-  @ApiProperty({
-    description: '포스트의 고유 아이디',
-    type: Number,
-    required: false,
-  })
-  @IsNumber()
-  @IsOptional()
-  id?: number;
-
   @ApiProperty({
     description: '연결된 카테고리 fk',
     type: String,
@@ -20,9 +11,15 @@ export class PublishPostInput {
   @IsString()
   postCategoryId: string;
 
-  @ApiProperty({ description: '연결된 내지 fk', type: String })
+  @ApiProperty({
+    description: '연결된 내지 fk',
+    type: String,
+    nullable: true,
+    required: false,
+  })
   @IsString()
-  postBackgroundId: string;
+  @IsOptional()
+  postBackgroundId?: string;
 
   @ApiProperty({
     description: '제목(최대 100자)',
@@ -30,6 +27,10 @@ export class PublishPostInput {
   })
   @IsString()
   title: string;
+
+  @ApiProperty({ description: '수정용 제목', type: String })
+  @IsString()
+  title_html: string;
 
   @ApiProperty({
     description: '댓글 허용 여부(boolean)',
@@ -50,6 +51,9 @@ export class PublishPostInput {
   @ApiProperty({ description: '게시글 내용', type: String })
   @IsString()
   content: string;
+
+  @ApiProperty({ description: '게시글 설명(html 태그 제외)', type: String })
+  main_description: string;
 
   @ApiProperty({ description: '게시글 캡쳐 이미지 url', type: String })
   @IsString()

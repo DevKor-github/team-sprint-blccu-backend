@@ -1,10 +1,12 @@
 version: "3.7"
 
 services:
-  my-backend:
+  blccu-ecr:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        PLATFORM: linux/amd64
     ports:
       - 3000:3000
     env_file:

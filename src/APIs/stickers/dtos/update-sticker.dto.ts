@@ -1,17 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsUrl } from 'class-validator';
-import { URL } from 'url';
+import { IsBoolean, IsNumber, IsOptional, IsUrl } from 'class-validator';
 
 export class UpdateStickerInput {
-  @ApiProperty({ description: '찾을 스티커의 id', type: Number })
-  @IsNumber()
-  id: number;
-
-  @ApiProperty({ description: '변경할 url', type: String })
+  @ApiProperty({ description: '변경할 url', type: String, required: false })
   @IsUrl()
-  image_url: string;
+  @IsOptional()
+  image_url?: string;
+
+  @ApiProperty({
+    description: '재사용 가능 여부 설정',
+    type: Boolean,
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isReusable?: boolean;
 }
 export class UpdateStickerDto extends UpdateStickerInput {
   @IsNumber()
   kakaoId: number;
+
+  id: number;
 }

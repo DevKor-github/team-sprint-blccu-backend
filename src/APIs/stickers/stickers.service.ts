@@ -1,19 +1,18 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Sticker } from './entities/sticker.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateStickerDto } from './dtos/create-sticker.dto';
-import { AwsService } from 'src/utils/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
-import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
+import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { UsersService } from '../users/users.service';
-import { removeBackground } from '@imgly/background-removal-node';
-import { FindStickerDto } from './dtos/find-sticker.dto';
 import { UpdateStickerDto } from './dtos/update-sticker.dto';
+import {
+  IStickersServiceDelete,
+  IStickersServiceFetchUserStickers,
+  IStickersServiceId,
+} from './interfaces/stickers.service.interface';
+import { AwsService } from 'src/modules/aws/aws.service';
 
 @Injectable()
 export class StickersService {
@@ -25,17 +24,15 @@ export class StickersService {
     private readonly usersService: UsersService,
   ) {}
 
-  async findStickerById({ id }) {
+  async findStickerById({ id }: IStickersServiceId): Promise<Sticker> {
     return await this.stickersRepository.findOne({ where: { id } });
   }
 
-  async existCheck({ id }) {
+  async existCheck({ id }: IStickersServiceId): Promise<void> {
     const data = await this.findStickerById({ id });
     if (!data) throw new NotFoundException('스티커를 찾을 수 없습니다.');
   }
-  async saveImage(file: Express.Multer.File): Promise<ImageUploadResponseDto> {
-    return await this.imageUpload(file);
-  }
+
   async imageUpload(
     file: Express.Multer.File,
   ): Promise<ImageUploadResponseDto> {
@@ -46,6 +43,7 @@ export class StickersService {
       `${imageName}.${ext}`,
       file,
       ext,
+      1600,
     );
     return { image_url };
   }
@@ -53,7 +51,7 @@ export class StickersService {
     userKakaoId,
     file,
   }: CreateStickerDto): Promise<Sticker> {
-    const { image_url } = await this.saveImage(file);
+    const { image_url } = await this.imageUpload(file);
     const insertData = await this.stickersRepository
       .createQueryBuilder()
       .insert()
@@ -72,7 +70,7 @@ export class StickersService {
     file,
   }: CreateStickerDto): Promise<Sticker> {
     await this.usersService.adminCheck({ kakaoId: userKakaoId });
-    const { image_url } = await this.saveImage(file);
+    const { image_url } = await this.imageUpload(file);
     const insertData = await this.stickersRepository
       .createQueryBuilder()
       .insert()
@@ -87,44 +85,23 @@ export class StickersService {
     return data;
   }
 
-  async toggleReusable({ userKakaoId, id }) {
-    const sticker = await this.stickersRepository.findOne({ where: { id } });
-    if (!sticker) throw new NotFoundException('스티커가 존재하지 않습니다.');
-    if (sticker.userKakaoId != userKakaoId)
-      throw new UnauthorizedException('스티커 제작자가 아닙니다.');
-    return await this.stickersRepository.update(id, {
-      isReusable: () => '!isReusable',
-    });
-  }
-  async fetchUserStickers({ userKakaoId }): Promise<Sticker[]> {
+  async fetchUserStickers({
+    userKakaoId,
+  }: IStickersServiceFetchUserStickers): Promise<Sticker[]> {
     return await this.stickersRepository.find({
       where: { userKakaoId, isReusable: true, isDefault: false },
     });
   }
 
-  async fetchPublicStickers() {
+  async fetchPublicStickers(): Promise<Sticker[]> {
     return await this.stickersRepository.find({
       where: { isDefault: true },
     });
   }
 
-  async removeBg({ url }): Promise<ImageUploadResponseDto> {
-    const blobData = await removeBackground(url);
-    const arrayBuffer = await blobData.arrayBuffer();
-    const bufferData = Buffer.from(arrayBuffer);
-
-    const imageName = this.utilsService.getUUID();
-
-    const image_url = await this.awsService.imageUploadToS3Buffer(
-      imageName,
-      bufferData,
-      'png',
-    );
-    return { image_url };
-  }
-
   async updateSticker({
     image_url,
+    isReusable,
     kakaoId,
     id,
   }: UpdateStickerDto): Promise<Sticker> {
@@ -136,33 +113,30 @@ export class StickersService {
         throw new NotFoundException(
           '스티커가 존재하지 않거나 제작자 본인이 아닙니다.',
         );
-      await this.stickersRepository
-        .createQueryBuilder()
-        .update(Sticker)
-        .set({ image_url })
-        .where('id = :id', { id })
-        .execute();
-      const data = await this.stickersRepository.findOne({ where: { id } });
-      return data;
+      if (isReusable) sticker.isReusable = isReusable;
+      if (image_url) {
+        await this.awsService.deleteImageFromS3({ url: sticker.image_url });
+        sticker.image_url = image_url;
+      }
+      const result = await this.stickersRepository.save(sticker);
+      return result;
     } catch (e) {
       throw e;
     }
   }
 
-  async removeFromS3({ id, kakaoId }: FindStickerDto) {
-    try {
-      const sticker = await this.stickersRepository.findOne({
-        where: { id, user: { kakaoId } },
-      });
-      if (!sticker)
-        throw new NotFoundException(
-          '스티커가 존재하지 않거나 제작자 본인이 아닙니다.',
-        );
-      return await this.awsService.deleteImageFromS3({
-        url: sticker.image_url,
-      });
-    } catch (e) {
-      throw e;
-    }
+  async delete({ id, kakaoId }: IStickersServiceDelete): Promise<void> {
+    const sticker = await this.stickersRepository.findOne({
+      where: { id, user: { kakaoId } },
+    });
+    if (!sticker)
+      throw new NotFoundException(
+        '스티커가 존재하지 않거나 제작자 본인이 아닙니다.',
+      );
+    await this.awsService.deleteImageFromS3({
+      url: sticker.image_url,
+    });
+    await this.stickersRepository.remove(sticker);
+    return;
   }
 }

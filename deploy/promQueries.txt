@@ -1,0 +1,5 @@
+// 전체 엔드포인트의 분포
+histogram_quantile(0.95, sum(rate(nestjs_success_requests_bucket[5m])) by (le, endpoint))
+
+// 특정 엔드포인트의 성공 요청 시간 분포
+histogram_quantile(0.95, sum(rate(nestjs_success_requests_bucket{endpoint="AppController#healthCheck", method="GET"}[5m])) by (le))

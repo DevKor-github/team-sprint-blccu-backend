@@ -7,3 +7,9 @@ export class PostResponseDto extends OmitType(Posts, ['user']) {
   @ApiProperty({ description: '작성자의 정보', type: UserPrimaryResponseDto })
   user: UserPrimaryResponseDto;
 }
+
+export class PostOnlyResponseDto extends OmitType(Posts, [
+  'user',
+  'postBackground',
+  'postCategory',
+]) {}

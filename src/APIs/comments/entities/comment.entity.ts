@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -50,7 +51,7 @@ export class Comment {
 
   @ApiProperty({ type: Number, description: '신고 당한 횟수' })
   @Column({ default: 0 })
-  blame_count: number;
+  report_count: number;
 
   @ApiProperty({ type: Comment, description: '루트 댓글 정보' })
   @ManyToOne(() => Comment, (comment) => comment.children, {
@@ -64,21 +65,22 @@ export class Comment {
   @ApiProperty({ type: Number, description: '루트 댓글 아이디' })
   @Column({ nullable: true })
   @RelationId((comment: Comment) => comment.parent)
-  parentId: Comment;
+  parentId: number;
 
   @ApiProperty({ type: [Comment], description: '자식 댓글 정보' })
   @OneToMany(() => Comment, (comment) => comment.parent)
   children: Comment[];
 
+  @Index()
   @ApiProperty({ type: Date, description: '생성 날짜' })
-  @CreateDateColumn()
+  @CreateDateColumn({ default: () => 'CURRENT_TIMESTAMP(6)' })
   date_created: Date;
 
   @ApiProperty({ type: Date, description: '수정 날짜' })
   @UpdateDateColumn()
   date_updated: Date;
 
-  @ApiProperty({ type: Date, description: '논리 삭제 칼럼' })
+  @ApiProperty({ type: Date, description: '논리 삭제 칼럼', nullable: true })
   @DeleteDateColumn()
   date_deleted: Date;
 }

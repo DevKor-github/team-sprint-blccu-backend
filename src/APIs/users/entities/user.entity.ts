@@ -4,6 +4,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   // PrimaryColumn,
   // PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -14,6 +15,10 @@ export class User {
   @ApiProperty({ description: '카카오 id', type: Number })
   kakaoId: number;
 
+  @Column({ unique: true })
+  @ApiProperty({ description: '유저 핸들러', type: String })
+  handle: string;
+
   @Column({ default: '' })
   @ApiProperty({ description: 'crypted refresh token', type: String })
   current_refresh_token: string;
@@ -22,6 +27,25 @@ export class User {
   @ApiProperty({ description: '어드민 유저 여부', type: Boolean })
   isAdmin: boolean;
 
+  @Column({ default: 0 })
+  @ApiProperty({
+    description: '팔로잉 수',
+    type: Number,
+    required: false,
+    default: 0,
+  })
+  following_count: number;
+
+  @Column({ default: 0 })
+  @ApiProperty({
+    description: '팔로워 수',
+    type: Number,
+    required: false,
+    default: 0,
+  })
+  follower_count: number;
+
+  @Index({ fulltext: true, parser: 'ngram' })
   @Column({ unique: true })
   @ApiProperty({ description: '유저 이름', type: String })
   username: string;
@@ -45,4 +69,7 @@ export class User {
   @DeleteDateColumn()
   @ApiProperty({ description: '삭제된 날짜', type: Date })
   date_deleted: Date;
+
+  // @OneToMany(() => Agreement, (agreement) => agreement.user)
+  // agreements: Agreement[];
 }

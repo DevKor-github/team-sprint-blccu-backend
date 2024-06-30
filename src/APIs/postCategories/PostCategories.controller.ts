@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -20,16 +21,54 @@ import { PostCategoriesService } from './PostCategories.service';
 import { Request } from 'express';
 import { CreatePostCategoryDto } from './dtos/create-post-category.dto';
 import { CreatePostCategoryResponseDto } from './dtos/create-post-category-response.dto';
-import { PostCategory } from './entities/postCategory.entity';
-import { AuthGuardV2 } from 'src/commons/guards/auth.guard';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
+import {
+  FetchPostCategoryDto,
+  FetchPostCategoriesDto,
+} from './dtos/fetch-post-category.dto';
+import { PatchPostCategoryDto } from './dtos/patch-post-category.dto';
 
-@ApiTags('카테고리 API')
-@Controller('postcg')
+@ApiTags('유저 API')
+@Controller('users')
 export class PostCategoriesController {
   constructor(private readonly postCategoriesService: PostCategoriesService) {}
 
   @ApiOperation({
-    summary: '카테고리 생성',
+    summary: '특정 유저의 카테고리 전체 조회',
+    description:
+      '특정 유저가 생성한 카테고리의 이름과 id, 게시글 개수를 조회한다.',
+  })
+  @ApiOkResponse({
+    type: [FetchPostCategoriesDto],
+  })
+  @Get(':userId/categories')
+  @HttpCode(200)
+  async fetchPostCategories(
+    @Req() req: Request,
+    @Param('userId') targetKakaoId: number,
+  ): Promise<FetchPostCategoriesDto[]> {
+    const kakaoId = req.user.userId;
+    return await this.postCategoriesService.fetchAll({
+      kakaoId,
+      targetKakaoId,
+    });
+  }
+
+  @ApiOperation({
+    summary: '특정 카테고리 조회',
+    description: 'id에 해당하는 카테고리를 조회한다.',
+  })
+  @ApiOkResponse({ type: FetchPostCategoryDto })
+  @Get('categories/:categoryId')
+  async fetchMyCategory(
+    @Req() req: Request,
+    @Param('categoryId') id: string,
+  ): Promise<FetchPostCategoryDto> {
+    return await this.postCategoriesService.findWithId({ id });
+  }
+
+  @ApiOperation({
+    summary: '게시글 카테고리 생성',
     description: '로그인된 유저와 연결된 카테고리를 생성한다.',
   })
   @ApiCookieAuth()
@@ -38,7 +77,7 @@ export class PostCategoriesController {
     type: CreatePostCategoryResponseDto,
   })
   @UseGuards(AuthGuardV2)
-  @Post()
+  @Post('me/categories')
   @HttpCode(201)
   async createPostCategory(
     @Req() req: Request,
@@ -49,32 +88,58 @@ export class PostCategoriesController {
     return await this.postCategoriesService.create({ kakaoId, name });
   }
 
-  @ApiOperation({
-    summary: '유저의 모든 카테고리 불러오기',
-    description: '로그인된 유저가 생성한 카테고리를 모두 불러온다',
-  })
+  // @ApiOperation({
+  //   summary: '로그인된 유저의 카테고리 전체 조회',
+  //   description:
+  //     '로그인된 유저가 생성한 카테고리의 이름과 id, 게시글 개수를 조회한다.',
+  // })
+  // @ApiCookieAuth()
+  // @ApiOkResponse({
+  //   type: [FetchPostCategoriesDto],
+  // })
+  // @UseGuards(AuthGuardV2)
+  // @Get('me/categories')
+  // async fetchMyCategories(
+  //   @Req() req: Request,
+  // ): Promise<FetchPostCategoriesDto[]> {
+  //   const kakaoId = req.user.userId;
+  //   console.log('kakaoId: ', kakaoId);
+  //   return await this.postCategoriesService.fetchAll({
+  //     kakaoId,
+  //     targetKakaoId: kakaoId,
+  //   });
+  // }
+
+  @ApiOperation({ summary: '로그인된 유저의 특정 카테고리 수정' })
   @ApiCookieAuth()
-  @ApiOkResponse({
-    description: '',
-    type: [PostCategory],
-  })
+  @ApiOkResponse({ type: FetchPostCategoryDto })
   @UseGuards(AuthGuardV2)
-  @Get()
-  @HttpCode(200)
-  async fetchPostCategories(@Req() req: Request): Promise<PostCategory[]> {
+  @Patch('me/categories/:categoryId')
+  async patchCategory(
+    @Req() req: Request,
+    @Param('categoryId') id: string,
+    @Body() body: PatchPostCategoryDto,
+  ): Promise<FetchPostCategoryDto> {
     const kakaoId = req.user.userId;
-    return await this.postCategoriesService.fetchAll({ kakaoId });
+    return await this.postCategoriesService.patch({
+      kakaoId,
+      id,
+      ...body,
+    });
   }
 
   @ApiOperation({
     summary: '유저의 지정 카테고리 삭제하기',
     description:
-      '로그인된 유저의 카테고리 중 param:id와 일치하는 카테고리를 삭제한다',
+      '로그인된 유저의 카테고리 중 categoryId 일치하는 카테고리를 삭제한다',
   })
   @ApiCookieAuth()
-  @Delete(':id')
+  @Delete('me/categories/:categoryId')
   @UseGuards(AuthGuardV2)
-  async deletePostCategory(@Req() req: Request, @Param('id') id: string) {
+  async deletePostCategory(
+    @Req() req: Request,
+    @Param('categoryId') id: string,
+  ) {
     const kakaoId = req.user.userId;
     return await this.postCategoriesService.delete({ kakaoId, id });
   }

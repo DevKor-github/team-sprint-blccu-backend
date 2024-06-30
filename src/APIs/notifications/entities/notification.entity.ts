@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Posts } from 'src/APIs/posts/entities/posts.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
-import { NotType } from 'src/commons/enums/not-type.enum';
+import { NotType } from 'src/common/enums/not-type.enum';
 import {
   Column,
   CreateDateColumn,
@@ -42,21 +43,36 @@ export class Notification {
   @Column()
   type: NotType;
 
-  @ApiProperty({ description: '알림 체크 여부', type: Boolean })
-  @Column()
+  @ApiProperty({ description: '알림 체크 여부', type: Boolean, default: false })
+  @Column({ default: false })
   is_checked: boolean;
 
-  @ApiProperty({ description: '리다이렉션 url', type: String })
-  @Column()
-  url: string;
-
-  @ApiProperty({ description: '알림 메시지' })
-  @Column()
-  message: string;
-
+  @ApiProperty({ description: '생성된 날짜', type: Date })
   @CreateDateColumn()
   date_created: Date;
 
+  @ApiProperty({ description: '삭제된 날짜', type: Date })
   @DeleteDateColumn()
   date_deleted: Date;
+
+  @ApiProperty({
+    type: Number,
+    description: '알림이 발생한 게시글 id(nullable)',
+  })
+  @Column({ nullable: true })
+  @RelationId((notification: Notification) => notification.post)
+  postId: number;
+
+  @ApiProperty({
+    type: Posts,
+    description: '알림이 발생한 게시물',
+    nullable: true,
+  })
+  @JoinColumn()
+  @ManyToOne(() => Posts, {
+    nullable: true,
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL',
+  }) // 게시물을 참조하는 경우
+  post: Posts;
 }

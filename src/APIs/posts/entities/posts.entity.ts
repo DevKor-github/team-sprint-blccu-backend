@@ -3,12 +3,13 @@ import { IsString } from 'class-validator';
 import { PostBackground } from 'src/APIs/postBackgrounds/entities/postBackground.entity';
 import { PostCategory } from 'src/APIs/postCategories/entities/postCategory.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
-import { OpenScope } from 'src/commons/enums/open-scope.enum';
+import { OpenScope } from 'src/common/enums/open-scope.enum';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -31,7 +32,7 @@ export class Posts {
 
   @IsString()
   @ApiProperty({ description: '연결된 내지 fk', type: String })
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   @RelationId((posts: Posts) => posts.postBackground)
   postBackgroundId: string;
 
@@ -43,6 +44,10 @@ export class Posts {
   @ApiProperty({ description: '제목(최대 100자)', type: String })
   @Column({ length: 100, default: '' })
   title: string;
+
+  @ApiProperty({ description: '수정용 제목', type: String })
+  @Column({ default: '' })
+  title_html: string;
 
   @ApiProperty({ description: '임시저장(false), 발행(true)', type: Boolean })
   @Column({ default: false })
@@ -60,6 +65,10 @@ export class Posts {
   @Column({ default: 0 })
   comment_count: number;
 
+  @ApiProperty({ description: '신고수 카운트', type: Number })
+  @Column({ default: 0 })
+  report_count: number;
+
   @ApiProperty({ description: '댓글 허용 여부(boolean)', type: Boolean })
   @Column({ default: true })
   allow_comment: boolean;
@@ -73,8 +82,9 @@ export class Posts {
   @Column({ default: 'PUBLIC' })
   scope: OpenScope;
 
+  @Index()
   @ApiProperty({ description: '생성된 날짜', type: Date })
-  @CreateDateColumn()
+  @CreateDateColumn({ default: () => 'CURRENT_TIMESTAMP(6)' })
   date_created: Date;
 
   @ApiProperty({ description: '수정된 날짜', type: Date })
@@ -89,12 +99,16 @@ export class Posts {
   @Column('longtext')
   content: string;
 
-  @ApiProperty({ description: '게시글 캡쳐 이미지 url', type: String })
+  @ApiProperty({ description: '게시글 설명(html 태그 제외)', type: String })
   @Column()
+  main_description: string;
+
+  @ApiProperty({ description: '게시글 캡쳐 이미지 url', type: String })
+  @Column({ default: '' })
   image_url: string;
 
   @ApiProperty({ description: '게시글 대표 이미지 url', type: String })
-  @Column()
+  @Column({ default: '' })
   main_image_url: string;
 
   @ApiProperty({ description: '연결된 카테고리', type: PostCategory })
@@ -109,7 +123,7 @@ export class Posts {
   @ApiProperty({ description: '연결된 내지', type: PostBackground })
   @JoinColumn()
   @ManyToOne(() => PostBackground, {
-    nullable: false,
+    nullable: true,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })

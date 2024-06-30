@@ -1,21 +1,32 @@
-import { OmitType, PickType } from '@nestjs/swagger';
+import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
 import { User } from '../entities/user.entity';
 
 export const USER_SELECT_OPTION = {
   kakaoId: true,
+  handle: true,
   isAdmin: true,
   username: true,
+  follower_count: true,
+  following_count: true,
   description: true,
   profile_image: true,
   background_image: true,
   date_created: true,
   date_deleted: true,
 };
+export const USER_PRIMARY_SELECT_OPTION = {
+  kakaoId: true,
+  handle: true,
+  username: true,
+  description: true,
+  profile_image: true,
+};
 export class UserPrimaryResponseDto extends PickType(User, [
   'kakaoId',
   'username',
   'profile_image',
   'description',
+  'handle',
 ]) {}
 export class UserResponseDto extends OmitType(User, ['current_refresh_token']) {
   // @ApiProperty({ description: '카카오 id', type: Number })
@@ -34,4 +45,9 @@ export class UserResponseDto extends OmitType(User, ['current_refresh_token']) {
   // date_created: Date;
   // @ApiProperty({ description: '삭제된 날짜', type: Date })
   // date_deleted: Date;
+}
+
+export class UserResponseDtoWithFollowing extends UserResponseDto {
+  @ApiProperty({ type: Boolean, description: '팔로잉 유무' })
+  isFollowing: boolean;
 }
