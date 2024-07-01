@@ -1,9 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsEnum,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { BulkInsertStickerInput } from 'src/APIs/stickerBlocks/dtos/create-stickerBlocks.dto';
 import { OpenScope } from 'src/common/enums/open-scope.enum';
 import { IsBoolean } from 'src/common/validators/isBoolean';
 
 export class PublishPostInput {
+  @ApiProperty({ type: [BulkInsertStickerInput] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => BulkInsertStickerInput)
+  stickerBlocks: BulkInsertStickerInput[];
+
   @ApiProperty({
     description: '연결된 카테고리 fk',
     type: String,

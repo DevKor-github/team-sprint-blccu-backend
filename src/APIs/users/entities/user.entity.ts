@@ -9,6 +9,7 @@ import {
   // PrimaryGeneratedColumn,
 } from 'typeorm';
 
+@Index('ngramUser', ['username'], { fulltext: true, parser: 'ngram' })
 @Entity()
 export class User {
   @Column({ type: 'bigint', primary: true })
@@ -45,7 +46,6 @@ export class User {
   })
   follower_count: number;
 
-  @Index({ fulltext: true, parser: 'ngram' })
   @Column({ unique: true })
   @ApiProperty({ description: '유저 이름', type: String })
   username: string;

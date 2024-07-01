@@ -44,6 +44,7 @@ import { SortOption } from 'src/common/enums/sort-option';
 import { CursorFetchPosts } from './dtos/cursor-fetch-posts.dto';
 import { CursorPagePostResponseDto } from './dtos/cursor-page-post-response.dto';
 import { PatchPostInput } from './dtos/patch-post.dto';
+import { DeletePostInput } from './dtos/delete-post.dto';
 
 @ApiTags('게시글 API')
 @Controller('posts')
@@ -67,14 +68,22 @@ export class PostsController {
   }
 
   @ApiOperation({
-    summary: '게시글 논리 삭제',
-    description: '로그인 된 유저의 postId에 해당하는 게시글을 논리삭제한다.',
+    summary: '게시글 삭제',
+    description:
+      '로그인 된 유저의 postId에 해당하는 게시글을 삭제한다. isHardDelete(nullable)을 통해 삭제 방식 결정',
   })
   @ApiCookieAuth()
   @UseGuards(AuthGuardV2)
   @Delete(':postId')
-  async softDelete(@Req() req: Request, @Param('postId') id: number) {
+  async softDelete(
+    @Req() req: Request,
+    @Param('postId') id: number,
+    @Body() body: DeletePostInput,
+  ) {
     const kakaoId = req.user.userId;
+    if (body.isHardDelete === true) {
+      return await this.postsService.hardDelete({ kakaoId, id });
+    }
     return await this.postsService.softDelete({ kakaoId, id });
   }
 

@@ -45,6 +45,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { AwsService } from 'src/modules/aws/aws.service';
 import { PostBackground } from '../postBackgrounds/entities/postBackground.entity';
+import { PublishPostDto } from './dtos/publish-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -106,7 +107,7 @@ export class PostsService {
     if (!us) throw new BadRequestException('존재하지 않는 user입니다.');
   }
 
-  async save(createPostDto: IPostsServiceCreate) {
+  async save(createPostDto: IPostsServiceCreate): Promise<PublishPostDto> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -129,10 +130,15 @@ export class PostsService {
         .values(post)
         .execute();
       await queryRunner.commitTransaction();
-      const result = this.postsRepository.findOne({
+      const postData = await this.postsRepository.findOne({
         where: { id: data.identifiers[0].id },
       });
-      return result;
+      const stickerBlockData = await this.stickerBlocksService.bulkInsert({
+        postsId: postData.id,
+        kakaoId: createPostDto.userKakaoId,
+        stickerBlocks: createPostDto.stickerBlocks,
+      });
+      return { postData, stickerBlockData };
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw e;
