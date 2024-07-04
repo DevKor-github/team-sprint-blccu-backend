@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber } from 'class-validator';
 import { UserResponseDto } from 'src/APIs/users/dtos/user-response.dto';
 import { User } from 'src/APIs/users/entities/user.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import {
   Column,
   Entity,
@@ -11,36 +13,37 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Follow {
-  @ApiProperty({ type: String, description: 'PK: uuid' })
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class Follow extends CommonEntity {
+  @ApiProperty({ type: String, description: 'PK: A_I_' })
+  @PrimaryGeneratedColumn()
+  @IsNumber()
+  id: number;
 
   @ApiProperty({ type: UserResponseDto, description: '이웃 추가를 받은 유저' })
   @JoinColumn()
-  @ManyToOne(() => User, (users) => users.kakaoId, {
+  @ManyToOne(() => User, (users) => users.id, {
     nullable: false,
     onUpdate: 'NO ACTION',
     onDelete: 'CASCADE',
   })
-  to_user: User;
+  toUser: User;
 
   @ApiProperty({ type: UserResponseDto, description: '이웃 추가를 한 유저' })
   @JoinColumn()
-  @ManyToOne(() => User, (users) => users.kakaoId, {
+  @ManyToOne(() => User, (users) => users.id, {
     nullable: false,
     onUpdate: 'NO ACTION',
     onDelete: 'CASCADE',
   })
-  from_user: User;
+  fromUser: User;
 
   @ApiProperty({ type: Number, description: '이웃 추가를 받은 유저' })
-  @Column()
-  @RelationId((follow: Follow) => follow.to_user)
-  toUserKakaoId: number;
+  @Column({ name: 'to_user_id' })
+  @RelationId((follow: Follow) => follow.toUser)
+  toUserId: number;
 
   @ApiProperty({ type: Number, description: '이웃 추가를 한 유저' })
-  @Column()
-  @RelationId((follow: Follow) => follow.from_user)
-  fromUserKakaoId: number;
+  @Column({ name: 'from_user_id' })
+  @RelationId((follow: Follow) => follow.fromUser)
+  fromUserId: number;
 }

@@ -32,20 +32,20 @@ export class Article extends IndexedCommonEntity {
   @IsNumber()
   id: number;
 
-  @ApiProperty({ description: '연결된 카테고리 fk', type: String })
+  @ApiProperty({ description: '연결된 카테고리 fk', type: Number })
   @Column({ name: 'article_category_id', nullable: true })
-  @RelationId((article: Article) => article.postCategory)
+  @RelationId((article: Article) => article.articleCategory)
   @IsString()
   @IsOptional()
-  articleCategoryId: string;
+  articleCategoryId: number;
 
   @IsString()
-  @ApiProperty({ description: '연결된 내지 fk', type: String })
+  @ApiProperty({ description: '연결된 내지 fk', type: Number })
   @Column({ name: 'article_background_id', nullable: true })
-  @RelationId((article: Article) => article.postBackground)
+  @RelationId((article: Article) => article.articleBackground)
   @IsString()
   @IsOptional()
-  articleBackgroundId: string;
+  articleBackgroundId: number;
 
   @ApiProperty({ description: '작성한 유저 fk', type: Number })
   @Column({ name: 'user_id', nullable: false })
