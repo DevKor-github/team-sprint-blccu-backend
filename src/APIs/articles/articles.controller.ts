@@ -6,7 +6,7 @@ import {
   HttpCode,
   Param,
   Patch,
-  Post,
+  Article,
   Query,
   Req,
   UploadedFile,
@@ -23,44 +23,47 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { PostsService } from './articles.service';
-import { FetchPostsDto } from './dtos/fetch-posts.dto';
-import { PublishPostDto } from './dtos/publish-post.dto';
-import { PagePostResponseDto } from './dtos/page-post-response.dto';
-import { CreatePostInput } from './dtos/create-post.input';
-import { PublishPostInput } from './dtos/publish-post.input';
+import { ArticlesService } from './articles.service';
+import { FetchArticlesDto } from './dtos/fetch-posts.dto';
+import { PublishArticleDto } from './dtos/publish-post.dto';
+import { PageArticleResponseDto } from './dtos/page-post-response.dto';
+import { CreateArticleInput } from './dtos/create-post.input';
+import { PublishArticleInput } from './dtos/publish-post.input';
 import { ImageUploadDto } from 'src/common/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
-import { FetchUserPostsInput } from './dtos/fetch-user-posts.input';
+import { FetchUserArticlesInput } from './dtos/fetch-user-posts.input';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
-import { PostOnlyResponseDto, PostResponseDto } from './dtos/post-response.dto';
 import {
-  FetchPostForUpdateDto,
-  PostResponseDtoExceptCategory,
+  ArticleOnlyResponseDto,
+  ArticleResponseDto,
+} from './dtos/post-response.dto';
+import {
+  FetchArticleForUpdateDto,
+  ArticleResponseDtoExceptCategory,
 } from './dtos/fetch-post-for-update.dto';
 import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
 import { SortOption } from 'src/common/enums/sort-option';
-import { CursorFetchPosts } from './dtos/cursor-fetch-posts.dto';
-import { CursorPagePostResponseDto } from './dtos/cursor-page-post-response.dto';
-import { PatchPostInput } from './dtos/patch-post.dto';
-import { DeletePostInput } from './dtos/delete-post.dto';
+import { CursorFetchArticles } from './dtos/cursor-fetch-posts.dto';
+import { CursorPageArticleResponseDto } from './dtos/cursor-page-post-response.dto';
+import { PatchArticleInput } from './dtos/patch-post.dto';
+import { DeleteArticleInput } from './dtos/delete-post.dto';
 
 @ApiTags('게시글 API')
 @Controller('posts')
-export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+export class ArticlesController {
+  constructor(private readonly postsService: ArticlesService) {}
 
   @ApiOperation({
     summary: '게시글 등록',
     description: '게시글을 등록한다.',
   })
-  @Post()
+  @Article()
   @ApiCookieAuth()
-  @ApiCreatedResponse({ description: '등록 성공', type: PublishPostDto })
+  @ApiCreatedResponse({ description: '등록 성공', type: PublishArticleDto })
   @UseGuards(AuthGuardV2)
   @HttpCode(201)
-  async publishPost(@Req() req: Request, @Body() body: PublishPostInput) {
+  async publishArticle(@Req() req: Request, @Body() body: PublishArticleInput) {
     const kakaoId = req.user.userId;
     console.log(body);
     const dto = { ...body, userKakaoId: kakaoId, isPublished: true };
@@ -78,7 +81,7 @@ export class PostsController {
   async softDelete(
     @Req() req: Request,
     @Param('postId') id: number,
-    @Body() body: DeletePostInput,
+    @Body() body: DeleteArticleInput,
   ) {
     const kakaoId = req.user.userId;
     if (body.isHardDelete === true) {
@@ -91,12 +94,12 @@ export class PostsController {
     summary: '게시글 임시등록',
     description: '게시글을 임시등록한다.',
   })
-  @Post('temp')
+  @Article('temp')
   @ApiCookieAuth()
-  @ApiCreatedResponse({ description: '임시등록 성공', type: PublishPostDto })
+  @ApiCreatedResponse({ description: '임시등록 성공', type: PublishArticleDto })
   @UseGuards(AuthGuardV2)
   @HttpCode(201)
-  async updatePost(@Req() req: Request, @Body() body: CreatePostInput) {
+  async updateArticle(@Req() req: Request, @Body() body: CreateArticleInput) {
     const kakaoId = req.user.userId;
     const dto = { ...body, userKakaoId: kakaoId, isPublished: false };
     return await this.postsService.save(dto);
@@ -104,17 +107,17 @@ export class PostsController {
 
   @ApiOperation({ summary: '게시글 patch' })
   @ApiCookieAuth()
-  @ApiOkResponse({ type: PostOnlyResponseDto })
+  @ApiOkResponse({ type: ArticleOnlyResponseDto })
   @UseGuards(AuthGuardV2)
   @Patch(':postId')
   @HttpCode(200)
-  async patchPost(
+  async patchArticle(
     @Req() req: Request,
-    @Body() body: PatchPostInput,
+    @Body() body: PatchArticleInput,
     @Param('postId') id: number,
-  ): Promise<PostOnlyResponseDto> {
+  ): Promise<ArticleOnlyResponseDto> {
     const kakaoId = req.user.userId;
-    return await this.postsService.patchPost({ ...body, id, kakaoId });
+    return await this.postsService.patchArticle({ ...body, id, kakaoId });
   }
 
   @ApiOperation({
@@ -122,15 +125,15 @@ export class PostsController {
     description: '로그인된 유저의 임시작성 게시글을 조회한다.',
   })
   @ApiCookieAuth()
-  @ApiOkResponse({ type: [PostResponseDtoExceptCategory] })
+  @ApiOkResponse({ type: [ArticleResponseDtoExceptCategory] })
   @UseGuards(AuthGuardV2)
   @Get('temp')
-  async fetchTempPosts(
+  async fetchTempArticles(
     @Req() req: Request,
-  ): Promise<PostResponseDtoExceptCategory[]> {
+  ): Promise<ArticleResponseDtoExceptCategory[]> {
     const kakaoId = req.user.userId;
     console.log(kakaoId);
-    return await this.postsService.fetchTempPosts({ kakaoId });
+    return await this.postsService.fetchTempArticles({ kakaoId });
   }
 
   @ApiOperation({
@@ -149,7 +152,7 @@ export class PostsController {
   })
   @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
-  @Post('image')
+  @Article('image')
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
   async createPrivateSticker(
@@ -178,11 +181,11 @@ export class PostsController {
       'id에 해당하는 게시글을 가져온다. 조회수를 올린다. 보호된 게시글은 권한이 있는 사용자만 접근 가능하다.',
   })
   @Get('detail/:postId')
-  @ApiOkResponse({ type: PostResponseDto })
-  async fetchPostDetail(
+  @ApiOkResponse({ type: ArticleResponseDto })
+  async fetchArticleDetail(
     @Param('postId') id: number,
     @Req() req: Request,
-  ): Promise<PostResponseDto> {
+  ): Promise<ArticleResponseDto> {
     const kakaoId = req.user.userId;
     return await this.postsService.fetchDetail({ kakaoId, id });
   }
@@ -193,46 +196,16 @@ export class PostsController {
       '본인 게시글 수정용으로 id에 해당하는 게시글에 조인된 스티커 블록들의 값과 게시글 세부 데이터를 모두 가져온다.',
   })
   @ApiCookieAuth()
-  @ApiOkResponse({ type: FetchPostForUpdateDto })
+  @ApiOkResponse({ type: FetchArticleForUpdateDto })
   @UseGuards(AuthGuardV2)
   @HttpCode(200)
   @Get('update/:postId')
-  async fetchPost(
+  async fetchArticle(
     @Req() req: Request,
     @Param('postId') id: number,
-  ): Promise<FetchPostForUpdateDto> {
+  ): Promise<FetchArticleForUpdateDto> {
     const kakaoId = req.user.userId;
-    return await this.postsService.fetchPostForUpdate({ id, kakaoId });
-  }
-
-  @ApiOperation({
-    summary: '[offset]전체 게시글 조회 API',
-    description:
-      'Query를 통해 오프셋 페이지네이션 가능. default) pageNo: 1, pageSize: 10',
-  })
-  @ApiCreatedResponse({ description: '조회 성공', type: PagePostResponseDto })
-  @HttpCode(200)
-  @Get('offset')
-  async fetchPosts(@Query() post: FetchPostsDto): Promise<PagePostResponseDto> {
-    return await this.postsService.fetchPosts(post);
-  }
-
-  @ApiOperation({
-    summary: '[offset]친구 게시글 조회',
-    description:
-      '친구의 게시글을 조회한다. Query를 통해 오프셋 페이지네이션 가능. default) pageNo: 1, pageSize: 10',
-  })
-  @ApiCreatedResponse({ description: '조회 성공', type: PagePostResponseDto })
-  @UseGuards(AuthGuardV2)
-  @HttpCode(200)
-  @ApiCookieAuth()
-  @Get('offset/friends')
-  async fetchFriendsPosts(
-    @Query() page: FetchPostsDto,
-    @Req() req: Request,
-  ): Promise<PagePostResponseDto> {
-    const kakaoId = req.user.userId;
-    return await this.postsService.fetchFriendsPosts({ kakaoId, page });
+    return await this.postsService.fetchArticleForUpdate({ id, kakaoId });
   }
 
   @ApiOperation({
@@ -241,16 +214,16 @@ export class PostsController {
       '커서 기반으로 게시글을 조회한다. 최초 조회 시 커서 값을 비워서 요청한다. 쿼리 옵션을 변경할 경우 기존의 커서 값을 쓸 수 없다. PUBLIC 게시글만 조회한다.',
   })
   @Get('cursor')
-  @ApiOkResponse({ type: CursorPagePostResponseDto })
+  @ApiOkResponse({ type: CursorPageArticleResponseDto })
   async fetchCursor(
-    @Query() cursorOption: CursorFetchPosts,
-  ): Promise<CustomCursorPageDto<PostResponseDto>> {
+    @Query() cursorOption: CursorFetchArticles,
+  ): Promise<CustomCursorPageDto<ArticleResponseDto>> {
     if (!cursorOption.cursor && cursorOption.sort === SortOption.ASC) {
       cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '0');
     } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
       cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '9');
     }
-    return this.postsService.fetchPostsCursor({ cursorOption });
+    return this.postsService.fetchArticlesCursor({ cursorOption });
   }
 
   @ApiOperation({
@@ -261,18 +234,21 @@ export class PostsController {
   @ApiCookieAuth()
   @UseGuards(AuthGuardV2)
   @Get('cursor/friends')
-  @ApiOkResponse({ type: CursorPagePostResponseDto })
+  @ApiOkResponse({ type: CursorPageArticleResponseDto })
   async fetchFriendsCursor(
-    @Query() cursorOption: CursorFetchPosts,
+    @Query() cursorOption: CursorFetchArticles,
     @Req() req: Request,
-  ): Promise<CustomCursorPageDto<PostResponseDto>> {
+  ): Promise<CustomCursorPageDto<ArticleResponseDto>> {
     const kakaoId = req.user.userId;
     if (!cursorOption.cursor && cursorOption.sort === SortOption.ASC) {
       cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '0');
     } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
       cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '9');
     }
-    return this.postsService.fetchFriendsPostsCursor({ cursorOption, kakaoId });
+    return this.postsService.fetchFriendsArticlesCursor({
+      cursorOption,
+      kakaoId,
+    });
   }
 
   @ApiOperation({
@@ -281,19 +257,19 @@ export class PostsController {
       '로그인 된 유저의 경우 private/protected 게시글 조회 권한 체크 후 조회. 카테고리 이름으로 필터링 가능',
   })
   @Get('/cursor/user/:userId')
-  @ApiOkResponse({ type: CursorPagePostResponseDto })
-  async fetchUserPosts(
+  @ApiOkResponse({ type: CursorPageArticleResponseDto })
+  async fetchUserArticles(
     @Param('userId') targetKakaoId: number,
     @Req() req: Request,
-    @Query() cursorOption: FetchUserPostsInput,
-  ): Promise<CursorPagePostResponseDto> {
+    @Query() cursorOption: FetchUserArticlesInput,
+  ): Promise<CursorPageArticleResponseDto> {
     const kakaoId = req.user.userId;
     if (!cursorOption.cursor && cursorOption.sort === SortOption.ASC) {
       cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '0');
     } else if (!cursorOption.cursor && cursorOption.sort === SortOption.DESC) {
       cursorOption.cursor = this.postsService.createDefaultCursor(7, 7, '9');
     }
-    return await this.postsService.fetchUserPostsCursor({
+    return await this.postsService.fetchUserArticlesCursor({
       kakaoId,
       targetKakaoId,
       cursorOption,

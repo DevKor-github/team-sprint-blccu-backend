@@ -1,38 +1,38 @@
 import { Brackets, DataSource, Repository } from 'typeorm';
-import { Posts } from './entities/article.entity';
+import { Article } from './entities/article.entity';
 import { Injectable } from '@nestjs/common';
 import { OpenScope } from 'src/common/enums/open-scope.enum';
-import { PostResponseDto } from './dtos/post-response.dto';
-import { PostResponseDtoExceptCategory } from './dtos/fetch-post-for-update.dto';
-import { PostsOrderOption } from 'src/common/enums/posts-order-option';
-import { PostsFilterOption } from 'src/common/enums/posts-filter-option';
+import { PostResponseDto } from './dtos/article-response.dto';
+import { PostResponseDtoExceptCategory } from './dtos/fetch-article-for-update.dto';
+import { ArticlesOrderOption } from 'src/common/enums/articles-order-option';
+import { ArticlesFilterOption } from 'src/common/enums/articles-filter-option';
 import { SortOption } from 'src/common/enums/sort-option';
 import {
-  IPostsRepoFetchFriendsPostsCursor,
-  IPostsRepoFetchPostsCursor,
-  IPostsRepoFetchUserPostsCursor,
-  IPostsRepoGetCursorQuery,
+  IArticlesRepoFetchFriendsArticlesCursor,
+  IArticlesRepoFetchArticlesCursor,
+  IArticlesRepoFetchUserArticlesCursor,
+  IArticlesRepoGetCursorQuery,
 } from './interfaces/articles.repository.interface';
 import { Follow } from '../follows/entities/follow.entity';
 @Injectable()
-export class PostsRepository extends Repository<Posts> {
+export class ArticlesRepository extends Repository<Article> {
   constructor(private dataSource: DataSource) {
-    super(Posts, dataSource.createEntityManager());
+    super(Article, dataSource.createEntityManager());
   }
-  async upsertPost(post) {
+  async upsertPost(article) {
     return await this.createQueryBuilder()
       .insert()
-      .into(Posts, Object.keys(post))
-      .values(post)
+      .into(Article, Object.keys(article))
+      .values(article)
       .execute();
   }
 
-  async fetchPosts(page) {
+  async fetchArticles(page) {
     return (
       this.createQueryBuilder('p')
         .innerJoin('p.user', 'user')
-        .leftJoinAndSelect('p.postBackground', 'postBackground')
-        .leftJoinAndSelect('p.postCategory', 'postCategory')
+        .leftJoinAndSelect('p.articleBackground', 'articleBackground')
+        .leftJoinAndSelect('p.articleCategory', 'articleCategory')
         .addSelect([
           'user.handle',
           'user.kakaoId',
@@ -44,10 +44,10 @@ export class PostsRepository extends Repository<Posts> {
         .andWhere('p.scope IN (:...scopes)', { scopes: [OpenScope.PUBLIC] })
         .andWhere('p.date_deleted IS NULL')
         //sql injection 방지를 위해 반드시 enum 거칠 것
-        .andWhere(`${PostsFilterOption[page.filter]} LIKE :search`, {
+        .andWhere(`${ArticlesFilterOption[page.filter]} LIKE :search`, {
           search: `%${page.search}%`,
         })
-        .orderBy(`p.${PostsOrderOption[page.order]}`, 'DESC')
+        .orderBy(`p.${ArticlesOrderOption[page.order]}`, 'DESC')
         .take(page.getLimit())
         .skip(page.getOffset())
         .getManyAndCount()
@@ -60,8 +60,8 @@ export class PostsRepository extends Repository<Posts> {
     });
     return await this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')
-      .leftJoinAndSelect('p.postBackground', 'postBackground')
-      .leftJoinAndSelect('p.postCategory', 'postCategory')
+      .leftJoinAndSelect('p.articleBackground', 'articleBackground')
+      .leftJoinAndSelect('p.articleCategory', 'articleCategory')
       .addSelect([
         'user.handle',
         'user.kakaoId',
@@ -77,8 +77,8 @@ export class PostsRepository extends Repository<Posts> {
   async fetchPostForUpdate(id) {
     return await this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')
-      .leftJoinAndSelect('p.postBackground', 'postBackground')
-      .leftJoinAndSelect('p.postCategory', 'postCategory')
+      .leftJoinAndSelect('p.articleBackground', 'articleBackground')
+      .leftJoinAndSelect('p.articleCategory', 'articleCategory')
       .addSelect([
         'user.handle',
         'user.kakaoId',
@@ -91,11 +91,11 @@ export class PostsRepository extends Repository<Posts> {
       .getOne();
   }
 
-  async fetchFriendsPosts(subQuery, page) {
+  async fetchFriendsArticles(subQuery, page) {
     return this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')
-      .leftJoinAndSelect('p.postBackground', 'postBackground')
-      .leftJoinAndSelect('p.postCategory', 'postCategory')
+      .leftJoinAndSelect('p.articleBackground', 'articleBackground')
+      .leftJoinAndSelect('p.articleCategory', 'articleCategory')
       .addSelect([
         'user.handle',
         'user.kakaoId',
@@ -108,10 +108,10 @@ export class PostsRepository extends Repository<Posts> {
       .andWhere('p.scope IN (:...scopes)', {
         scopes: [OpenScope.PUBLIC],
       }) //sql injection 방지를 위해 만드시 enum 거칠 것
-      .andWhere(`${PostsFilterOption[page.filter]} LIKE :search`, {
+      .andWhere(`${ArticlesFilterOption[page.filter]} LIKE :search`, {
         search: `%${page.search}%`,
       })
-      .orderBy(`p.${PostsOrderOption[page.order]}`, 'DESC')
+      .orderBy(`p.${ArticlesOrderOption[page.order]}`, 'DESC')
       .andWhere('p.isPublished = true')
       .orderBy('p.id', 'DESC')
       .take(page.getLimit())
@@ -119,13 +119,13 @@ export class PostsRepository extends Repository<Posts> {
       .getManyAndCount();
   }
 
-  async fetchTempPosts(
+  async fetchTempArticles(
     kakaoId: number,
   ): Promise<PostResponseDtoExceptCategory[]> {
     return this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')
-      .leftJoinAndSelect('p.postBackground', 'postBackground')
-      .leftJoinAndSelect('p.postCategory', 'postCategory')
+      .leftJoinAndSelect('p.articleBackground', 'articleBackground')
+      .leftJoinAndSelect('p.articleCategory', 'articleCategory')
       .addSelect([
         'user.handle',
         'user.kakaoId',
@@ -140,8 +140,8 @@ export class PostsRepository extends Repository<Posts> {
       .getMany();
   }
 
-  getCursorQuery({ order, sort, take, cursor }: IPostsRepoGetCursorQuery) {
-    const _order = PostsOrderOption[order];
+  getCursorQuery({ order, sort, take, cursor }: IArticlesRepoGetCursorQuery) {
+    const _order = ArticlesOrderOption[order];
 
     const queryBuilder = this.createQueryBuilder('p');
     const queryByOrderSort =
@@ -152,8 +152,8 @@ export class PostsRepository extends Repository<Posts> {
     queryBuilder
       .take(take + 1)
       .innerJoin('p.user', 'user')
-      .leftJoinAndSelect('p.postBackground', 'postBackground')
-      .leftJoinAndSelect('p.postCategory', 'postCategory')
+      .leftJoinAndSelect('p.articleBackground', 'articleBackground')
+      .leftJoinAndSelect('p.articleCategory', 'articleCategory')
       .addSelect([
         'user.handle',
         'user.kakaoId',
@@ -172,10 +172,10 @@ export class PostsRepository extends Repository<Posts> {
     return queryBuilder;
   }
 
-  async fetchPostsCursor({
+  async fetchArticlesCursor({
     cursorOption,
     date_filter,
-  }: IPostsRepoFetchPostsCursor) {
+  }: IArticlesRepoFetchArticlesCursor) {
     const { order, cursor, take, sort } = cursorOption;
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
 
@@ -189,16 +189,16 @@ export class PostsRepository extends Repository<Posts> {
       });
     }
 
-    const posts: Posts[] = await queryBuilder.getMany();
+    const articles: Article[] = await queryBuilder.getMany();
 
-    return { posts };
+    return { articles };
   }
 
-  async fetchFriendsPostsCursor({
+  async fetchFriendsArticlesCursor({
     cursorOption,
     kakaoId,
     date_filter,
-  }: IPostsRepoFetchFriendsPostsCursor) {
+  }: IArticlesRepoFetchFriendsArticlesCursor) {
     const { order, cursor, take, sort } = cursorOption;
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
 
@@ -254,22 +254,22 @@ export class PostsRepository extends Repository<Posts> {
     //   });
     // }
 
-    const posts: Posts[] = await queryBuilder.getMany();
+    const articles: Article[] = await queryBuilder.getMany();
 
-    return { posts };
+    return { articles };
   }
 
-  async fetchUserPosts({
+  async fetchUserArticles({
     cursorOption,
     scope,
     userKakaoId,
     date_filter,
-  }: IPostsRepoFetchUserPostsCursor) {
+  }: IArticlesRepoFetchUserArticlesCursor) {
     const { order, cursor, take, sort } = cursorOption;
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
 
     if (cursorOption.categoryId) {
-      queryBuilder.andWhere('postCategory.id = :categoryId', {
+      queryBuilder.andWhere('articleCategory.id = :categoryId', {
         categoryId: cursorOption.categoryId,
       });
     }
@@ -285,8 +285,8 @@ export class PostsRepository extends Repository<Posts> {
       });
     }
 
-    const posts: Posts[] = await queryBuilder.getMany();
+    const articles: Article[] = await queryBuilder.getMany();
 
-    return { posts };
+    return { articles };
   }
 }

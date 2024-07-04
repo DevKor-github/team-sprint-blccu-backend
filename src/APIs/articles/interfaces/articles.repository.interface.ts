@@ -1,32 +1,32 @@
-import { PostsOrderOptionWrap } from 'src/common/enums/posts-order-option';
+import { ArticlesOrderOptionWrap } from 'src/common/enums/articles-order-option';
 import { SortOption } from 'src/common/enums/sort-option';
 import {
-  IPostsServiceFetchPostsCursor,
-  IPostsServiceFetchFriendsPostsCursor,
-  IPostsServiceFetchUserPostsCursor,
-} from './posts.service.interface';
+  IArticlesServiceFetchArticlesCursor,
+  IArticlesServiceFetchFriendsArticlesCursor,
+  IArticlesServiceFetchUserArticlesCursor,
+} from './articles.service.interface';
 import { OpenScope } from 'src/common/enums/open-scope.enum';
 
-export interface IPostsRepoGetCursorQuery {
-  order: PostsOrderOptionWrap;
+export interface IArticlesRepoGetCursorQuery {
+  order: ArticlesOrderOptionWrap;
   sort: SortOption;
   take: number;
   cursor: string;
 }
 
-export interface IPostsRepoFetchPostsCursor
-  extends IPostsServiceFetchPostsCursor {
+export interface IArticlesRepoFetchArticlesCursor
+  extends IArticlesServiceFetchArticlesCursor {
   date_filter: Date;
 }
 
-export interface IPostsRepoFetchFriendsPostsCursor
-  extends Pick<IPostsServiceFetchFriendsPostsCursor, 'cursorOption'> {
+export interface IArticlesRepoFetchFriendsArticlesCursor
+  extends Pick<IArticlesServiceFetchFriendsArticlesCursor, 'cursorOption'> {
   date_filter: Date;
   kakaoId: number;
 }
 
-export interface IPostsRepoFetchUserPostsCursor
-  extends Pick<IPostsServiceFetchUserPostsCursor, 'cursorOption'> {
+export interface IArticlesRepoFetchUserArticlesCursor
+  extends Pick<IArticlesServiceFetchUserArticlesCursor, 'cursorOption'> {
   date_filter: Date;
   scope: OpenScope[];
   userKakaoId: number;
