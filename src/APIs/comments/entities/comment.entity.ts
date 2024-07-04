@@ -1,30 +1,31 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Posts } from 'src/APIs/articles/entities/articles.entity';
+import { IsNumber, IsString } from 'class-validator';
+import { Article } from 'src/APIs/articles/entities/article.entity';
+import { Report } from 'src/APIs/reports/entities/report.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
+import { IndexedCommonEntity } from 'src/common/entities/indexed-common.entity';
 import {
   Column,
-  CreateDateColumn,
-  DeleteDateColumn,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   RelationId,
-  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
-export class Comment {
+export class Comment extends IndexedCommonEntity {
   @ApiProperty({ type: Number, description: '댓글 id' })
   @PrimaryGeneratedColumn()
+  @IsNumber()
   id: number;
 
   @ApiProperty({ type: Number, description: '작성자 유저 아이디' })
-  @Column()
+  @Column({ name: 'user_id' })
   @RelationId((comment: Comment) => comment.user)
-  userKakaoId: number;
+  @IsNumber()
+  userId: number;
 
   @ApiProperty({ type: User, description: '사용자 정보' })
   @ManyToOne(() => User, (users) => users.id, { nullable: false })
@@ -32,26 +33,29 @@ export class Comment {
   user: User;
 
   @ApiProperty({ type: Number, description: '게시글 id' })
-  @Column()
-  @RelationId((comment: Comment) => comment.posts)
-  postsId: number;
+  @Column({ name: 'article_id' })
+  @RelationId((comment: Comment) => comment.article)
+  @IsNumber()
+  articleId: number;
 
-  @ApiProperty({ type: Posts, description: '게시글 정보' })
-  @ManyToOne(() => Posts, (posts) => posts.id, {
+  @ApiProperty({ type: Article, description: '게시글 정보' })
+  @ManyToOne(() => Article, (article) => article.id, {
     nullable: false,
     onUpdate: 'NO ACTION',
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  posts: Posts;
+  article: Article;
 
-  @ApiProperty({ type: String, description: '내용 정보' })
+  @ApiProperty({ type: String, description: '내용 정보', maxLength: 1500 })
   @Column({ length: 1500 })
+  @IsString()
   content: string;
 
-  @ApiProperty({ type: Number, description: '신고 당한 횟수' })
-  @Column({ default: 0 })
-  report_count: number;
+  @ApiProperty({ type: Number, description: '신고 당한 횟수', default: 0 })
+  @Column({ name: 'report_count', default: 0 })
+  @IsNumber()
+  reportCount: number;
 
   @ApiProperty({ type: Comment, description: '루트 댓글 정보' })
   @ManyToOne(() => Comment, (comment) => comment.children, {
@@ -63,7 +67,7 @@ export class Comment {
   parent: Comment;
 
   @ApiProperty({ type: Number, description: '루트 댓글 아이디' })
-  @Column({ nullable: true })
+  @Column({ name: 'parent_id', nullable: true })
   @RelationId((comment: Comment) => comment.parent)
   parentId: number;
 
@@ -71,16 +75,11 @@ export class Comment {
   @OneToMany(() => Comment, (comment) => comment.parent)
   children: Comment[];
 
-  @Index()
-  @ApiProperty({ type: Date, description: '생성 날짜' })
-  @CreateDateColumn({ default: () => 'CURRENT_TIMESTAMP(6)' })
-  date_created: Date;
-
-  @ApiProperty({ type: Date, description: '수정 날짜' })
-  @UpdateDateColumn()
-  date_updated: Date;
-
-  @ApiProperty({ type: Date, description: '논리 삭제 칼럼', nullable: true })
-  @DeleteDateColumn()
-  date_deleted: Date;
+  @ApiProperty({
+    type: () => [Report],
+    description: '연결된 신고',
+    nullable: true,
+  })
+  @OneToMany(() => Report, (report) => report.comment)
+  reports: Report[];
 }

@@ -9,9 +9,11 @@ import {
 } from 'class-validator';
 import { ArticleBackground } from 'src/APIs/articleBackgrounds/entities/articleBackground.entity';
 import { ArticleCategory } from 'src/APIs/articleCategories/entities/articleCategory.entity';
+import { Comment } from 'src/APIs/comments/entities/comment.entity';
+import { Notification } from 'src/APIs/notifications/entities/notification.entity';
 import { StickerBlock } from 'src/APIs/stickerBlocks/entities/stickerblock.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
-import { CommonEntity } from 'src/common/entities/common.entity';
+import { IndexedCommonEntity } from 'src/common/entities/indexed-common.entity';
 import { OpenScope } from 'src/common/enums/open-scope.enum';
 import {
   Column,
@@ -24,7 +26,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Article extends CommonEntity {
+export class Article extends IndexedCommonEntity {
   @ApiProperty({ description: '게시글의 고유 아이디', type: Number })
   @PrimaryGeneratedColumn()
   @IsNumber()
