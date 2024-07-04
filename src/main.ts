@@ -6,11 +6,13 @@ import { HttpExceptionFilter } from './common/filter/http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
 import expressBasicAuth from 'express-basic-auth';
 import { PrometheusInterceptor } from './common/interceptors/prometheus.interceptor';
-import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 // import * as expressBasicAuth from 'express-basic-auth';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(
+    AppModule,
+    { snapshot: true }, // you should delete here!
+  );
   app.use(cookieParser());
   app.use(
     ['/api-docs'],
