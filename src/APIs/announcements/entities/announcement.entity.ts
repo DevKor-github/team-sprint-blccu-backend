@@ -1,15 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { CommonEntity } from 'src/common/entities/common.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class Announcement {
+export class Announcement extends CommonEntity {
   @ApiProperty({ type: Number, description: 'PK: A_I_' })
   @PrimaryGeneratedColumn()
   id: number;
@@ -21,16 +15,4 @@ export class Announcement {
   @ApiProperty({ type: String, description: '내용' })
   @Column()
   content: string;
-
-  @ApiProperty({ type: Date, description: '생성된 날짜' })
-  @CreateDateColumn()
-  date_created: Date;
-
-  @ApiProperty({ type: Date, description: '수정된 날짜' })
-  @UpdateDateColumn()
-  date_updated: Date;
-
-  @ApiProperty({ type: Date, description: '삭제된 날짜' })
-  @DeleteDateColumn()
-  date_deleted: Date;
 }

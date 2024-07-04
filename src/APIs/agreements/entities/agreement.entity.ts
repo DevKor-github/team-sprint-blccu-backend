@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsEnum, IsNumber } from 'class-validator';
 import { User } from 'src/APIs/users/entities/user.entity';
-import { CommonEntity } from 'src/common/\bentities/common.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import { AgreementType } from 'src/common/enums/agreement-type.enum';
 import {
   Column,
