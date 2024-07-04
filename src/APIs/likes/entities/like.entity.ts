@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber } from 'class-validator';
+import { Article } from 'src/APIs/articles/entities/article.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import {
   Column,
   Entity,
@@ -10,9 +13,10 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Like {
-  @ApiProperty({ description: 'PK: uuid', type: Number })
-  @PrimaryGeneratedColumn('uuid')
+export class Like extends CommonEntity {
+  @ApiProperty({ description: 'PK: number', type: Number })
+  @PrimaryGeneratedColumn()
+  @IsNumber()
   id: number;
 
   @ApiProperty({ description: '좋아요를 누른 유저', type: User })
@@ -21,27 +25,29 @@ export class Like {
   user: User;
 
   @ApiProperty({ description: '유저 아이디', type: Number })
-  @Column()
+  @Column({ name: 'user_id' })
   @RelationId((like: Like) => like.user)
-  userKakaoId: number;
+  @IsNumber()
+  userId: number;
 
   @ApiProperty({
-    description: '좋아요를 누른 포스트',
-    type: Posts,
+    description: '좋아요를 누른 게시글',
+    type: Article,
   })
   @JoinColumn()
-  @ManyToOne(() => Posts, {
+  @ManyToOne(() => Article, {
     nullable: false,
     onUpdate: 'NO ACTION',
     onDelete: 'CASCADE',
   })
-  posts: Posts;
+  article: Article;
 
   @ApiProperty({
     type: Number,
     description: '게시글 아이디',
   })
-  @Column()
-  @RelationId((like: Like) => like.posts)
-  postsId: number;
+  @Column({ name: 'article_id' })
+  @RelationId((like: Like) => like.article)
+  @IsNumber()
+  articleId: number;
 }
