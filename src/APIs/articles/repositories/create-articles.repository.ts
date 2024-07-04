@@ -7,7 +7,7 @@ export class CreateArticlesRepository extends Repository<Article> {
   constructor(private dataSource: DataSource) {
     super(Article, dataSource.createEntityManager());
   }
-  async insertPost(article) {
+  async insert(article) {
     return await this.createQueryBuilder()
       .insert()
       .into(Article, Object.keys(article))

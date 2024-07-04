@@ -22,12 +22,12 @@ export interface IArticlesRepoFetchArticlesCursor
 export interface IArticlesRepoFetchFriendsArticlesCursor
   extends Pick<IArticlesServiceFetchFriendsArticlesCursor, 'cursorOption'> {
   date_filter: Date;
-  kakaoId: number;
+  userId: number;
 }
 
 export interface IArticlesRepoFetchUserArticlesCursor
   extends Pick<IArticlesServiceFetchUserArticlesCursor, 'cursorOption'> {
   date_filter: Date;
   scope: OpenScope[];
-  userKakaoId: number;
+  userId: number;
 }

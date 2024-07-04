@@ -133,8 +133,8 @@ export class Article extends IndexedCommonEntity {
   @IsUrl()
   mainImageUrl: string;
 
-  @ApiProperty({ description: '연결된 카테고리', type: PostCategory })
-  @ManyToOne(() => PostCategory, {
+  @ApiProperty({ description: '연결된 카테고리', type: ArticleCategory })
+  @ManyToOne(() => ArticleCategory, {
     nullable: true,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
@@ -142,9 +142,9 @@ export class Article extends IndexedCommonEntity {
   @JoinColumn()
   articleCategory: ArticleCategory;
 
-  @ApiProperty({ description: '연결된 내지', type: PostBackground })
+  @ApiProperty({ description: '연결된 내지', type: ArticleBackground })
   @JoinColumn()
-  @ManyToOne(() => PostBackground, {
+  @ManyToOne(() => ArticleBackground, {
     nullable: true,
     onUpdate: 'SET NULL',
     onDelete: 'SET NULL',

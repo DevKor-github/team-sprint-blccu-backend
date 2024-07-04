@@ -35,7 +35,7 @@ export class StickerBlock extends CommonEntity {
 
   @ApiProperty({ description: '참조하는 포스트 아이디', type: Number })
   @Column({ name: 'article_id' })
-  @RelationId((stickerBlock: StickerBlock) => stickerBlock.posts)
+  @RelationId((stickerBlock: StickerBlock) => stickerBlock.article)
   @IsNumber()
   articleId: number;
 
