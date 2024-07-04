@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Posts } from 'src/APIs/articles/entities/articles.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
 import {
   Column,
@@ -11,11 +10,10 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Likes {
-  // refactoring => pk 예측가능 값이어도 상관 없는 경우 A_I_로 하기
-  @ApiProperty({ description: 'PK: uuid', type: String })
+export class Like {
+  @ApiProperty({ description: 'PK: uuid', type: Number })
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id: number;
 
   @ApiProperty({ description: '좋아요를 누른 유저', type: User })
   @JoinColumn()
@@ -24,7 +22,7 @@ export class Likes {
 
   @ApiProperty({ description: '유저 아이디', type: Number })
   @Column()
-  @RelationId((like: Likes) => like.user)
+  @RelationId((like: Like) => like.user)
   userKakaoId: number;
 
   @ApiProperty({
@@ -44,6 +42,6 @@ export class Likes {
     description: '게시글 아이디',
   })
   @Column()
-  @RelationId((like: Likes) => like.posts)
+  @RelationId((like: Like) => like.posts)
   postsId: number;
 }

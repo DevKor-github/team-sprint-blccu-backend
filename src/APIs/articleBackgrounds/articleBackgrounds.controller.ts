@@ -8,7 +8,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { PostBackgroundsService } from './postBackgrounds.service';
+import { ArticleBackgroundsService } from './articleBackgrounds.service';
 import {
   ApiBody,
   ApiConsumes,
@@ -19,13 +19,13 @@ import {
 } from '@nestjs/swagger';
 import { ImageUploadDto } from '../../common/dto/image-upload.dto';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
-import { PostBackground } from './entities/postBackground.entity';
+import { ArticleBackground } from './entities/articleBackground.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('')
-export class PostBackgroundsController {
+export class ArticleBackgroundsController {
   constructor(
-    private readonly postBackgroundsService: PostBackgroundsService,
+    private readonly articleBackgroundsService: ArticleBackgroundsService,
   ) {}
 
   @ApiTags('어드민 API')
@@ -39,13 +39,13 @@ export class PostBackgroundsController {
     description: '이미지 서버에 파일 업로드 완료',
     type: ImageUploadResponseDto,
   })
-  @Post('users/admin/posts/background')
+  @Post('users/admin/article/background')
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
   async uploadImage(
     @UploadedFile() file: Express.Multer.File,
   ): Promise<ImageUploadResponseDto> {
-    const url = await this.postBackgroundsService.imageUpload(file);
+    const url = await this.articleBackgroundsService.imageUpload(file);
     return url;
   }
 
@@ -53,17 +53,17 @@ export class PostBackgroundsController {
   @ApiOperation({ summary: '내지 모두 불러오기' })
   @ApiOkResponse({
     description: '모든 내지 fetch 완료',
-    type: [PostBackground],
+    type: [ArticleBackground],
   })
-  @Get('posts/backgrounds')
-  async fetchAll(): Promise<PostBackground[]> {
-    return await this.postBackgroundsService.fetchAll();
+  @Get('article/backgrounds')
+  async fetchAll(): Promise<ArticleBackground[]> {
+    return await this.articleBackgroundsService.fetchAll();
   }
 
   @ApiTags('어드민 API')
   @ApiOperation({ summary: '내지 삭제하기' })
-  @Delete('users/admin/posts/background/:id')
+  @Delete('users/admin/article/background/:id')
   async delete(@Param('id') id: string) {
-    return await this.postBackgroundsService.delete({ id });
+    return await this.articleBackgroundsService.delete({ id });
   }
 }

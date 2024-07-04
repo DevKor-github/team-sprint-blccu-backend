@@ -1,5 +1,5 @@
 import { Brackets, DataSource, Repository } from 'typeorm';
-import { Article } from './entities/article.entity';
+import { Article } from '../entities/article.entity';
 import { Injectable } from '@nestjs/common';
 import { OpenScope } from 'src/common/enums/open-scope.enum';
 import { PostResponseDto } from './dtos/article-response.dto';
@@ -12,68 +12,14 @@ import {
   IArticlesRepoFetchArticlesCursor,
   IArticlesRepoFetchUserArticlesCursor,
   IArticlesRepoGetCursorQuery,
-} from './interfaces/articles.repository.interface';
-import { Follow } from '../follows/entities/follow.entity';
+} from '../interfaces/articles.repository.interface';
+import { Follow } from '../../follows/entities/follow.entity';
 @Injectable()
 export class ArticlesRepository extends Repository<Article> {
   constructor(private dataSource: DataSource) {
     super(Article, dataSource.createEntityManager());
   }
-  async upsertPost(article) {
-    return await this.createQueryBuilder()
-      .insert()
-      .into(Article, Object.keys(article))
-      .values(article)
-      .execute();
-  }
 
-  async fetchArticles(page) {
-    return (
-      this.createQueryBuilder('p')
-        .innerJoin('p.user', 'user')
-        .leftJoinAndSelect('p.articleBackground', 'articleBackground')
-        .leftJoinAndSelect('p.articleCategory', 'articleCategory')
-        .addSelect([
-          'user.handle',
-          'user.kakaoId',
-          'user.description',
-          'user.profile_image',
-          'user.username',
-        ])
-        .where('p.isPublished = true')
-        .andWhere('p.scope IN (:...scopes)', { scopes: [OpenScope.PUBLIC] })
-        .andWhere('p.date_deleted IS NULL')
-        //sql injection 방지를 위해 반드시 enum 거칠 것
-        .andWhere(`${ArticlesFilterOption[page.filter]} LIKE :search`, {
-          search: `%${page.search}%`,
-        })
-        .orderBy(`p.${ArticlesOrderOption[page.order]}`, 'DESC')
-        .take(page.getLimit())
-        .skip(page.getOffset())
-        .getManyAndCount()
-    );
-  }
-
-  async fetchPostDetail({ id, scope }): Promise<PostResponseDto> {
-    await this.update(id, {
-      view_count: () => 'view_count +1',
-    });
-    return await this.createQueryBuilder('p')
-      .innerJoin('p.user', 'user')
-      .leftJoinAndSelect('p.articleBackground', 'articleBackground')
-      .leftJoinAndSelect('p.articleCategory', 'articleCategory')
-      .addSelect([
-        'user.handle',
-        'user.kakaoId',
-        'user.description',
-        'user.profile_image',
-        'user.username',
-      ])
-      .where('p.id = :id', { id })
-      .andWhere('p.scope IN (:scope)', { scope })
-      .andWhere('p.date_deleted IS NULL')
-      .getOne();
-  }
   async fetchPostForUpdate(id) {
     return await this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')

@@ -12,7 +12,7 @@ import { DataSource } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { StickerBlocksService } from '../stickerBlocks/stickerBlocks.service';
-import { ArticlesRepository } from './articles.repository';
+import { ArticlesRepository } from './repositories/articles.repository';
 import { CustomCursorPageMetaDto } from 'src/utils/cursor-pages/dtos/cursor-page-meta.dto';
 import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
 import { FollowsService } from '../follows/follows.service';

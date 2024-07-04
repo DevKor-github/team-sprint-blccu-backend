@@ -7,8 +7,8 @@ import {
   IsString,
   IsUrl,
 } from 'class-validator';
-import { PostBackground } from 'src/APIs/postBackgrounds/entities/postBackground.entity';
-import { PostCategory } from 'src/APIs/postCategories/entities/postCategory.entity';
+import { PostBackground } from 'src/APIs/articleBackgrounds/entities/postBackground.entity';
+import { PostCategory } from 'src/APIs/articleCategories/entities/postCategory.entity';
 import { StickerBlock } from 'src/APIs/stickerBlocks/entities/stickerblock.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
 import { CommonEntity } from 'src/common/entities/common.entity';
@@ -31,19 +31,19 @@ export class Article extends CommonEntity {
   id: number;
 
   @ApiProperty({ description: '연결된 카테고리 fk', type: String })
-  @Column({ name: 'post_category_id', nullable: true })
+  @Column({ name: 'article_category_id', nullable: true })
   @RelationId((article: Article) => article.postCategory)
   @IsString()
   @IsOptional()
-  postCategoryId: string;
+  articleCategoryId: string;
 
   @IsString()
   @ApiProperty({ description: '연결된 내지 fk', type: String })
-  @Column({ name: 'post_background_id', nullable: true })
+  @Column({ name: 'article_background_id', nullable: true })
   @RelationId((article: Article) => article.postBackground)
   @IsString()
   @IsOptional()
-  postBackgroundId: string;
+  articleBackgroundId: string;
 
   @ApiProperty({ description: '작성한 유저 fk', type: Number })
   @Column({ name: 'user_id', nullable: false })

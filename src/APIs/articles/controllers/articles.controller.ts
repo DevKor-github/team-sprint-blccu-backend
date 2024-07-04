@@ -23,31 +23,31 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { ArticlesService } from './articles.service';
-import { FetchArticlesDto } from './dtos/fetch-posts.dto';
-import { PublishArticleDto } from './dtos/publish-post.dto';
-import { PageArticleResponseDto } from './dtos/page-post-response.dto';
-import { CreateArticleInput } from './dtos/create-post.input';
-import { PublishArticleInput } from './dtos/publish-post.input';
+import { ArticlesService } from '../articles.service';
+import { FetchArticlesDto } from '../dtos/fetch-posts.dto';
+import { PublishArticleDto } from '../dtos/publish-post.dto';
+import { PageArticleResponseDto } from '../dtos/page-post-response.dto';
+import { CreateArticleInput } from '../dtos/create-post.input';
+import { PublishArticleInput } from '../dtos/publish-post.input';
 import { ImageUploadDto } from 'src/common/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
-import { FetchUserArticlesInput } from './dtos/fetch-user-posts.input';
+import { FetchUserArticlesInput } from '../dtos/fetch-user-posts.input';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import {
   ArticleOnlyResponseDto,
   ArticleResponseDto,
-} from './dtos/post-response.dto';
+} from '../dtos/post-response.dto';
 import {
   FetchArticleForUpdateDto,
   ArticleResponseDtoExceptCategory,
-} from './dtos/fetch-post-for-update.dto';
+} from '../dtos/fetch-post-for-update.dto';
 import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
 import { SortOption } from 'src/common/enums/sort-option';
-import { CursorFetchArticles } from './dtos/cursor-fetch-posts.dto';
-import { CursorPageArticleResponseDto } from './dtos/cursor-page-post-response.dto';
-import { PatchArticleInput } from './dtos/patch-post.dto';
-import { DeleteArticleInput } from './dtos/delete-post.dto';
+import { CursorFetchArticles } from '../dtos/cursor-fetch-posts.dto';
+import { CursorPageArticleResponseDto } from '../dtos/cursor-page-post-response.dto';
+import { PatchArticleInput } from '../dtos/patch-post.dto';
+import { DeleteArticleInput } from '../dtos/delete-post.dto';
 
 @ApiTags('게시글 API')
 @Controller('posts')

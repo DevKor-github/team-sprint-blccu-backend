@@ -12,5 +12,5 @@ export abstract class CommonEntity {
 
   @ApiProperty({ type: Date, description: '삭제된 날짜' })
   @DeleteDateColumn({ name: 'date_deleted' })
-  date_deleted: Date;
+  dateDeleted: Date;
 }

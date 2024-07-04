@@ -6,10 +6,10 @@ import { ArticlesService } from './articles.service';
 import { ArticleBackground } from '../articleBackgrounds/entities/articleBackground.entity';
 import { ArticleCategory } from '../articleCategories/entities/articleCategory.entity';
 import { StickerBlocksModule } from '../stickerBlocks/stickerBlocks.module';
-import { ArticlesRepository } from './articles.repository';
+import { ArticlesRepository } from './repositories/articles.repository';
 import { FollowsModule } from '../follows/follows.module';
 import { AwsModule } from 'src/modules/aws/aws.module';
-import { ArticlesController } from './articles.controller';
+import { ArticlesController } from './controllers/articles.controller';
 import { Article } from './entities/article.entity';
 
 @Module({
