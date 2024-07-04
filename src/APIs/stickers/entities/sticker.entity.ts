@@ -1,26 +1,32 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsNumber, IsUrl } from 'class-validator';
+import { StickerBlock } from 'src/APIs/stickerBlocks/entities/stickerblock.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   RelationId,
 } from 'typeorm';
 
 @Entity()
-export class Sticker {
+export class Sticker extends CommonEntity {
   @ApiProperty({ description: 'PK: A_I', type: Number })
   @PrimaryGeneratedColumn()
+  @IsNumber()
   id: number;
 
   @ApiProperty({ description: '제작한 유저 fk', type: Number })
-  @Column()
+  @Column({ name: 'user_id' })
   @RelationId((sticker: Sticker) => sticker.user)
-  userKakaoId: number;
+  @IsNumber()
+  userId: number;
 
-  // @ApiProperty({ description: '제작한 유저', type: User })
+  @ApiProperty({ description: '제작한 유저', type: User })
   @JoinColumn()
   @ManyToOne(() => User, {
     onUpdate: 'CASCADE',
@@ -34,20 +40,33 @@ export class Sticker {
     type: String,
     nullable: false,
   })
-  @Column({ nullable: false })
-  image_url: string;
+  @Column({ name: 'image_url', nullable: false })
+  @IsUrl()
+  imageUrl: string;
 
   @ApiProperty({
     description: '블꾸 기본 제공 스티커 유무',
     type: Boolean,
+    default: false,
   })
-  @Column({ nullable: false, default: false })
+  @Column({ name: 'is_default', nullable: false, default: false })
+  @IsBoolean()
   isDefault: boolean;
 
   @ApiProperty({
     description: '재사용 가능 유무',
     type: Boolean,
+    default: false,
   })
-  @Column({ nullable: false, default: false })
+  @Column({ name: 'is_reusable', nullable: false, default: false })
+  @IsBoolean()
   isReusable: boolean;
+
+  @ApiProperty({
+    type: () => [StickerBlock],
+    description: '연결된 스티커블럭',
+    nullable: true,
+  })
+  @OneToMany(() => StickerBlock, (stickerBlock) => stickerBlock.sticker)
+  stickerBlocks: StickerBlock[];
 }

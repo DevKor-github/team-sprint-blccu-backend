@@ -11,6 +11,7 @@ import { ArticleBackground } from 'src/APIs/articleBackgrounds/entities/articleB
 import { ArticleCategory } from 'src/APIs/articleCategories/entities/articleCategory.entity';
 import { Comment } from 'src/APIs/comments/entities/comment.entity';
 import { Notification } from 'src/APIs/notifications/entities/notification.entity';
+import { Report } from 'src/APIs/reports/entities/report.entity';
 import { StickerBlock } from 'src/APIs/stickerBlocks/entities/stickerblock.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
 import { IndexedCommonEntity } from 'src/common/entities/indexed-common.entity';
