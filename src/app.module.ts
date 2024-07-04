@@ -30,6 +30,7 @@ import { redisStore } from 'cache-manager-redis-yet';
 import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
 import { MetricsModule } from './modules/metrics/metrics.module';
+import { DevtoolsModule } from '@nestjs/devtools-integration';
 
 @Module({
   imports: [
@@ -54,6 +55,9 @@ import { MetricsModule } from './modules/metrics/metrics.module';
     HttpModule,
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    DevtoolsModule.register({
+      http: true,
     }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
