@@ -1,5 +1,5 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
-import { Posts } from '../entities/posts.entity';
+import { Posts } from '../entities/article.entity';
 import { CreateStickerBlocksResponseDto } from 'src/APIs/stickerBlocks/dtos/create-stickerBlocks.dto';
 
 export class PublishPostResult extends OmitType(Posts, [

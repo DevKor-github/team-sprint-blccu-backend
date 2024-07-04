@@ -1,5 +1,5 @@
 import { Brackets, DataSource, Repository } from 'typeorm';
-import { Posts } from './entities/posts.entity';
+import { Posts } from './entities/article.entity';
 import { Injectable } from '@nestjs/common';
 import { OpenScope } from 'src/common/enums/open-scope.enum';
 import { PostResponseDto } from './dtos/post-response.dto';
@@ -12,7 +12,7 @@ import {
   IPostsRepoFetchPostsCursor,
   IPostsRepoFetchUserPostsCursor,
   IPostsRepoGetCursorQuery,
-} from './interfaces/posts.repository.interface';
+} from './interfaces/articles.repository.interface';
 import { Follow } from '../follows/entities/follow.entity';
 @Injectable()
 export class PostsRepository extends Repository<Posts> {

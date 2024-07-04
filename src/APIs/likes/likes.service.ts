@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Likes } from './entities/like.entity';
-import { Posts } from '../posts/entities/posts.entity';
+import { Posts } from '../articles/entities/article.entity';
 import { FetchLikeResponseDto } from './dtos/fetch-likes.dto';
 import { LikesRepository } from './likes.repository';
 import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';

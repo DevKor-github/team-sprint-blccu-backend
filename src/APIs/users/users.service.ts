@@ -21,7 +21,7 @@ import { UtilsService } from 'src/utils/utils.service';
 import { UploadImageDto } from './dtos/upload-image.dto';
 import { UsersRepository } from './users.repository';
 import { DataSource, UpdateResult } from 'typeorm';
-import { Posts } from '../posts/entities/posts.entity';
+import { Posts } from '../articles/entities/article.entity';
 import { Follow } from '../follows/entities/follow.entity';
 import { User } from './entities/user.entity';
 import { Comment } from '../comments/entities/comment.entity';

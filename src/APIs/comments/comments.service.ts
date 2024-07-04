@@ -7,7 +7,7 @@ import {
 import { CreateCommentDto } from './dtos/create-comment.dto';
 import { CommentsRepository } from './comments.repository';
 import { DataSource, EntityManager, UpdateResult } from 'typeorm';
-import { Posts } from '../posts/entities/posts.entity';
+import { Posts } from '../articles/entities/article.entity';
 import {
   ChildrenComment,
   FetchCommentDto,

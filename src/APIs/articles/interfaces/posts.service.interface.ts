@@ -2,7 +2,7 @@ import { CreatePostInput } from '../dtos/create-post.input';
 import { CursorFetchPosts } from '../dtos/cursor-fetch-posts.dto';
 import { FetchUserPostsInput } from '../dtos/fetch-user-posts.input';
 import { PatchPostInput } from '../dtos/patch-post.dto';
-import { Posts } from '../entities/posts.entity';
+import { Posts } from '../entities/article.entity';
 
 export interface IPostsServicePostId extends Pick<Posts, 'id'> {}
 

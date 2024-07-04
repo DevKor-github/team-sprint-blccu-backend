@@ -10,7 +10,7 @@ import { CreateReportDto } from './dtos/create-report.dto';
 import { UsersService } from '../users/users.service';
 import { FetchReportResponse } from './dtos/fetch-report.dto';
 import { ReportTarget } from 'src/common/enums/report-target.enum';
-import { Posts } from '../posts/entities/posts.entity';
+import { Posts } from '../articles/entities/article.entity';
 import { Comment } from '../comments/entities/comment.entity';
 
 @Injectable()

@@ -1,6 +1,6 @@
 import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
 import { Likes } from '../entities/like.entity';
-import { Posts } from 'src/APIs/posts/entities/posts.entity';
+import { Posts } from 'src/APIs/articles/entities/articles.entity';
 
 export class FetchLikesDto {
   @ApiProperty({ type: Number, description: 'post_id' })

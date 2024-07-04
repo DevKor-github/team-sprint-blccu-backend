@@ -9,7 +9,7 @@ import {
 
 import { UtilsService } from 'src/utils/utils.service';
 import { DataSource } from 'typeorm';
-import { Posts } from './entities/posts.entity';
+import { Posts } from './entities/article.entity';
 import { Page } from '../../utils/pages/page';
 import { FetchPostsDto } from './dtos/fetch-posts.dto';
 import { PagePostResponseDto } from './dtos/page-post-response.dto';
@@ -18,7 +18,7 @@ import { PostCategory } from '../postCategories/entities/postCategory.entity';
 import { User } from '../users/entities/user.entity';
 import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
 import { StickerBlocksService } from '../stickerBlocks/stickerBlocks.service';
-import { PostsRepository } from './posts.repository';
+import { PostsRepository } from './articles.repository';
 import { PostOnlyResponseDto, PostResponseDto } from './dtos/post-response.dto';
 import {
   FetchPostForUpdateDto,

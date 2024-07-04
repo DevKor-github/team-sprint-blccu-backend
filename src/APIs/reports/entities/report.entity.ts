@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
 import { Comment } from 'src/APIs/comments/entities/comment.entity';
-import { Posts } from 'src/APIs/posts/entities/posts.entity';
+import { Posts } from 'src/APIs/articles/entities/articles.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
 import { ReportTarget } from 'src/common/enums/report-target.enum';
 import { ReportType } from 'src/common/enums/report-type.enum';

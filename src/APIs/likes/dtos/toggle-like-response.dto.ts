@@ -1,5 +1,5 @@
 import { OmitType } from '@nestjs/swagger';
-import { Posts } from 'src/APIs/posts/entities/posts.entity';
+import { Posts } from 'src/APIs/articles/entities/articles.entity';
 import { Likes } from '../entities/like.entity';
 
 export class ToggleLikeResponseDto extends OmitType(Posts, [
