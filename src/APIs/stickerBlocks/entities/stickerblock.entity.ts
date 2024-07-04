@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Posts } from 'src/APIs/articles/entities/articles.entity';
+import { IsNumber } from 'class-validator';
+import { Article } from 'src/APIs/articles/entities/article.entity';
 import { Sticker } from 'src/APIs/stickers/entities/sticker.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import {
   Column,
   Entity,
@@ -11,14 +13,16 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class StickerBlock {
+export class StickerBlock extends CommonEntity {
   @ApiProperty({ description: 'PK: A_I_', type: Number })
   @PrimaryGeneratedColumn()
+  @IsNumber()
   id: number;
 
   @ApiProperty({ description: '참조하는 스티커의 아이디', type: Number })
-  @Column()
+  @Column({ name: 'sticker_id' })
   @RelationId((stickerBlock: StickerBlock) => stickerBlock.sticker)
+  @IsNumber()
   stickerId: number;
 
   @ApiProperty({ description: '참조하는 스티커', type: Sticker })
@@ -30,17 +34,18 @@ export class StickerBlock {
   sticker: Sticker;
 
   @ApiProperty({ description: '참조하는 포스트 아이디', type: Number })
-  @Column()
+  @Column({ name: 'article_id' })
   @RelationId((stickerBlock: StickerBlock) => stickerBlock.posts)
-  postsId: number;
+  @IsNumber()
+  articleId: number;
 
-  @ApiProperty({ description: '참조하는 포스트', type: Posts })
+  @ApiProperty({ description: '참조하는 포스트', type: Article })
   @JoinColumn()
-  @ManyToOne(() => Posts, (posts) => posts.id, {
+  @ManyToOne(() => Article, (article) => article.id, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  posts: Posts;
+  article: Article;
 
   @ApiProperty({ description: '스티커의 posX', type: Number })
   @Column({ type: 'float' })
