@@ -8,15 +8,18 @@ import {
 } from 'typeorm';
 import { StickerCategory } from './stickerCategory.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber } from 'class-validator';
+import { CommonEntity } from 'src/common/entities/common.entity';
 
 @Entity()
-export class StickerCategoryMapper {
+export class StickerCategoryMapper extends CommonEntity {
   @ApiProperty({ type: Number, description: '스티커 아이디' })
-  @PrimaryColumn()
+  @PrimaryColumn({ name: 'sticker_id' })
   @RelationId(
     (stickerCategoryMapper: StickerCategoryMapper) =>
       stickerCategoryMapper.sticker,
   )
+  @IsNumber()
   stickerId: number;
 
   @JoinColumn()
@@ -27,11 +30,12 @@ export class StickerCategoryMapper {
   sticker: Sticker;
 
   @ApiProperty({ type: Number, description: '스티커 카테고리 아이디' })
-  @PrimaryColumn()
+  @PrimaryColumn({ name: 'sticker_category_id' })
   @RelationId(
     (stickerCategoryMapper: StickerCategoryMapper) =>
       stickerCategoryMapper.stickerCategory,
   )
+  @IsNumber()
   stickerCategoryId: number;
 
   @JoinColumn()
