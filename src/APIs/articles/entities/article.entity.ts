@@ -7,8 +7,8 @@ import {
   IsString,
   IsUrl,
 } from 'class-validator';
-import { PostBackground } from 'src/APIs/articleBackgrounds/entities/postBackground.entity';
-import { PostCategory } from 'src/APIs/articleCategories/entities/postCategory.entity';
+import { ArticleBackground } from 'src/APIs/articleBackgrounds/entities/articleBackground.entity';
+import { ArticleCategory } from 'src/APIs/articleCategories/entities/articleCategory.entity';
 import { StickerBlock } from 'src/APIs/stickerBlocks/entities/stickerblock.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
 import { CommonEntity } from 'src/common/entities/common.entity';
@@ -137,16 +137,16 @@ export class Article extends CommonEntity {
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  postCategory: PostCategory;
+  articleCategory: ArticleCategory;
 
   @ApiProperty({ description: '연결된 내지', type: PostBackground })
   @JoinColumn()
   @ManyToOne(() => PostBackground, {
     nullable: true,
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
+    onUpdate: 'SET NULL',
+    onDelete: 'SET NULL',
   })
-  postBackground: PostBackground;
+  articleBackground: ArticleBackground;
 
   @ApiProperty({ description: '작성자', type: User })
   @JoinColumn()
@@ -162,7 +162,7 @@ export class Article extends CommonEntity {
     description: '연결된 댓글',
     nullable: true,
   })
-  @OneToMany(() => Comment, (comment) => comment.articleId)
+  @OneToMany(() => Comment, (comment) => comment.article)
   comments: Comment[];
 
   @ApiProperty({
@@ -170,7 +170,7 @@ export class Article extends CommonEntity {
     description: '연결된 알림',
     nullable: true,
   })
-  @OneToMany(() => Notification, (notification) => notification.articleId)
+  @OneToMany(() => Notification, (notification) => notification.article)
   notifications: Notification[];
 
   @ApiProperty({
@@ -178,7 +178,7 @@ export class Article extends CommonEntity {
     description: '연결된 신고',
     nullable: true,
   })
-  @OneToMany(() => Report, (report) => report.articleId)
+  @OneToMany(() => Report, (report) => report.article)
   reports: Report[];
 
   @ApiProperty({
@@ -186,6 +186,6 @@ export class Article extends CommonEntity {
     description: '연결된 스티커블럭',
     nullable: true,
   })
-  @OneToMany(() => StickerBlock, (stickerBlock) => stickerBlock.articleId)
+  @OneToMany(() => StickerBlock, (stickerBlock) => stickerBlock.article)
   stickerBlocks: StickerBlock[];
 }

@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Article } from 'src/APIs/articles/entities/article.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class ArticleBackground {
+export class ArticleBackground extends CommonEntity {
   @ApiProperty({ description: 'PK: A_I_', type: Number })
   @PrimaryGeneratedColumn()
   id: number;
@@ -17,6 +18,6 @@ export class ArticleBackground {
     description: '연결된 게시글',
     nullable: true,
   })
-  @OneToMany(() => Article, (article) => article.articleBackgroundId)
+  @OneToMany(() => Article, (article) => article.articleBackground)
   articles: Article[];
 }

@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
 import { Article } from 'src/APIs/articles/entities/article.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import {
   Column,
   Entity,
@@ -13,7 +14,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class ArticleCategory {
+export class ArticleCategory extends CommonEntity {
   @ApiProperty({ type: String, description: 'PK: A_I_' })
   @PrimaryGeneratedColumn()
   @IsNumber()
@@ -39,6 +40,6 @@ export class ArticleCategory {
     description: '연결된 게시글',
     nullable: true,
   })
-  @OneToMany(() => Article, (article) => article.articleCategoryId)
+  @OneToMany(() => Article, (article) => article.articleCategory)
   articles: Article[];
 }

@@ -27,7 +27,7 @@ export class Comment {
   userKakaoId: number;
 
   @ApiProperty({ type: User, description: '사용자 정보' })
-  @ManyToOne(() => User, (users) => users.kakaoId, { nullable: false })
+  @ManyToOne(() => User, (users) => users.id, { nullable: false })
   @JoinColumn()
   user: User;
 
