@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { PostCategory } from './entities/postCategory.entity';
 import { DataSource, Repository } from 'typeorm';
+import { ArticleCategory } from './entities/articleCategory.entity';
 
 @Injectable()
-export class PostCategoriesRepository extends Repository<PostCategory> {
+export class ArticleCategoriesRepository extends Repository<ArticleCategory> {
   constructor(private dataSource: DataSource) {
-    super(PostCategory, dataSource.createEntityManager());
+    super(ArticleCategory, dataSource.createEntityManager());
   }
 
   async fetchUserCategory({ scope, userKakaoId }) {

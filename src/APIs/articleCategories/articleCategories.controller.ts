@@ -17,21 +17,25 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { PostCategoriesService } from './PostCategories.service';
 import { Request } from 'express';
-import { CreatePostCategoryDto } from './dtos/create-post-category.dto';
-import { CreatePostCategoryResponseDto } from './dtos/create-post-category-response.dto';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import {
-  FetchPostCategoryDto,
-  FetchPostCategoriesDto,
-} from './dtos/fetch-post-category.dto';
-import { PatchPostCategoryDto } from './dtos/patch-post-category.dto';
+  FetchArticleCategoriesResponse,
+  FetchArticleCategoryResponse,
+} from './dtos/fetch-articleCategory.dto';
+import {
+  CreateArticleCategoryInput,
+  CreateArticleCategoryResponse,
+} from './dtos/create-articleCategory.dto';
+import { ArticleCategoriesService } from './articleCategories.service';
+import { PatchArticleCategoryInput } from './dtos/patch-articleCategory.dto';
 
 @ApiTags('유저 API')
 @Controller('users')
-export class PostCategoriesController {
-  constructor(private readonly postCategoriesService: PostCategoriesService) {}
+export class ArticleCategoriesController {
+  constructor(
+    private readonly articleCategoriesService: ArticleCategoriesService,
+  ) {}
 
   @ApiOperation({
     summary: '특정 유저의 카테고리 전체 조회',
@@ -39,16 +43,16 @@ export class PostCategoriesController {
       '특정 유저가 생성한 카테고리의 이름과 id, 게시글 개수를 조회한다.',
   })
   @ApiOkResponse({
-    type: [FetchPostCategoriesDto],
+    type: [FetchArticleCategoriesResponse],
   })
   @Get(':userId/categories')
   @HttpCode(200)
-  async fetchPostCategories(
+  async fetchArticleCategories(
     @Req() req: Request,
     @Param('userId') targetKakaoId: number,
-  ): Promise<FetchPostCategoriesDto[]> {
+  ): Promise<FetchArticleCategoriesResponse[]> {
     const kakaoId = req.user.userId;
-    return await this.postCategoriesService.fetchAll({
+    return await this.articleCategoriesService.fetchAll({
       kakaoId,
       targetKakaoId,
     });
@@ -58,13 +62,13 @@ export class PostCategoriesController {
     summary: '특정 카테고리 조회',
     description: 'id에 해당하는 카테고리를 조회한다.',
   })
-  @ApiOkResponse({ type: FetchPostCategoryDto })
+  @ApiOkResponse({ type: FetchArticleCategoryResponse })
   @Get('categories/:categoryId')
   async fetchMyCategory(
     @Req() req: Request,
     @Param('categoryId') id: string,
-  ): Promise<FetchPostCategoryDto> {
-    return await this.postCategoriesService.findWithId({ id });
+  ): Promise<FetchArticleCategoryResponse> {
+    return await this.articleCategoriesService.findWithId({ id });
   }
 
   @ApiOperation({
@@ -74,54 +78,32 @@ export class PostCategoriesController {
   @ApiCookieAuth()
   @ApiCreatedResponse({
     description: '카테고리 생성 완료',
-    type: CreatePostCategoryResponseDto,
+    type: CreateArticleCategoryResponse,
   })
   @UseGuards(AuthGuardV2)
   @Post('me/categories')
   @HttpCode(201)
-  async createPostCategory(
+  async createArticleCategory(
     @Req() req: Request,
-    @Body() body: CreatePostCategoryDto,
-  ): Promise<CreatePostCategoryResponseDto> {
+    @Body() body: CreateArticleCategoryInput,
+  ): Promise<CreateArticleCategoryResponse> {
     const kakaoId = req.user.userId;
     const name = body.name;
-    return await this.postCategoriesService.create({ kakaoId, name });
+    return await this.articleCategoriesService.create({ kakaoId, name });
   }
-
-  // @ApiOperation({
-  //   summary: '로그인된 유저의 카테고리 전체 조회',
-  //   description:
-  //     '로그인된 유저가 생성한 카테고리의 이름과 id, 게시글 개수를 조회한다.',
-  // })
-  // @ApiCookieAuth()
-  // @ApiOkResponse({
-  //   type: [FetchPostCategoriesDto],
-  // })
-  // @UseGuards(AuthGuardV2)
-  // @Get('me/categories')
-  // async fetchMyCategories(
-  //   @Req() req: Request,
-  // ): Promise<FetchPostCategoriesDto[]> {
-  //   const kakaoId = req.user.userId;
-  //   console.log('kakaoId: ', kakaoId);
-  //   return await this.postCategoriesService.fetchAll({
-  //     kakaoId,
-  //     targetKakaoId: kakaoId,
-  //   });
-  // }
 
   @ApiOperation({ summary: '로그인된 유저의 특정 카테고리 수정' })
   @ApiCookieAuth()
-  @ApiOkResponse({ type: FetchPostCategoryDto })
+  @ApiOkResponse({ type: FetchArticleCategoryResponse })
   @UseGuards(AuthGuardV2)
   @Patch('me/categories/:categoryId')
-  async patchCategory(
+  async patchArticleCategory(
     @Req() req: Request,
     @Param('categoryId') id: string,
-    @Body() body: PatchPostCategoryDto,
-  ): Promise<FetchPostCategoryDto> {
+    @Body() body: PatchArticleCategoryInput,
+  ): Promise<FetchArticleCategoryResponse> {
     const kakaoId = req.user.userId;
-    return await this.postCategoriesService.patch({
+    return await this.articleCategoriesService.patch({
       kakaoId,
       id,
       ...body,
@@ -136,11 +118,11 @@ export class PostCategoriesController {
   @ApiCookieAuth()
   @Delete('me/categories/:categoryId')
   @UseGuards(AuthGuardV2)
-  async deletePostCategory(
+  async deleteArticleCategory(
     @Req() req: Request,
     @Param('categoryId') id: string,
   ) {
     const kakaoId = req.user.userId;
-    return await this.postCategoriesService.delete({ kakaoId, id });
+    return await this.articleCategoriesService.delete({ kakaoId, id });
   }
 }

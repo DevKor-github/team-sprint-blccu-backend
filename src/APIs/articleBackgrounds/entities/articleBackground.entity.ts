@@ -12,6 +12,11 @@ export class ArticleBackground {
   @Column({ nullable: false })
   imageUrl: string;
 
+  @ApiProperty({
+    type: () => [Article],
+    description: '연결된 게시글',
+    nullable: true,
+  })
   @OneToMany(() => Article, (article) => article.articleBackgroundId)
   articles: Article[];
 }
