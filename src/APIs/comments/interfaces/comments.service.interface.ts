@@ -1,25 +1,32 @@
-export interface ICommentsServicePostsIdValidCheck {
+import { CommentCreateRequestDto } from '../dtos/request/comment-create-request.dto';
+
+export interface ICommentsServiceArticleIdValidCheck {
   parentId: number;
-  postsId: number;
+  articleId: number;
 }
 
 export interface ICommentsServiceId {
-  id: number;
+  commentId: number;
 }
 
-export interface ICommentsServicePatch {
-  kakaoId: number;
-  postsId: number;
-  id: number;
+export interface ICommentsServicePatchComment {
+  userId: number;
+  articleId: number;
+  commentId: number;
   content: string;
 }
 
-export interface ICommentsServiceFetch {
-  postsId: number;
+export interface ICommentsServiceFindComments {
+  articleId: number;
 }
 
-export interface ICommentsServiceDelete {
-  id: number;
-  userKakaoId: number;
-  postsId: number;
+export interface ICommentsServiceDeleteComment {
+  commentId: number;
+  userId: number;
+  articleId: number;
+}
+
+export interface ICommentsServiceCreateComment extends CommentCreateRequestDto {
+  articleId: number;
+  userId: number;
 }

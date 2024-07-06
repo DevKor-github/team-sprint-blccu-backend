@@ -1,13 +1,13 @@
-import { CreateCommentDto } from '../dtos/create-comment.dto';
+import { ICommentsServiceCreateComment } from './comments.service.interface';
 
 export interface ICommentsRepositoryInsertComment {
-  createCommentDto: CreateCommentDto;
+  createCommentDto: ICommentsServiceCreateComment;
 }
 
 export interface ICommentsRepositoryfetchComments {
-  postsId: number;
+  articleId: number;
 }
 
 export interface ICommentsRepositoryId {
-  id: number;
+  commentId: number;
 }

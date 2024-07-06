@@ -1,35 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import { FeedbacksRepository } from './feedbacks.repository';
 import {
-  IFeedbacksServiceCreate,
-  IFeedbacksServiceKakaoId,
+  IFeedbacksServiceCreateFeedback,
+  IFeedbacksServiceUserId,
 } from './interfaces/feedbacks.service.interface';
-import { FetchFeedbackDto } from './dtos/fetch-feedback.dto';
-import { UsersService } from '../users/users.service';
+import { FeedbackDto } from './dtos/common/feedback.dto';
+import { UsersValidateService } from '../users/services/users-validate-service';
 
 @Injectable()
 export class FeedbacksService {
   constructor(
-    private readonly feedbacksRepository: FeedbacksRepository,
-    private readonly usersService: UsersService,
+    private readonly repo_feedbacks: FeedbacksRepository,
+    private readonly svc_usersValidate: UsersValidateService,
   ) {}
 
-  async create({
-    kakaoId,
+  async createFeedback({
+    userId,
     content,
     type,
-  }: IFeedbacksServiceCreate): Promise<FetchFeedbackDto> {
-    return await this.feedbacksRepository.save({
+  }: IFeedbacksServiceCreateFeedback): Promise<FeedbackDto> {
+    return await this.repo_feedbacks.save({
       type,
       content,
-      userKakaoId: kakaoId,
+      userId: userId,
     });
   }
 
-  async fetchAll({
-    kakaoId,
-  }: IFeedbacksServiceKakaoId): Promise<FetchFeedbackDto[]> {
-    await this.usersService.adminCheck({ kakaoId });
-    return await this.feedbacksRepository.find();
+  async fetchFeedbacks({
+    userId,
+  }: IFeedbacksServiceUserId): Promise<FeedbackDto[]> {
+    await this.svc_usersValidate.adminCheck({ userId });
+    return await this.repo_feedbacks.find();
   }
 }

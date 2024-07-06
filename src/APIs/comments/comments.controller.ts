@@ -11,7 +11,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
-import { CreateCommentInput } from './dtos/create-comment.dto';
 import { Request } from 'express';
 import {
   ApiCookieAuth,
@@ -21,63 +20,66 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
-import {
-  ChildrenComment,
-  FetchCommentDto,
-  FetchCommentsDto,
-} from './dtos/fetch-comments.dto';
-import { PatchCommentDto } from './dtos/patch-comment.dto';
+import { CommentChildrenDto } from './dtos/common/comment-children.dto';
+import { CommentCreateRequestDto } from './dtos/request/comment-create-request.dto';
+import { CommentsGetResponseDto } from './dtos/response/comments-get-response.dto';
+import { CommentDto } from './dtos/common/comment.dto';
+import { CommentPatchRequestDto } from './dtos/request/comment-patch-request.dto';
 
 @ApiTags('게시글 API')
-@Controller('posts/:postId/comments')
+@Controller('articles/:articleId/comments')
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(private readonly svc_comments: CommentsService) {}
 
   @ApiOperation({
     summary: '댓글을 작성한다.',
     description: '댓글을 작성한다.',
   })
-  @ApiOkResponse({ type: ChildrenComment })
+  @ApiOkResponse({ type: CommentChildrenDto })
   @ApiCookieAuth()
   @Post()
   @UseGuards(AuthGuardV2)
   @HttpCode(200)
-  async insertComment(
+  async createComment(
     @Req() req: Request,
-    @Param('postId') postsId: number,
-    @Body() body: CreateCommentInput,
-  ): Promise<ChildrenComment> {
-    const userKakaoId = req.user.userId;
-    return await this.commentsService.insert({ ...body, postsId, userKakaoId });
+    @Param('articleId') articleId: number,
+    @Body() body: CommentCreateRequestDto,
+  ): Promise<CommentChildrenDto> {
+    const userId = req.user.userId;
+    return await this.svc_comments.createComment({
+      ...body,
+      articleId,
+      userId,
+    });
   }
 
   @ApiOperation({
     summary: '특정 게시글에 대한 댓글 조회',
   })
-  @ApiOkResponse({ type: [FetchCommentsDto] })
+  @ApiOkResponse({ type: [CommentsGetResponseDto] })
   @Get()
   async fetchComments(
-    @Param('postId') postsId: number,
-  ): Promise<FetchCommentsDto[]> {
-    return await this.commentsService.fetchComments({ postsId });
+    @Param('articleId') articleId: number,
+  ): Promise<CommentsGetResponseDto[]> {
+    return await this.svc_comments.fetchComments({ articleId });
   }
 
   @ApiOperation({ summary: '특정 게시글에 대한 댓글 수정' })
   @ApiCookieAuth()
-  @ApiOkResponse({ type: FetchCommentDto })
+  @ApiOkResponse({ type: CommentDto })
   @UseGuards(AuthGuardV2)
   @Patch(':commentId')
   async patchComment(
     @Req() req: Request,
-    @Param('postId') postsId: number,
-    @Param('commentId') id: number,
-    @Body() dto: PatchCommentDto,
-  ): Promise<FetchCommentDto> {
-    const kakaoId = req.user.userId;
-    return await this.commentsService.patchComment({
-      kakaoId,
-      postsId,
-      id,
+    @Param('articleId') articleId: number,
+    @Param('commentId') commentId: number,
+    @Body() dto: CommentPatchRequestDto,
+  ): Promise<CommentDto> {
+    const userId = req.user.userId;
+    return await this.svc_comments.patchComment({
+      userId,
+      articleId,
+      commentId,
       ...dto,
     });
   }
@@ -93,14 +95,14 @@ export class CommentsController {
   @HttpCode(204)
   async deleteComment(
     @Req() req: Request,
-    @Param('postId') postsId: number,
-    @Param('commentId') id: number,
+    @Param('articleId') articleId: number,
+    @Param('commentId') commentId: number,
   ): Promise<void> {
-    const userKakaoId = req.user.userId;
-    return await this.commentsService.delete({
-      postsId,
-      id,
-      userKakaoId,
+    const userId = req.user.userId;
+    return await this.svc_comments.delete({
+      articleId,
+      commentId,
+      userId,
     });
   }
 }
