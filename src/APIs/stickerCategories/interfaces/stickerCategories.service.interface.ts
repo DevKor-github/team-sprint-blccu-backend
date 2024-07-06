@@ -1,12 +1,12 @@
 import { MapCategoryDto } from '../dtos/map-category.dto';
 
 export interface IStickerCategoriesServiceMapCategory {
-  kakaoId: number;
+  userId: number;
   maps: MapCategoryDto[];
 }
 
 export interface IStickerCategoriesServiceId {
-  id: number;
+  stickerCategoryId: number;
 }
 
 export interface IStickerCategoriesServiceName {
@@ -14,6 +14,6 @@ export interface IStickerCategoriesServiceName {
 }
 
 export interface IStickerCategoriesServiceCreateCategory {
-  kakaoId: number;
+  userId: number;
   name: string;
 }

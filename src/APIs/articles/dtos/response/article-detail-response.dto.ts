@@ -1,7 +1,7 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
 
-import { UserPrimaryResponseDto } from 'src/APIs/users/dtos/user-response.dto';
 import { Article } from '../../entities/article.entity';
+import { UserPrimaryResponseDto } from 'src/APIs/users/dtos/response/user-primary-response.dto';
 
 export class ArticleDetailResponseDto extends OmitType(Article, [
   'comments',

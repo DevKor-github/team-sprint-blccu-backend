@@ -10,6 +10,7 @@ import {
 } from '../interfaces/articles.service.interface';
 import { ArticleDetailForUpdateResponseDto } from '../dtos/response/article-detail-for-update-response.dto';
 import { ArticleDetailResponseDto } from '../dtos/response/article-detail-response.dto';
+import { ArticleDto } from '../dtos/common/article.dto';
 
 @Injectable()
 export class ArticlesReadService {
@@ -36,16 +37,16 @@ export class ArticlesReadService {
     });
     if (data.userId !== userId)
       throw new UnauthorizedException('본인이 아닙니다.');
-    const article = await this.repo_articlesRead.readUpdateDetail(id);
-    const stickerBlocks = await this.svc_stickerBlocks.fetchBlocks({
+    const article = await this.repo_articlesRead.readUpdateDetail({
+      articleId,
+    });
+    const stickerBlocks = await this.svc_stickerBlocks.findStickerBlocks({
       articleId,
     });
     return { article, stickerBlocks };
   }
 
-  async readTempArticles({
-    userId,
-  }): Promise<ArticleResponseDtoExceptCategory[]> {
+  async readTempArticles({ userId }): Promise<ArticleDto[]> {
     return await this.repo_articlesRead.readTemp(userId);
   }
 

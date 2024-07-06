@@ -22,9 +22,9 @@ import { ArticleCreateResponseDto } from '../dtos/response/article-create-respon
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { ArticleCreateRequestDto } from '../dtos/request/article-create-request.dto';
 import { ArticleCreateDraftRequestDto } from '../dtos/request/article-create-draft-request.dto';
-import { ImageUploadDto } from 'src/common/dtos/image-upload.dto';
-import { ImageUploadResponseDto } from 'src/common/dtos/image-upload-response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageUploadRequestDto } from 'src/modules/images/dtos/image-upload-request.dto';
+import { ImageUploadResponseDto } from 'src/modules/images/dtos/image-upload-response.dto';
 
 @ApiTags('게시글 API')
 @Controller('articles')
@@ -81,7 +81,7 @@ export class ArticlesCreateController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: '업로드 할 파일',
-    type: ImageUploadDto,
+    type: ImageUploadRequestDto,
   })
   @ApiCreatedResponse({
     description: '이미지 서버에 파일 업로드 완료',
@@ -98,5 +98,4 @@ export class ArticlesCreateController {
   ): Promise<ImageUploadResponseDto> {
     return await this.svc_articlesCreate.imageUpload(file);
   }
-}
 }

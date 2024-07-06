@@ -45,10 +45,10 @@ export class StickerCategoriesController {
   @ApiOkResponse({ type: [StickerCategoryMapper] })
   @Get('stickers/categories/:id')
   async fetchStickersByCategoryName(
-    @Param('id') id: number,
+    @Param('stickerCategoryId') stickerCategoryId: number,
   ): Promise<StickerCategoryMapper[]> {
     return await this.stickerCategoriesService.fetchStickersByCategoryId({
-      id,
+      stickerCategoryId,
     });
   }
 
@@ -65,9 +65,9 @@ export class StickerCategoriesController {
     @Req() req: Request,
     @Body() body: CreateStickerCategoryInput,
   ): Promise<StickerCategory> {
-    const kakaoId = req.user.userId;
+    const userId = req.user.userId;
     return await this.stickerCategoriesService.createCategory({
-      kakaoId,
+      userId,
       ...body,
     });
   }
@@ -85,9 +85,9 @@ export class StickerCategoriesController {
     @Req() req: Request,
     @Body() mapCategoryDto: BulkMapCategoryDto,
   ): Promise<StickerCategoryMapper[]> {
-    const kakaoId = req.user.userId;
+    const userId = req.user.userId;
     return await this.stickerCategoriesService.mapCategory({
-      kakaoId,
+      userId,
       ...mapCategoryDto,
     });
   }

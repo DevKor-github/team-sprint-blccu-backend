@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNumber, IsOptional, IsUrl } from 'class-validator';
+import { IsBoolean, IsOptional, IsUrl } from 'class-validator';
 
 export class StickerPatchRequestDto {
   @ApiProperty({ description: '변경할 url', type: String, required: false })
@@ -15,11 +15,4 @@ export class StickerPatchRequestDto {
   @IsBoolean()
   @IsOptional()
   isReusable?: boolean;
-}
-
-export class UpdateStickerDto extends UpdateStickerInput {
-  @IsNumber()
-  kakaoId: number;
-
-  id: number;
 }

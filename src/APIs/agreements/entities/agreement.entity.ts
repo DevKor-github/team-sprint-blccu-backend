@@ -20,7 +20,7 @@ export class Agreement extends CommonEntity {
   id: number;
 
   @JoinColumn()
-  @ManyToOne(() => User, (user) => user.kakaoId, {
+  @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
     onUpdate: 'NO ACTION',
     onDelete: 'CASCADE',

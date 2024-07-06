@@ -1,14 +1,14 @@
 import { DataSource, Repository } from 'typeorm';
 import { Article } from '../entities/article.entity';
 import { Injectable } from '@nestjs/common';
-import { ArticleDetailResponse } from '../dtos/response/article-detail-response.dto';
+import { ArticleDetailResponseDto } from '../dtos/response/article-detail-response.dto';
 
 @Injectable()
 export class ArticlesReadRepository extends Repository<Article> {
   constructor(private dataSource: DataSource) {
     super(Article, dataSource.createEntityManager());
   }
-  async readDetail({ articleId, scope }): Promise<ArticleDetailResponse> {
+  async readDetail({ articleId, scope }): Promise<ArticleDetailResponseDto> {
     await this.update(articleId, {
       viewCount: () => 'view_count +1',
     });
@@ -46,7 +46,7 @@ export class ArticlesReadRepository extends Repository<Article> {
       .getOne();
   }
 
-  async readTemp({ userId }): Promise<ArticleDetailResponse[]> {
+  async readTemp({ userId }): Promise<ArticleDetailResponseDto[]> {
     return this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')
       .leftJoinAndSelect('p.article_background', 'article_background')

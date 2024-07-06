@@ -5,18 +5,18 @@ import { Article } from '../entities/article.entity';
 import { StickerBlocksService } from 'src/APIs/stickerBlocks/stickerBlocks.service';
 import { ArticlesValidateService } from './articles-validate.service';
 import { ArticlesReadRepository } from '../repositories/articles-read.repository';
-import { AwsService } from 'src/modules/aws/aws.service';
 import { ArticleCreateResponseDto } from '../dtos/response/article-create-response.dto';
-import { ImageUploadResponseDto } from 'src/common/dtos/image-upload-response.dto';
 import { getUUID } from 'src/utils/uuidUtils';
+import { ImagesService } from 'src/modules/images/images.service';
+import { ImageUploadResponseDto } from 'src/modules/images/dtos/image-upload-response.dto';
 
 @Injectable()
 export class ArticlesCreateService {
   constructor(
     private readonly db_dataSource: DataSource,
     private readonly svc_articlesValidate: ArticlesValidateService,
+    private readonly svc_images: ImagesService,
     private readonly svc_stickerBlocks: StickerBlocksService,
-    private readonly svc_aws: AwsService,
     private readonly repo_articlesRead: ArticlesReadRepository,
   ) {}
 
@@ -48,11 +48,12 @@ export class ArticlesCreateService {
       const articleData = await this.repo_articlesRead.findOne({
         where: { id: queryResult.identifiers[0].id },
       });
-      const stickerBlockData = await this.svc_stickerBlocks.bulkInsert({
-        articleId: articleData.id,
-        userId: createArticleDto.userId,
-        stickerBlocks: createArticleDto.stickerBlocks,
-      });
+      const stickerBlockData = await this.svc_stickerBlocks.createStickerBlocks(
+        {
+          articleId: articleData.id,
+          stickerBlocks: createArticleDto.stickerBlocks,
+        },
+      );
       return { articleData, stickerBlockData };
     } catch (e) {
       await queryRunner.rollbackTransaction();
@@ -65,15 +66,11 @@ export class ArticlesCreateService {
   async imageUpload(
     file: Express.Multer.File,
   ): Promise<ImageUploadResponseDto> {
-    const imageName = getUUID();
-    const ext = file.originalname.split('.').pop();
-
-    const imageUrl = await this.svc_aws.imageUploadToS3(
-      `${imageName}.${ext}`,
+    const { imageUrl } = await this.svc_images.imageUpload({
       file,
-      ext,
-      1280,
-    );
+      ext: 'png',
+      resize: 1280,
+    });
 
     return { imageUrl };
   }

@@ -22,12 +22,14 @@ export class StickersService {
     private readonly svc_images: ImagesService,
   ) {}
 
-  async findStickerById({ id }: IStickersServiceId): Promise<StickerDto> {
-    return await this.repo_stickers.findOne({ where: { id } });
+  async findStickerById({
+    stickerId,
+  }: IStickersServiceId): Promise<StickerDto> {
+    return await this.repo_stickers.findOne({ where: { id: stickerId } });
   }
 
-  async existCheck({ id }: IStickersServiceId): Promise<void> {
-    const data = await this.findStickerById({ id });
+  async existCheck({ stickerId }: IStickersServiceId): Promise<void> {
+    const data = await this.findStickerById({ stickerId });
     if (!data) throw new NotFoundException('스티커를 찾을 수 없습니다.');
   }
 

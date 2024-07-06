@@ -1,9 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { FollowUserDto } from './dtos/follow-user.dto';
 import { OpenScope } from 'src/common/enums/open-scope.enum';
 import { FollowsRepository } from './follows.repository';
-import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
 import { User } from '../users/entities/user.entity';
 import {
   IFollowsServiceFindList,
@@ -11,6 +9,8 @@ import {
 } from './interfaces/follows.service.interface';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotType } from 'src/common/enums/not-type.enum';
+import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
+import { FollowDto } from './dtos/common/follow.dto';
 
 @Injectable()
 export class FollowsService {
@@ -76,7 +76,7 @@ export class FollowsService {
   async followUser({
     fromUser,
     toUser,
-  }: IFollowsServiceUsers): Promise<FollowUserDto> {
+  }: IFollowsServiceUsers): Promise<FollowDto> {
     const queryRunner = this.db_dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -171,7 +171,7 @@ export class FollowsService {
   async findFollowings({
     userId,
     loggedUser,
-  }: IFollowsServiceFindList): Promise<UserResponseDtoWithFollowing[]> {
+  }: IFollowsServiceFindList): Promise<UserFollowingResponseDto[]> {
     const follows = await this.repo_follows.getFollowings({
       userId,
       loggedUser,
@@ -182,7 +182,7 @@ export class FollowsService {
   async findFollowers({
     userId,
     loggedUser,
-  }: IFollowsServiceFindList): Promise<UserResponseDtoWithFollowing[]> {
+  }: IFollowsServiceFindList): Promise<UserFollowingResponseDto[]> {
     const follows = await this.repo_follows.getFollowers({
       userId,
       loggedUser,

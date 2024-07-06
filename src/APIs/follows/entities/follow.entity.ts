@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber } from 'class-validator';
-import { UserResponseDto } from 'src/APIs/users/dtos/user-response.dto';
+import { UserDto } from 'src/APIs/users/dtos/common/user.dto';
 import { User } from 'src/APIs/users/entities/user.entity';
 import { CommonEntity } from 'src/common/entities/common.entity';
 import {
@@ -19,7 +19,7 @@ export class Follow extends CommonEntity {
   @IsNumber()
   id: number;
 
-  @ApiProperty({ type: UserResponseDto, description: '이웃 추가를 받은 유저' })
+  @ApiProperty({ type: UserDto, description: '이웃 추가를 받은 유저' })
   @JoinColumn()
   @ManyToOne(() => User, (users) => users.id, {
     nullable: false,
@@ -28,7 +28,7 @@ export class Follow extends CommonEntity {
   })
   toUser: User;
 
-  @ApiProperty({ type: UserResponseDto, description: '이웃 추가를 한 유저' })
+  @ApiProperty({ type: UserDto, description: '이웃 추가를 한 유저' })
   @JoinColumn()
   @ManyToOne(() => User, (users) => users.id, {
     nullable: false,

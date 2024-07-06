@@ -1,8 +1,8 @@
 import { DataSource, Repository } from 'typeorm';
 import { Follow } from './entities/follow.entity';
 import { Injectable } from '@nestjs/common';
-import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
 import { IFollowsRepositoryFindList } from './interfaces/follows.repository.interface';
+import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
 
 @Injectable()
 export class FollowsRepository extends Repository<Follow> {
@@ -13,7 +13,7 @@ export class FollowsRepository extends Repository<Follow> {
   async getFollowers({
     userId,
     loggedUser,
-  }: IFollowsRepositoryFindList): Promise<UserResponseDtoWithFollowing[]> {
+  }: IFollowsRepositoryFindList): Promise<UserFollowingResponseDto[]> {
     const followings = await this.createQueryBuilder('follow')
       .innerJoin('follow.from_user', 'user')
       .where('user.date_deleted IS NULL')
@@ -65,7 +65,7 @@ export class FollowsRepository extends Repository<Follow> {
   async getFollowings({
     userId,
     loggedUser,
-  }: IFollowsRepositoryFindList): Promise<UserResponseDtoWithFollowing[]> {
+  }: IFollowsRepositoryFindList): Promise<UserFollowingResponseDto[]> {
     const followings = await this.createQueryBuilder('follow')
       .innerJoin('follow.to_user', 'user')
       .where('user.date_deleted IS NULL')

@@ -49,7 +49,7 @@ export class ArticlesPaginateRepository extends Repository<Article> {
 
   async fetchArticlesCursor({
     cursorOption,
-    date_filter,
+    dateFilter,
   }: IArticlesRepoFetchArticlesCursor) {
     const { order, cursor, take, sort } = cursorOption;
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
@@ -58,9 +58,9 @@ export class ArticlesPaginateRepository extends Repository<Article> {
       scopes: [OpenScope.PUBLIC],
     });
 
-    if (date_filter) {
-      queryBuilder.andWhere('p.date_created > :date_filter', {
-        date_filter: date_filter,
+    if (dateFilter) {
+      queryBuilder.andWhere('p.date_created > :dateFilter', {
+        dateFilter,
       });
     }
 
@@ -72,7 +72,7 @@ export class ArticlesPaginateRepository extends Repository<Article> {
   async fetchFriendsArticlesCursor({
     cursorOption,
     userId,
-    date_filter,
+    dateFilter,
   }: IArticlesRepoFetchFriendsArticlesCursor) {
     const { order, cursor, take, sort } = cursorOption;
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
@@ -105,9 +105,9 @@ export class ArticlesPaginateRepository extends Repository<Article> {
         }),
       );
 
-    if (date_filter) {
-      queryBuilder.andWhere('p.date_created > :date_filter', {
-        date_filter: date_filter,
+    if (dateFilter) {
+      queryBuilder.andWhere('p.date_created > :dateFilter', {
+        dateFilter,
       });
     }
 
@@ -120,7 +120,7 @@ export class ArticlesPaginateRepository extends Repository<Article> {
     cursorOption,
     scope,
     userId,
-    date_filter,
+    dateFilter,
   }: IArticlesRepoFetchUserArticlesCursor) {
     const { order, cursor, take, sort } = cursorOption;
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
@@ -136,9 +136,9 @@ export class ArticlesPaginateRepository extends Repository<Article> {
       })
       .andWhere('p.scope IN (:scope)', { scope });
 
-    if (date_filter) {
+    if (dateFilter) {
       queryBuilder.andWhere('p.date_created > :date_filter', {
-        date_filter: date_filter,
+        date_filter: dateFilter,
       });
     }
 

@@ -26,7 +26,7 @@ export class StickerBlocksService {
   }: IStickerBlocksServiceCreateStickerBlock): Promise<StickerBlockDto> {
     try {
       await this.svc_stickers.existCheck({
-        id: stickerId,
+        stickerId: stickerId,
       });
 
       const data = await this.repo_stickerBlocks.save({
@@ -50,7 +50,7 @@ export class StickerBlocksService {
     }));
     stickerBlocksToInsert.forEach(async (stickerBlock) => {
       await this.svc_stickers.existCheck({
-        id: stickerBlock.stickerId,
+        stickerId: stickerBlock.stickerId,
       });
     });
     return await this.repo_stickerBlocks.save(stickerBlocksToInsert);
@@ -74,7 +74,10 @@ export class StickerBlocksService {
     });
     for (const block of blocksToDelete) {
       if (block.sticker.isReusable === false)
-        await this.svc_stickers.delete({ userId, id: block.id });
+        await this.svc_stickers.deleteSticker({
+          userId,
+          stickerId: block.stickerId,
+        });
       await this.repo_stickerBlocks.remove(block);
     }
     return;

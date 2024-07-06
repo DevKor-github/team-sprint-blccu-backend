@@ -1,8 +1,5 @@
 import { ForbiddenException } from '@nestjs/common';
 import { ArticlesValidateService } from './articles-validate.service';
-import { ArticlesReadRepository } from '../repositories/articles-read.repository';
-import { DataSource } from 'typeorm';
-import { ArticlesUpdateRepository } from '../repositories/articles-update.repository';
 import { ArticlesCreateRepository } from '../repositories/articles-create.repository';
 import { IArticlesServicePatchArticle } from '../interfaces/articles.service.interface';
 import { ArticleDto } from '../dtos/common/article.dto';

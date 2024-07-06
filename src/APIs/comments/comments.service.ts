@@ -13,7 +13,6 @@ import {
   ICommentsServiceFindComments,
   ICommentsServiceId,
   ICommentsServicePatchComment,
-,
 } from './interfaces/comments.service.interface';
 import { Comment } from './entities/comment.entity';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -45,7 +44,9 @@ export class CommentsService {
   }
 
   async existCheck({ commentId }: ICommentsServiceId): Promise<CommentDto> {
-    const comment = await this.repo_comments.findOne({ where: { id: commentId} });
+    const comment = await this.repo_comments.findOne({
+      where: { id: commentId },
+    });
     if (!comment) {
       throw new NotFoundException(
         '댓글의 아이디를 찾을 수 없습니다. 존재하지 않거나 이미 삭제되었습니다.',
@@ -54,7 +55,9 @@ export class CommentsService {
     return comment;
   }
 
-  async createComment(createCommentDto: ICommentsServiceCreateComment): Promise<CommentChildrenDto> {
+  async createComment(
+    createCommentDto: ICommentsServiceCreateComment,
+  ): Promise<CommentChildrenDto> {
     const post = await this.db_dataSource.manager.findOne(Article, {
       where: { id: createCommentDto.articleId },
     });
@@ -65,16 +68,20 @@ export class CommentsService {
         parentId: createCommentDto.parentId,
         articleId: createCommentDto.articleId,
       });
-    await this.db_dataSource.manager.update(Article, createCommentDto.articleId, {
-      commentCount: () => 'comment_count +1',
-    });
+    await this.db_dataSource.manager.update(
+      Article,
+      createCommentDto.articleId,
+      {
+        commentCount: () => 'comment_count +1',
+      },
+    );
 
     const commentData = await this.repo_comments.insertComment({
       createCommentDto,
     });
-    const { id } = commentData.identifiers[0];
+    const { commentId } = commentData.identifiers[0];
     const { article, parent, ...result } =
-      await this.repo_comments.fetchCommentWithNotiInfo({ id });
+      await this.repo_comments.fetchCommentWithNotiInfo({ commentId });
 
     if (result.parentId && parent.userId != result.userId) {
       await this.svc_notifications.emitAlarm({
@@ -103,7 +110,7 @@ export class CommentsService {
     commentId,
     content,
   }: ICommentsServicePatchComment): Promise<CommentDto> {
-    const commentData = await this.existCheck({ id });
+    const commentData = await this.existCheck({ commentId });
     if (!commentData) throw new NotFoundException('댓글을 찾을 수 없습니다.');
     if (commentData.articleId != articleId)
       throw new NotFoundException('루트 게시글의 아이디가 일치하지 않습니다.');
