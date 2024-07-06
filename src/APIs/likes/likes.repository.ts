@@ -1,19 +1,19 @@
 import { DataSource, Repository } from 'typeorm';
-import { Likes } from './entities/like.entity';
 import { Follow } from '../follows/entities/follow.entity';
 import { Injectable } from '@nestjs/common';
 import { ILikesRepositoryIds } from './interfaces/likes.repository.interface';
-import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
+import { Like } from './entities/like.entity';
+import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
 
 @Injectable()
-export class LikesRepository extends Repository<Likes> {
+export class LikesRepository extends Repository<Like> {
   constructor(private dataSource: DataSource) {
-    super(Likes, dataSource.createEntityManager());
+    super(Like, dataSource.createEntityManager());
   }
   async getLikes({
-    kakaoId,
-    id,
-  }: ILikesRepositoryIds): Promise<UserResponseDtoWithFollowing[]> {
+    userId,
+    articleId,
+  }: ILikesRepositoryIds): Promise<UserFollowingResponseDto[]> {
     const users = await this.createQueryBuilder('likes')
       .innerJoin('likes.posts', 'posts')
       .leftJoin('likes.user', 'user')
@@ -44,7 +44,7 @@ export class LikesRepository extends Repository<Likes> {
         'user.date_deleted AS date_deleted',
         'CASE WHEN follow.toUserKakaoId IS NOT NULL THEN true ELSE false END AS isFollowing',
       ])
-      .setParameters({ id, kakaoId })
+      .setParameters({ articleId, userId })
       .getRawMany();
 
     return users.map((user) => ({
