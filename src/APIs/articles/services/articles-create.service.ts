@@ -6,9 +6,9 @@ import { StickerBlocksService } from 'src/APIs/stickerBlocks/stickerBlocks.servi
 import { ArticlesValidateService } from './articles-validate.service';
 import { ArticlesReadRepository } from '../repositories/articles-read.repository';
 import { AwsService } from 'src/modules/aws/aws.service';
-import { UtilsService } from 'src/modules/utils/utils.service';
 import { ArticleCreateResponseDto } from '../dtos/response/article-create-response.dto';
 import { ImageUploadResponseDto } from 'src/common/dtos/image-upload-response.dto';
+import { getUUID } from 'src/utils/uuidUtils';
 
 @Injectable()
 export class ArticlesCreateService {
@@ -17,7 +17,6 @@ export class ArticlesCreateService {
     private readonly svc_articlesValidate: ArticlesValidateService,
     private readonly svc_stickerBlocks: StickerBlocksService,
     private readonly svc_aws: AwsService,
-    private readonly svc_utils: UtilsService,
     private readonly repo_articlesRead: ArticlesReadRepository,
   ) {}
 
@@ -66,7 +65,7 @@ export class ArticlesCreateService {
   async imageUpload(
     file: Express.Multer.File,
   ): Promise<ImageUploadResponseDto> {
-    const imageName = this.svc_utils.getUUID();
+    const imageName = getUUID();
     const ext = file.originalname.split('.').pop();
 
     const imageUrl = await this.svc_aws.imageUploadToS3(

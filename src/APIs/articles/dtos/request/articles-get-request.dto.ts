@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional } from 'class-validator';
 import { ArticleOrderOptionWrap } from 'src/common/enums/article-order-option';
 import { DateOption } from 'src/common/enums/date-option';
-import { CustomCursorPageOptionsDto } from 'src/modules/utils/cursor-pages/dtos/cursor-page-option.dto';
+import { CustomCursorPageOptionsDto } from 'src/utils/cursor-pages/dtos/cursor-page-option.dto';
 
 export class ArticlesGetRequestDto extends CustomCursorPageOptionsDto {
   @ApiProperty({

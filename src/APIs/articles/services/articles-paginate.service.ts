@@ -2,12 +2,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ArticlesValidateService } from './articles-validate.service';
 import { ArticlesPaginateRepository } from '../repositories/articles-paginate.repository.ts';
 import { ArticleOrderOption } from 'src/common/enums/article-order-option';
-import { CustomCursorPageMetaDto } from 'src/modules/utils/cursor-pages/dtos/cursor-page-meta.dto';
-import { CustomCursorPageDto } from 'src/modules/utils/cursor-pages/dtos/cursor-page.dto';
+import { CustomCursorPageMetaDto } from 'src/utils/cursor-pages/dtos/cursor-page-meta.dto';
+import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
 import { FollowsService } from 'src/APIs/follows/follows.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { UtilsService } from 'src/modules/utils/utils.service';
 import {
   IArticlesServiceCreateCursorResponse,
   IArticlesServiceFetchArticlesCursor,
@@ -15,6 +14,7 @@ import {
   IArticlesServiceFetchUserArticlesCursor,
 } from '../interfaces/articles.service.interface';
 import { ArticleDto } from '../dtos/common/article.dto';
+import { getDate } from 'src/utils/dateUtils';
 
 @Injectable()
 export class ArticlesPaginateService {
@@ -23,7 +23,6 @@ export class ArticlesPaginateService {
     private readonly svc_articlesValidate: ArticlesValidateService,
     private readonly repo_articlesPaginate: ArticlesPaginateRepository,
     private readonly svc_follow: FollowsService,
-    private readonly svc_utils: UtilsService,
     @Inject(CACHE_MANAGER) private db_cacheManager: Cache,
   ) {}
 
@@ -96,7 +95,7 @@ export class ArticlesPaginateService {
 
     let dateFilter: Date;
     if (cursorOption.dateCreated)
-      dateFilter = this.svc_utils.getDate(cursorOption.dateCreated);
+      dateFilter = getDate(cursorOption.dateCreated);
     const { articles } = await this.repo_articlesPaginate.fetchArticlesCursor({
       cursorOption,
       dateFilter,
@@ -114,7 +113,7 @@ export class ArticlesPaginateService {
   > {
     let dateFilter: Date;
     if (cursorOption.dateCreated)
-      dateFilter = this.svc_utils.getDate(cursorOption.dateCreated);
+      dateFilter = getDate(cursorOption.dateCreated);
 
     const { articles } =
       await this.repo_articlesPaginate.fetchFriendsArticlesCursor({
@@ -134,7 +133,7 @@ export class ArticlesPaginateService {
   > {
     let dateFilter: Date;
     if (cursorOption.dateCreated)
-      dateFilter = this.svc_utils.getDate(cursorOption.dateCreated);
+      dateFilter = getDate(cursorOption.dateCreated);
 
     const scope = await this.svc_follow.getScope({
       fromUser: targetUserId,

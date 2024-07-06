@@ -41,17 +41,6 @@ import { DeleteUserInput } from './dtos/delete-user.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // 배포 때 삭제!!!!
-  @Get('all')
-  @ApiOperation({
-    summary: '[ONLY FOR DEV] 모든 유저의 정보를 조회한다',
-    description: '배포 때 삭제할 거임. 개발 및 테스트용',
-  })
-  findAllUsers() {
-    return this.usersService.getAll();
-  }
-  // ================================
-
   @ApiOperation({
     summary: '이름이 포함된 유저 검색',
     description: '이름에 username이 포함된 유저를 검색한다.',

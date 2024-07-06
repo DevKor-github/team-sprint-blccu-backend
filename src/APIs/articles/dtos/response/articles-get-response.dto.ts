@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CustomCursorPageMetaDto } from 'src/modules/utils/cursor-pages/dtos/cursor-page-meta.dto';
+import { CustomCursorPageMetaDto } from 'src/utils/cursor-pages/dtos/cursor-page-meta.dto';
 import { ArticleDto } from '../common/article.dto';
 
 export class ArticlesGetResponseDto {

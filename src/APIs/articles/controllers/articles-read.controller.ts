@@ -23,7 +23,7 @@ import { ArticlesGetResponseDto } from '../dtos/response/articles-get-response.d
 import { ArticlesGetRequestDto } from '../dtos/request/articles-get-request.dto';
 import { ArticlesPaginateService } from '../services/articles-paginate.service';
 import { SortOption } from 'src/common/enums/sort-option';
-import { CustomCursorPageDto } from 'src/modules/utils/cursor-pages/dtos/cursor-page.dto';
+import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
 
 @ApiTags('게시글 API')
 @Controller('articles')
