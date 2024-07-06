@@ -20,9 +20,9 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { Request } from 'express';
-import { CreateAnouncementInput } from './dtos/create-announcement.dto';
-import { AnnouncementResponseDto } from './dtos/announcement-response.dto';
-import { PatchAnnouncementInput } from './dtos/patch-announcment.dto';
+import { AnnouncementDto } from './dtos/common/announcement.dto';
+import { AnnouncementPatchRequestDto } from './dtos/request/announcement-patch-request.dto';
+import { AnnouncementCreateRequestDto } from './dtos/request/announcement-create-request.dto';
 
 @ApiTags('공지 API')
 @Controller()
@@ -33,37 +33,44 @@ export class AnnouncementsController {
   @ApiOperation({ summary: '[어드민용] 공지사항 작성' })
   @ApiCookieAuth()
   @UseGuards(AuthGuardV2)
-  @ApiCreatedResponse({ type: AnnouncementResponseDto })
+  @ApiCreatedResponse({ type: AnnouncementDto })
   @Post('users/admin/anmts')
   @HttpCode(201)
   async createAnmt(
     @Req() req: Request,
-    @Body() body: CreateAnouncementInput,
-  ): Promise<AnnouncementResponseDto> {
-    const kakaoId = req.user.userId;
-    return await this.announcementsService.create({ ...body, kakaoId });
+    @Body() body: AnnouncementCreateRequestDto,
+  ): Promise<AnnouncementDto> {
+    const userId = req.user.userId;
+    return await this.announcementsService.createAnnoucement({
+      ...body,
+      userId,
+    });
   }
 
   @ApiOperation({ summary: '공지사항 조회' })
-  @ApiOkResponse({ type: [AnnouncementResponseDto] })
+  @ApiOkResponse({ type: [AnnouncementDto] })
   @Get('anmts')
-  async fetchAnmts(): Promise<AnnouncementResponseDto[]> {
-    return await this.announcementsService.fetchAll();
+  async fetchAnmts(): Promise<AnnouncementDto[]> {
+    return await this.announcementsService.getAnnouncements();
   }
 
   @ApiTags('어드민 API')
   @ApiOperation({ summary: '[어드민용] 공지사항 수정' })
   @ApiCookieAuth()
-  @ApiOkResponse({ type: [AnnouncementResponseDto] })
+  @ApiOkResponse({ type: [AnnouncementDto] })
   @UseGuards(AuthGuardV2)
-  @Patch('users/admin/anmts/:id')
+  @Patch('users/admin/anmts/:announcementId')
   async patchAnmt(
     @Req() req: Request,
-    @Body() body: PatchAnnouncementInput,
-    @Param('id') id: number,
-  ): Promise<AnnouncementResponseDto[]> {
-    const kakaoId = req.user.userId;
-    return await this.announcementsService.patch({ ...body, id, kakaoId });
+    @Body() body: AnnouncementPatchRequestDto,
+    @Param('announcementId') announcementId: number,
+  ): Promise<AnnouncementDto[]> {
+    const userId = req.user.userId;
+    return await this.announcementsService.patchAnnouncement({
+      ...body,
+      announcementId,
+      userId,
+    });
   }
 
   @ApiTags('어드민 API')
@@ -72,14 +79,17 @@ export class AnnouncementsController {
     description: 'id에 해당하는 공지사항 삭제, 삭제된 공지사항을 반환',
   })
   @ApiCookieAuth()
-  @ApiOkResponse({ type: AnnouncementResponseDto })
+  @ApiOkResponse({ type: AnnouncementDto })
   @UseGuards(AuthGuardV2)
-  @Delete('users/admin/anmts/:id')
+  @Delete('users/admin/anmts/:announcementId')
   async removeAnmt(
     @Req() req: Request,
-    @Param('id') id: number,
-  ): Promise<AnnouncementResponseDto> {
-    const kakaoId = req.user.userId;
-    return await this.announcementsService.remove({ kakaoId, id });
+    @Param('announcementId') announcementId: number,
+  ): Promise<AnnouncementDto> {
+    const userId = req.user.userId;
+    return await this.announcementsService.removeAnnouncement({
+      userId,
+      announcementId,
+    });
   }
 }

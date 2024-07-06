@@ -1,21 +1,21 @@
 import { Announcement } from '../entities/announcement.entity';
 
-export interface IAnnouncementsSerciceCreate
+export interface IAnnouncementsSerciceCreateAnnouncement
   extends Omit<
     Announcement,
-    'id' | 'date_created' | 'date_updated' | 'date_deleted'
+    'id' | 'dateCreated' | 'dateUpdated' | 'dateDeleted'
   > {
-  kakaoId: number;
+  userId: number;
 }
 
-export interface IAnnouncementsSerciceRemove {
-  kakaoId: number;
-  id: number;
+export interface IAnnouncementsSerciceRemoveAnnouncement {
+  userId: number;
+  announcementId: number;
 }
 
-export interface IAnnouncementsSercicePatch {
-  kakaoId: number;
-  id: number;
+export interface IAnnouncementsSercicePatchAnnouncement {
+  userId: number;
+  announcementId: number;
   title?: string;
   content?: string;
 }

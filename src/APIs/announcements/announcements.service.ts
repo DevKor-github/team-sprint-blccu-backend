@@ -3,56 +3,60 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Announcement } from './entities/announcement.entity';
 import { Repository } from 'typeorm';
 import {
-  IAnnouncementsSerciceCreate,
-  IAnnouncementsSercicePatch,
-  IAnnouncementsSerciceRemove,
+  IAnnouncementsSerciceCreateAnnouncement,
+  IAnnouncementsSercicePatchAnnouncement,
+  IAnnouncementsSerciceRemoveAnnouncement,
 } from './interfaces/announcements.service.interface';
-import { UsersService } from '../users/users.service';
-import { AnnouncementResponseDto } from './dtos/announcement-response.dto';
+import { UsersValidateService } from '../users/services/users-validate-service';
+import { AnnouncementDto } from './dtos/common/announcement.dto';
 
 @Injectable()
 export class AnnouncementsService {
   constructor(
     @InjectRepository(Announcement)
-    private readonly annoucementsRepository: Repository<Announcement>,
-    private readonly usersService: UsersService,
+    private readonly repo_announcements: Repository<Announcement>,
+    private readonly svc_usersValidate: UsersValidateService,
   ) {}
 
-  async create({
-    kakaoId,
+  async createAnnoucement({
+    userId,
     title,
     content,
-  }: IAnnouncementsSerciceCreate): Promise<AnnouncementResponseDto> {
-    await this.usersService.adminCheck({ kakaoId });
-    return await this.annoucementsRepository.save({ title, content });
+  }: IAnnouncementsSerciceCreateAnnouncement): Promise<AnnouncementDto> {
+    await this.svc_usersValidate.adminCheck({ userId });
+    return await this.repo_announcements.save({ title, content });
   }
 
-  async fetchAll(): Promise<AnnouncementResponseDto[]> {
-    return await this.annoucementsRepository.find();
+  async getAnnouncements(): Promise<AnnouncementDto[]> {
+    return await this.repo_announcements.find();
   }
 
-  async patch({
-    kakaoId,
-    id,
+  async patchAnnouncement({
+    userId,
+    announcementId,
     title,
     content,
-  }: IAnnouncementsSercicePatch): Promise<AnnouncementResponseDto[]> {
-    await this.usersService.adminCheck({ kakaoId });
-    const anmt = await this.annoucementsRepository.findOne({ where: { id } });
+  }: IAnnouncementsSercicePatchAnnouncement): Promise<AnnouncementDto[]> {
+    await this.svc_usersValidate.adminCheck({ userId });
+    const anmt = await this.repo_announcements.findOne({
+      where: { id: announcementId },
+    });
     if (!anmt) throw new NotFoundException('공지를 찾을 수 없습니다.');
     if (title) anmt.title = title;
     if (content) anmt.content = content;
-    await this.annoucementsRepository.save(anmt);
-    return await this.annoucementsRepository.find({ where: { id: anmt.id } });
+    await this.repo_announcements.save(anmt);
+    return await this.repo_announcements.find({ where: { id: anmt.id } });
   }
 
-  async remove({
-    kakaoId,
-    id,
-  }: IAnnouncementsSerciceRemove): Promise<AnnouncementResponseDto> {
-    await this.usersService.adminCheck({ kakaoId });
-    const anmt = await this.annoucementsRepository.findOne({ where: { id } });
+  async removeAnnouncement({
+    userId,
+    announcementId,
+  }: IAnnouncementsSerciceRemoveAnnouncement): Promise<AnnouncementDto> {
+    await this.svc_usersValidate.adminCheck({ userId });
+    const anmt = await this.repo_announcements.findOne({
+      where: { id: announcementId },
+    });
     if (!anmt) throw new NotFoundException('공지를 찾을 수 없습니다.');
-    return await this.annoucementsRepository.softRemove(anmt);
+    return await this.repo_announcements.softRemove(anmt);
   }
 }
