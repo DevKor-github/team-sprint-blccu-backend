@@ -6,69 +6,75 @@ import {
 } from '@nestjs/common';
 import { FollowsService } from '../follows/follows.service';
 import { ArticleCategoriesRepository } from './articleCategories.repository';
-import { CreateArticleCategoryResponse } from './dtos/create-articleCategory.dto';
-import {
-  FetchArticleCategoriesResponse,
-  FetchArticleCategoryResponse,
-} from './dtos/fetch-articleCategory.dto';
+import { ArticleCategoryDto } from './dtos/common/articleCategory.dto';
+import { ArticleCategoriesResponseDto } from './dtos/response/articleCategories-response.dto';
 
 @Injectable()
 export class ArticleCategoriesService {
   constructor(
-    private readonly followsService: FollowsService,
-    private readonly articleCategoryRepository: ArticleCategoriesRepository,
+    private readonly svc_follows: FollowsService,
+    private readonly repo_articleCategories: ArticleCategoriesRepository,
   ) {}
-  async findWithName({ kakaoId, name }) {
-    return await this.articleCategoryRepository.find({
-      where: { user: { kakaoId }, name },
+  async findArticleCategoryByName({
+    userId,
+    name,
+  }): Promise<ArticleCategoryDto> {
+    return await this.repo_articleCategories.findOne({
+      where: { user: { id: userId }, name },
     });
   }
 
-  async create({ kakaoId, name }): Promise<CreateArticleCategoryResponse> {
-    const data = await this.findWithName({ kakaoId, name });
-    if (data.length > 0) {
+  async createArticleCategory({ userId, name }): Promise<ArticleCategoryDto> {
+    const articleData = await this.findArticleCategoryByName({ userId, name });
+    if (articleData) {
       throw new BadRequestException('이미 동명의 카테고리가 존재합니다.');
     }
-    const result = await this.articleCategoryRepository.save({
-      user: { kakaoId },
+    const result = await this.repo_articleCategories.save({
+      user: { id: userId },
       name,
     });
     return result;
   }
 
-  async patch({ kakaoId, id, name }): Promise<FetchArticleCategoryResponse> {
-    const data = await this.findWithId({ id });
+  async patchArticleCategory({
+    userId,
+    articleCategoryId,
+    name,
+  }): Promise<ArticleCategoryDto> {
+    const data = await this.findArticleCategoryById({ articleCategoryId });
     if (!data) throw new NotFoundException('카테고리를 찾을 수 없습니다.');
-    if (data.userId != kakaoId)
+    if (data.userId != userId)
       throw new ForbiddenException('카테고리를 수정할 권한이 없습니다.');
     data.name = name;
-    return await this.articleCategoryRepository.save(data);
+    return await this.repo_articleCategories.save(data);
   }
 
-  async findWithId({ id }): Promise<FetchArticleCategoryResponse> {
-    return await this.articleCategoryRepository.findOne({
-      where: { id },
+  async findArticleCategoryById({
+    articleCategoryId,
+  }): Promise<ArticleCategoryDto> {
+    return await this.repo_articleCategories.findOne({
+      where: { id: articleCategoryId },
     });
   }
 
   async fetchAll({
-    kakaoId,
-    targetKakaoId,
-  }): Promise<FetchArticleCategoriesResponse[]> {
-    const scope = await this.followsService.getScope({
-      from_user: targetKakaoId,
-      to_user: kakaoId,
+    userId,
+    targetUserId,
+  }): Promise<ArticleCategoriesResponseDto[]> {
+    const scope = await this.svc_follows.getScope({
+      fromUser: targetUserId,
+      toUser: userId,
     });
-    return await this.articleCategoryRepository.fetchUserCategory({
-      userKakaoId: targetKakaoId,
+    return await this.repo_articleCategories.fetchUserCategory({
+      userId: targetUserId,
       scope,
     });
   }
 
-  delete({ kakaoId, id }) {
-    return this.articleCategoryRepository.delete({
-      id,
-      user: { kakaoId },
+  deleteArticleCategory({ userId, articleCategoryId }) {
+    return this.repo_articleCategories.delete({
+      id: articleCategoryId,
+      user: { id: userId },
     });
   }
 }

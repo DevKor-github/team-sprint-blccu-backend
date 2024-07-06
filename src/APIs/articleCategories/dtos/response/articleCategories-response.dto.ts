@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArticleCategoryDto } from './articleCategory.dto';
-export class FetchArticleCategoryResponse extends ArticleCategoryDto {}
 
-export class FetchArticleCategoriesResponse {
+export class ArticleCategoriesResponseDto {
   @ApiProperty({ type: Number })
   postCount: number;
 
