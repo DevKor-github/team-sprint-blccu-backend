@@ -23,12 +23,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ImageUploadDto } from 'src/common/dtos/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
-import { Sticker } from './entities/sticker.entity';
-import { UpdateStickerInput } from './dtos/update-sticker.dto';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
+import { ImageUploadRequestDto } from 'src/modules/images/dtos/image-upload-request.dto';
+import { StickerDto } from './dtos/common/sticker.dto';
+import { StickerPatchRequestDto } from './dtos/request/sticker-patch-request.dto';
 
 @ApiTags('스티커 API')
 @Controller()
@@ -42,11 +42,11 @@ export class StickersController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: '업로드 할 파일',
-    type: ImageUploadDto,
+    type: ImageUploadRequestDto,
   })
   @ApiCreatedResponse({
     description: '이미지 서버에 파일 업로드 완료',
-    type: Sticker,
+    type: StickerDto,
   })
   @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
@@ -56,10 +56,10 @@ export class StickersController {
   async createPrivateSticker(
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
-  ): Promise<Sticker> {
-    const userKakaoId = req.user.userId;
+  ): Promise<StickerDto> {
+    const userId = req.user.userId;
     return await this.stickersService.createPrivateSticker({
-      userKakaoId,
+      userId,
       file,
     });
   }
@@ -69,14 +69,14 @@ export class StickersController {
     description:
       '본인이 만든 재사용 가능한 스티커들을 fetch한다. toggle이 우선적으로 이루어져야함.',
   })
-  @ApiOkResponse({ description: '조회 성공', type: [Sticker] })
+  @ApiOkResponse({ description: '조회 성공', type: [StickerDto] })
   @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
   @HttpCode(200)
   @Get('stickers/private')
-  async fetchPrivateStickers(@Req() req: Request): Promise<Sticker[]> {
-    const userKakaoId = req.user.userId;
-    return await this.stickersService.fetchUserStickers({ userKakaoId });
+  async fetchPrivateStickers(@Req() req: Request): Promise<StickerDto[]> {
+    const userId = req.user.userId;
+    return await this.stickersService.findUserStickers({ userId });
   }
 
   @ApiOperation({
@@ -87,17 +87,17 @@ export class StickersController {
   @Patch('stickers/:id')
   @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
-  @ApiOkResponse({ type: Sticker })
+  @ApiOkResponse({ type: StickerDto })
   @HttpCode(200)
   async patchSticker(
     @Req() req: Request,
-    @Param('id') id: number,
-    @Body() body: UpdateStickerInput,
-  ): Promise<Sticker> {
-    const kakaoId = req.user.userId;
+    @Param('stickerId') stickerId: number,
+    @Body() body: StickerPatchRequestDto,
+  ): Promise<StickerDto> {
+    const userId = req.user.userId;
     return await this.stickersService.updateSticker({
-      kakaoId,
-      id,
+      userId,
+      stickerId,
       ...body,
     });
   }
@@ -106,11 +106,11 @@ export class StickersController {
     summary: 'public 스티커를 fetch한다.',
     description: '블꾸가 만든 스티커들을 fetch한다.',
   })
-  @ApiOkResponse({ description: '조회 성공', type: [Sticker] })
+  @ApiOkResponse({ description: '조회 성공', type: [StickerDto] })
   @Get('stickers')
   @HttpCode(200)
-  async fetchPublicStickers(): Promise<Sticker[]> {
-    return await this.stickersService.fetchPublicStickers();
+  async fetchPublicStickers(): Promise<StickerDto[]> {
+    return await this.stickersService.findPublicStickers();
   }
 
   @ApiTags('어드민 API')
@@ -122,11 +122,11 @@ export class StickersController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: '업로드 할 파일',
-    type: ImageUploadDto,
+    type: ImageUploadRequestDto,
   })
   @ApiCreatedResponse({
     description: '이미지 서버에 파일 업로드 완료',
-    type: Sticker,
+    type: StickerDto,
   })
   @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
@@ -136,10 +136,10 @@ export class StickersController {
   async createPublicSticker(
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
-  ): Promise<Sticker> {
-    const userKakaoId = req.user.userId;
+  ): Promise<StickerDto> {
+    const userId = req.user.userId;
     return await this.stickersService.createPublicSticker({
-      userKakaoId,
+      userId,
       file,
     });
   }
@@ -148,12 +148,12 @@ export class StickersController {
   @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
   @ApiNoContentResponse({ description: '삭제 성공' })
-  @Delete('stickers/:id')
+  @Delete('stickers/:stickerId')
   async deleteSticker(
     @Req() req: Request,
-    @Param('id') id: number,
+    @Param('stickerId') stickerId: number,
   ): Promise<void> {
-    const kakaoId = req.user.userId;
-    return await this.stickersService.delete({ id, kakaoId });
+    const userId = req.user.userId;
+    return await this.stickersService.deleteSticker({ stickerId, userId });
   }
 }

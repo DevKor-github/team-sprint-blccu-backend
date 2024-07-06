@@ -13,7 +13,7 @@ import { StickerBlocksCreateRequestDto } from './dtos/request/stickerBlocks-crea
 @ApiTags('게시글 API')
 @Controller('articles/:articleId/stickers')
 export class StickerBlocksController {
-  constructor(private readonly stickerBlocksService: StickerBlocksService) {}
+  constructor(private readonly svc_stickerBlocks: StickerBlocksService) {}
 
   @ApiOperation({
     summary: '게시글 속 스티커 생성',
@@ -30,7 +30,7 @@ export class StickerBlocksController {
     // @Req() req: Request,
   ): Promise<StickerBlockDto[]> {
     // const userId = req.user.userId;
-    return await this.stickerBlocksService.createStickerBlocks({
+    return await this.svc_stickerBlocks.createStickerBlocks({
       ...body,
       articleId,
     });

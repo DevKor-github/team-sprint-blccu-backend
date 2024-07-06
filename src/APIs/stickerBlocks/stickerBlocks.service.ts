@@ -14,9 +14,9 @@ import { StickerBlockDto } from './dtos/common/stickerBlock.dto';
 @Injectable()
 export class StickerBlocksService {
   constructor(
-    private readonly stickersService: StickersService,
+    private readonly svc_stickers: StickersService,
     @InjectRepository(StickerBlock)
-    private readonly stickerBlocksRepository: Repository<StickerBlock>,
+    private readonly repo_stickerBlocks: Repository<StickerBlock>,
   ) {}
 
   async createStickerBlock({
@@ -25,11 +25,11 @@ export class StickerBlocksService {
     ...rest
   }: IStickerBlocksServiceCreateStickerBlock): Promise<StickerBlockDto> {
     try {
-      await this.stickersService.existCheck({
+      await this.svc_stickers.existCheck({
         id: stickerId,
       });
 
-      const data = await this.stickerBlocksRepository.save({
+      const data = await this.repo_stickerBlocks.save({
         ...rest,
         articleId,
         stickerId,
@@ -49,17 +49,17 @@ export class StickerBlocksService {
       articleId,
     }));
     stickerBlocksToInsert.forEach(async (stickerBlock) => {
-      await this.stickersService.existCheck({
+      await this.svc_stickers.existCheck({
         id: stickerBlock.stickerId,
       });
     });
-    return await this.stickerBlocksRepository.save(stickerBlocksToInsert);
+    return await this.repo_stickerBlocks.save(stickerBlocksToInsert);
   }
 
   async findStickerBlocks({
     articleId,
   }: IStikcerBlocksServiceFetchBlocks): Promise<StickerBlockDto[]> {
-    return await this.stickerBlocksRepository.find({
+    return await this.repo_stickerBlocks.find({
       where: { articleId },
     });
   }
@@ -68,14 +68,14 @@ export class StickerBlocksService {
     userId,
     articleId,
   }: IStikcerBlocksServiceDeleteBlocks): Promise<void> {
-    const blocksToDelete = await this.stickerBlocksRepository.find({
+    const blocksToDelete = await this.repo_stickerBlocks.find({
       relations: ['sticker'],
       where: { articleId },
     });
     for (const block of blocksToDelete) {
       if (block.sticker.isReusable === false)
-        await this.stickersService.delete({ userId, id: block.id });
-      await this.stickerBlocksRepository.remove(block);
+        await this.svc_stickers.delete({ userId, id: block.id });
+      await this.repo_stickerBlocks.remove(block);
     }
     return;
   }
