@@ -22,7 +22,7 @@ export class ArticlesPaginateService {
     // private readonly dataSource: DataSource,
     private readonly svc_articlesValidate: ArticlesValidateService,
     private readonly repo_articlesPaginate: ArticlesPaginateRepository,
-    private readonly svc_follow: FollowsService,
+    private readonly svc_follows: FollowsService,
     @Inject(CACHE_MANAGER) private db_cacheManager: Cache,
   ) {}
 
@@ -135,7 +135,7 @@ export class ArticlesPaginateService {
     if (cursorOption.dateCreated)
       dateFilter = getDate(cursorOption.dateCreated);
 
-    const scope = await this.svc_follow.getScope({
+    const scope = await this.svc_follows.getScope({
       fromUser: targetUserId,
       toUser: userId,
     });

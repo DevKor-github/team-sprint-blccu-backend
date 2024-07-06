@@ -9,11 +9,8 @@ import { ArticleDto } from '../dtos/common/article.dto';
 
 export class ArticlesUpdateService {
   constructor(
-    private readonly dataSource: DataSource,
     private readonly svc_articlesValidate: ArticlesValidateService,
-    private readonly repo_articlesRead: ArticlesReadRepository,
     private readonly repo_articlesCreate: ArticlesCreateRepository,
-    private readonly repo_articlesUpdate: ArticlesUpdateRepository,
   ) {}
   async patchArticle({
     userId,

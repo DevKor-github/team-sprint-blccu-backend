@@ -2,48 +2,46 @@ import { Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Follow } from '../follows/entities/follow.entity';
+import { plainToClass } from 'class-transformer';
+import { convertToCamelCase, getClassFields } from 'src/utils/classUtils';
+import { UserDto } from './dtos/common/user.dto';
+import { UserFollowingResponseDto } from './dtos/response/user-following-response.dto';
 
 @Injectable()
 export class UsersRepository extends Repository<User> {
-  constructor(private dataSource: DataSource) {
-    super(User, dataSource.createEntityManager());
+  constructor(private db_dataSource: DataSource) {
+    super(User, db_dataSource.createEntityManager());
   }
 
-  getFollowQuery({ kakaoId }) {
+  getFollowQuery({ userId }) {
     const queryBuilder = this.createQueryBuilder('user')
       .leftJoinAndSelect(
         (subQuery) => {
           return subQuery
-            .select('follow.to_user', 'toUserKakaoId')
+            .select('follow.to_user', 'to_user_id')
             .from(Follow, 'follow')
-            .where('follow.fromUserKakaoId = :kakaoId', { kakaoId });
+            .where('follow.from_user_id = :userId', { userId });
         },
         'follow',
-        'follow.toUserKakaoId = user.kakaoId',
+        'follow.to_user_id = user.id',
       )
       .where('user.date_deleted IS NULL')
       .select([
-        'user.username AS username',
-        'user.kakaoId AS kakaoId',
-        'user.handle AS handle',
-        'user.isAdmin AS isAdmin',
-        'user.username AS username',
-        'user.following_count AS following_count',
-        'user.follower_count AS follower_count',
-        'user.description AS description',
-        'user.profile_image AS profile_image',
-        'user.background_image AS background_image',
-        'user.date_created AS date_created',
-        'user.date_deleted AS date_deleted',
-        'CASE WHEN follow.toUserKakaoId IS NOT NULL THEN true ELSE false END AS isFollowing',
+        ...getClassFields(UserDto).map(
+          (column) => `user.${column} AS ${column}`,
+        ),
+        'CASE WHEN follow.to_user_id IS NOT NULL THEN true ELSE false END AS isFollowing',
       ])
-      .setParameters({ kakaoId });
+      .setParameters({ userId });
 
     return queryBuilder;
   }
   // 팔로잉 유무 포함 조회
-  async fetchUsersWithNameAndFollowing({ kakaoId, username }) {
-    const queryBuilder = this.getFollowQuery({ kakaoId });
+  async readWithNameAndFollowing({
+    userId,
+    username,
+  }): Promise<UserFollowingResponseDto[]> {
+    const queryBuilder = this.getFollowQuery({ userId });
     const users = await queryBuilder
       // .andWhere('MATCH(user.username) AGAINST (:username IN BOOLEAN MODE)', {
       //   username: `*${username}*`,
@@ -53,19 +51,12 @@ export class UsersRepository extends Repository<User> {
       })
       .getRawMany();
 
-    return users.map((user) => ({
-      username: user.username,
-      kakaoId: user.kakaoId,
-      handle: user.handle,
-      following_count: user.following_count,
-      follower_count: user.follower_count,
-      isAdmin: user.isAdmin === 1,
-      description: user.description,
-      profile_image: user.profile_image,
-      background_image: user.background_image,
-      date_created: user.date_created,
-      date_deleted: user.date_deleted,
-      isFollowing: user.isFollowing === 1,
-    }));
+    return users.map((user) =>
+      plainToClass(UserFollowingResponseDto, {
+        ...convertToCamelCase(user),
+        isAdmin: user.is_admin === 1,
+        isFollowing: user.isFollowing === 1,
+      }),
+    );
   }
 }

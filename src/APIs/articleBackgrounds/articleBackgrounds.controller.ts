@@ -17,7 +17,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ImageUploadDto } from '../../common/dtos/image-upload.dto';
+import { ImageUploadDto } from '../../modules/images/dtos/image-upload-request.dto';
 import { ImageUploadResponseDto } from 'src/common/dtos/image-upload-response.dto';
 import { ArticleBackground } from './entities/articleBackground.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
