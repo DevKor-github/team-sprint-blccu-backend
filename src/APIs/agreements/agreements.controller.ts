@@ -19,74 +19,78 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { Request } from 'express';
-import { CreateAgreementsInput } from './dtos/create-agreements.dto';
-import { FetchAgreementDto } from './dtos/fetch-agreement.dto';
-import { PatchAgreementInput } from './dtos/patch-agreement.dto';
-import { FetchContractDto } from './dtos/fetch-contract.dto';
+import { AgreementGetContractRequestDto } from './dtos/request/agreement-get-contract-request.dto';
+import { AgreementCreateRequestDto } from './dtos/request/agreement-create-request.dto';
+import { AgreementDto } from './dtos/common/agreement.dto';
+import { AgreementPatchRequestDto } from './dtos/request/agreement-patch-request.dto';
 
 @ApiTags('유저 API')
 @Controller('users')
 export class AgreementsController {
-  constructor(private readonly agreementsService: AgreementsService) {}
+  constructor(private readonly svc_agreements: AgreementsService) {}
 
   @ApiOperation({ summary: 'contract fetch' })
   @Get('contracts')
-  async fetchContract(@Query() query: FetchContractDto) {
-    const data = await this.agreementsService.fetchContract({ ...query });
+  async getContract(@Query() query: AgreementGetContractRequestDto) {
+    const data = await this.svc_agreements.findContract({ ...query });
     return data;
   }
 
   @ApiOperation({ summary: '온보딩 동의' })
   @ApiCookieAuth()
-  @ApiCreatedResponse({ type: FetchAgreementDto })
+  @ApiCreatedResponse({ type: AgreementDto })
   @UseGuards(AuthGuardV2)
   @Post('me/agreement')
   async agree(
     @Req() req: Request,
-    @Body() body: CreateAgreementsInput,
-  ): Promise<FetchAgreementDto> {
-    const kakaoId = req.user.userId;
-    return await this.agreementsService.create({ ...body, kakaoId });
+    @Body() body: AgreementCreateRequestDto,
+  ): Promise<AgreementDto> {
+    const userId = req.user.userId;
+    return await this.svc_agreements.createAgreement({ ...body, userId });
   }
 
   @ApiOperation({ summary: '로그인된 유저의 온보딩 동의 내용들을 fetch' })
   @ApiCookieAuth()
-  @ApiOkResponse({ type: [FetchAgreementDto] })
+  @ApiOkResponse({ type: [AgreementDto] })
   @UseGuards(AuthGuardV2)
   @Get('me/agreements')
-  async fetchAgreements(@Req() req: Request): Promise<FetchAgreementDto[]> {
-    const kakaoId = req.user.userId;
-    return await this.agreementsService.fetchAll({ kakaoId });
+  async fetchAgreements(@Req() req: Request): Promise<AgreementDto[]> {
+    const userId = req.user.userId;
+    return await this.svc_agreements.findAgreements({ userId });
   }
 
   @ApiTags('어드민 API')
   @ApiOperation({ summary: '[어드민용] 특정 유저의 온보딩 동의 내용을 조회' })
   @ApiCookieAuth()
-  @ApiOkResponse({ type: [FetchAgreementDto] })
+  @ApiOkResponse({ type: [AgreementDto] })
   @UseGuards(AuthGuardV2)
   @Get('admin/:userId/agreements')
   async fetchAgreementAdmin(
     @Req() req: Request,
     @Param('userId') targetUserKakaoId: number,
-  ): Promise<FetchAgreementDto[]> {
-    const kakaoId = req.user.userId;
-    await this.agreementsService.adminCheck({ kakaoId });
-    return await this.agreementsService.fetchAll({
-      kakaoId: targetUserKakaoId,
+  ): Promise<AgreementDto[]> {
+    const userId = req.user.userId;
+    await this.svc_agreements.adminCheck({ userId });
+    return await this.svc_agreements.findAgreements({
+      userId: targetUserKakaoId,
     });
   }
 
   @ApiOperation({ summary: '동의 여부를 수정' })
   @ApiCookieAuth()
-  @ApiOkResponse({ type: FetchAgreementDto })
+  @ApiOkResponse({ type: AgreementDto })
   @UseGuards(AuthGuardV2)
   @Patch('me/agreement/:agreementId')
   async patchAgreement(
     @Req() req: Request,
-    @Param('agreementId') id: number,
-    @Body() body: PatchAgreementInput,
-  ): Promise<FetchAgreementDto> {
-    const userKakaoId = req.user.userId;
-    return await this.agreementsService.patch({ ...body, id, userKakaoId });
+    @Param('agreementId') agreementId: number,
+    @Body() body: AgreementPatchRequestDto,
+  ): Promise<AgreementDto> {
+    const userId = req.user.userId;
+    return await this.svc_agreements.patchAgreement({
+      ...body,
+      agreementId,
+      userId,
+    });
   }
 }

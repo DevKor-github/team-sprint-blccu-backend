@@ -4,25 +4,20 @@ import { Agreement } from '../entities/agreement.entity';
 export interface IAgreementsServiceCreate
   extends Omit<
     Agreement,
-    | 'id'
-    | 'user'
-    | 'userKakaoId'
-    | 'date_created'
-    | 'date_updated'
-    | 'date_deleted'
-  > {
-  kakaoId: number;
+    'id' | 'user' | 'dateCreated' | 'dateUpdated' | 'dateDeleted'
+  > {}
+
+export interface IAgreementsServicePatchAgreement
+  extends Pick<Agreement, 'isAgreed' | 'userId'> {
+  agreementId: number;
 }
 
-export interface IAgreementsServicePatch
-  extends Pick<Agreement, 'id' | 'isAgreed' | 'userKakaoId'> {}
-
-export interface IAgreementsServiceKakaoId {
-  kakaoId: number;
+export interface IAgreementsServiceUserId {
+  userId: number;
 }
 
 export interface IAgreementsServiceId {
-  id: number;
+  agreementId: number;
 }
 
 export interface IAgreementsServiceFetchContract {

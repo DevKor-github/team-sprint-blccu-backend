@@ -8,38 +8,38 @@ import {
   IAgreementsServiceCreate,
   IAgreementsServiceFetchContract,
   IAgreementsServiceId,
-  IAgreementsServiceKakaoId,
-  IAgreementsServicePatch,
+  IAgreementsServicePatchAgreement,
+  IAgreementsServiceUserId,
 } from './interfaces/agreements.service.interface';
-import { FetchAgreementDto } from './dtos/fetch-agreement.dto';
-import { UsersService } from '../users/users.service';
 import path from 'path';
 import fs from 'fs';
+import { UsersValidateService } from '../users/services/users-validate-service';
+import { AgreementDto } from './dtos/common/agreement.dto';
 
 @Injectable()
 export class AgreementsService {
   constructor(
-    private readonly agreementsRepository: AgreementsRepository,
-    private readonly usersService: UsersService,
+    private readonly repo_agreements: AgreementsRepository,
+    private readonly svc_usersValidate: UsersValidateService,
   ) {}
 
-  async adminCheck({ kakaoId }: IAgreementsServiceKakaoId): Promise<void> {
-    await this.usersService.adminCheck({ kakaoId });
+  async adminCheck({ userId }: IAgreementsServiceUserId): Promise<void> {
+    await this.svc_usersValidate.adminCheck({ userId });
   }
 
-  async create({
-    kakaoId,
+  async createAgreement({
+    userId,
     agreementType,
     isAgreed,
-  }: IAgreementsServiceCreate): Promise<FetchAgreementDto> {
-    return await this.agreementsRepository.save({
+  }: IAgreementsServiceCreate): Promise<AgreementDto> {
+    return await this.repo_agreements.save({
       agreementType,
       isAgreed,
-      userKakaoId: kakaoId,
+      userId,
     });
   }
 
-  async fetchContract({ agreementType }: IAgreementsServiceFetchContract) {
+  async findContract({ agreementType }: IAgreementsServiceFetchContract) {
     const fileName = agreementType + '.html';
     const rootPath = process.cwd();
     const filePath = path.join(rootPath, 'src', 'assets', 'terms', fileName);
@@ -47,29 +47,30 @@ export class AgreementsService {
     return data;
   }
 
-  async fetchOne({ id }: IAgreementsServiceId): Promise<FetchAgreementDto> {
-    return await this.agreementsRepository.findOne({ where: { id } });
+  async findAgreement({
+    agreementId,
+  }: IAgreementsServiceId): Promise<AgreementDto> {
+    return await this.repo_agreements.findOne({ where: { id: agreementId } });
   }
 
-  async fetchAll({
-    kakaoId,
-  }: IAgreementsServiceKakaoId): Promise<FetchAgreementDto[]> {
-    return await this.agreementsRepository.find({
-      where: { user: { kakaoId } },
+  async findAgreements({
+    userId,
+  }: IAgreementsServiceUserId): Promise<AgreementDto[]> {
+    return await this.repo_agreements.find({
+      where: { user: { id: userId } },
     });
   }
 
-  async patch({
-    userKakaoId,
-    id,
+  async patchAgreement({
+    userId,
+    agreementId,
     isAgreed,
-  }: IAgreementsServicePatch): Promise<FetchAgreementDto> {
-    const data = await this.fetchOne({ id });
+  }: IAgreementsServicePatchAgreement): Promise<AgreementDto> {
+    const data = await this.findAgreement({ agreementId });
     if (!data) throw new NotFoundException('데이터를 찾을 수 없습니다.');
-    if (data.userKakaoId != userKakaoId)
-      throw new ForbiddenException('권한이 없습니다.');
+    if (data.userId != userId) throw new ForbiddenException('권한이 없습니다.');
     // if(data.agreementType != AgreementType.MARKETING_CONSENT)
     data.isAgreed = isAgreed;
-    return await this.agreementsRepository.save(data);
+    return await this.repo_agreements.save(data);
   }
 }
