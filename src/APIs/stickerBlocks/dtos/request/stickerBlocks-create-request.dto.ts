@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { StickerBlocksCreateDto } from '../common/stickerBlocks.create.dto';
+import { StickerBlocksCreateDto } from '../common/stickerBlocks-create.dto';
 import { IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 

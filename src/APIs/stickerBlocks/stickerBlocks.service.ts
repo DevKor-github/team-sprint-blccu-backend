@@ -2,16 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { StickerBlock } from './entities/stickerblock.entity';
 import { Repository } from 'typeorm';
-import { CreateStickerBlockDto } from './dtos/create-stickerBlock.dto';
 import { StickersService } from '../stickers/stickers.service';
 import {
-  CreateStickerBlocksDto,
-  CreateStickerBlocksResponseDto,
-} from './dtos/create-stickerBlocks.dto';
-import {
+  IStickerBlocksServiceCreateStickerBlock,
+  IStickerBlocksServiceCreateStickerBlocks,
   IStikcerBlocksServiceDeleteBlocks,
   IStikcerBlocksServiceFetchBlocks,
 } from './interfaces/stickerBlocks.service.interface';
+import { StickerBlockDto } from './dtos/common/stickerBlock.dto';
 
 @Injectable()
 export class StickerBlocksService {
@@ -21,35 +19,34 @@ export class StickerBlocksService {
     private readonly stickerBlocksRepository: Repository<StickerBlock>,
   ) {}
 
-  async create(
-    createStickerBlockDto: CreateStickerBlockDto,
-  ): Promise<StickerBlock> {
-    // 순환참조 막기 위해 자체 에러 헨들링
-    // await this.postsService.existCheck({
-    //   id: createStickerBlockDto.postsId,
-    // });
+  async createStickerBlock({
+    stickerId,
+    articleId,
+    ...rest
+  }: IStickerBlocksServiceCreateStickerBlock): Promise<StickerBlockDto> {
     try {
       await this.stickersService.existCheck({
-        id: createStickerBlockDto.stickerId,
+        id: stickerId,
       });
 
-      const data = await this.stickerBlocksRepository.save(
-        createStickerBlockDto,
-      );
+      const data = await this.stickerBlocksRepository.save({
+        ...rest,
+        articleId,
+        stickerId,
+      });
       return data;
     } catch (e) {
       throw new NotFoundException('게시글을 찾을 수 없습니다.');
     }
   }
 
-  async bulkInsert({
+  async createStickerBlocks({
     stickerBlocks,
-    postsId,
-    kakaoId,
-  }: CreateStickerBlocksDto): Promise<CreateStickerBlocksResponseDto[]> {
+    articleId,
+  }: IStickerBlocksServiceCreateStickerBlocks): Promise<StickerBlockDto[]> {
     const stickerBlocksToInsert = stickerBlocks.map((stickerBlock) => ({
       ...stickerBlock,
-      postsId,
+      articleId,
     }));
     stickerBlocksToInsert.forEach(async (stickerBlock) => {
       await this.stickersService.existCheck({
@@ -59,15 +56,15 @@ export class StickerBlocksService {
     return await this.stickerBlocksRepository.save(stickerBlocksToInsert);
   }
 
-  async fetchBlocks({
-    postsId,
-  }: IStikcerBlocksServiceFetchBlocks): Promise<StickerBlock[]> {
+  async findStickerBlocks({
+    articleId,
+  }: IStikcerBlocksServiceFetchBlocks): Promise<StickerBlockDto[]> {
     return await this.stickerBlocksRepository.find({
-      where: { postsId },
+      where: { articleId },
     });
   }
 
-  async deleteBlocks({
+  async deleteStickerBlocks({
     userId,
     articleId,
   }: IStikcerBlocksServiceDeleteBlocks): Promise<void> {
@@ -83,5 +80,5 @@ export class StickerBlocksService {
     return;
   }
 
-  async updateBlock() {}
+  async updateStickerBlocks() {}
 }
