@@ -113,13 +113,17 @@ export class Article extends IndexedCommonEntity {
   @IsEnum(OpenScope)
   scope: OpenScope;
 
-  @ApiProperty({ description: '게시글 내용', type: String })
-  @Column('longtext')
+  @ApiProperty({ description: '게시글 내용', type: String, default: '' })
+  @Column('longtext', { default: '' })
   @IsString()
   content: string;
 
-  @ApiProperty({ description: '게시글 설명(html 태그 제외)', type: String })
-  @Column({ name: 'main_description' })
+  @ApiProperty({
+    description: '게시글 설명(html 태그 제외)',
+    type: String,
+    default: '',
+  })
+  @Column({ name: 'main_description', default: '' })
   @IsString()
   mainDescription: string;
 

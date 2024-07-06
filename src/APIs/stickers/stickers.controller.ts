@@ -23,7 +23,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ImageUploadDto } from 'src/common/dto/image-upload.dto';
+import { ImageUploadDto } from 'src/common/dtos/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { Sticker } from './entities/sticker.entity';

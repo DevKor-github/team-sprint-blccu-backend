@@ -3,8 +3,8 @@ import { Repository } from 'typeorm';
 import { Sticker } from './entities/sticker.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateStickerDto } from './dtos/create-sticker.dto';
-import { UtilsService } from 'src/utils/utils.service';
-import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
+import { UtilsService } from 'src/modules/utils/utils.service';
+import { ImageUploadResponseDto } from 'src/common/dtos/image-upload-response.dto';
 import { UsersService } from '../users/users.service';
 import { UpdateStickerDto } from './dtos/update-sticker.dto';
 import {

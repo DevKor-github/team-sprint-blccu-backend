@@ -1,44 +1,44 @@
+import { ArticleCreateRequestDto } from '../dtos/request/article-create-request.dto';
+import { ArticlePatchRequestDto } from '../dtos/request/article-patch-request.dto';
+import { ArticlesGetRequestDto } from '../dtos/request/articles-get-request.dto';
+import { ArticlesGetUserRequestDto } from '../dtos/request/articles-get-user-request.dto';
 import { Article } from '../entities/article.entity';
 
-export interface IArticlesServiceArticleId extends Pick<Article, 'id'> {}
-
-export interface IArticlesServiceArticleUserIdPair {
-  id: number;
-  kakaoId: number;
+export interface IArticlesServiceArticleId {
+  articleId: number;
 }
 
-export interface IArticlesServiceCreate extends CreateArticleInput {
-  userKakaoId: number;
+export interface IArticlesServiceArticleUserIdPair {
+  articleId: number;
+  userId: number;
+}
 
+export interface IArticlesServiceCreate extends ArticleCreateRequestDto {
+  userId: number;
   isPublished: boolean;
 }
 
-export interface IArticlesServiceFetchArticleForUpdate {
-  id: number;
-  kakaoId: number;
-}
-
 export interface IArticlesServiceCreateCursorResponse {
-  cursorOption: CursorFetchArticles;
+  cursorOption: ArticlesGetRequestDto;
   articles: Article[];
 }
 
 export interface IArticlesServiceFetchArticlesCursor {
-  cursorOption: CursorFetchArticles;
+  cursorOption: ArticlesGetRequestDto;
 }
 
 export interface IArticlesServiceFetchFriendsArticlesCursor {
-  cursorOption: CursorFetchArticles;
-  kakaoId: number;
+  cursorOption: ArticlesGetRequestDto;
+  userId: number;
 }
 
 export interface IArticlesServiceFetchUserArticlesCursor {
-  cursorOption: FetchUserArticlesInput;
-  targetKakaoId: number;
-  kakaoId: number;
+  cursorOption: ArticlesGetUserRequestDto;
+  targetUserId: number;
+  userId: number;
 }
 
-export interface IArticlesServicePatchArticle extends PatchArticleInput {
-  kakaoId: number;
-  id: number;
+export interface IArticlesServicePatchArticle extends ArticlePatchRequestDto {
+  userId: number;
+  articleId: number;
 }

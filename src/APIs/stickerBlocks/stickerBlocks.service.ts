@@ -68,16 +68,16 @@ export class StickerBlocksService {
   }
 
   async deleteBlocks({
-    kakaoId,
-    postsId,
+    userId,
+    articleId,
   }: IStikcerBlocksServiceDeleteBlocks): Promise<void> {
     const blocksToDelete = await this.stickerBlocksRepository.find({
       relations: ['sticker'],
-      where: { postsId },
+      where: { articleId },
     });
     for (const block of blocksToDelete) {
       if (block.sticker.isReusable === false)
-        await this.stickersService.delete({ kakaoId, id: block.id });
+        await this.stickersService.delete({ userId, id: block.id });
       await this.stickerBlocksRepository.remove(block);
     }
     return;

@@ -16,8 +16,8 @@ import {
   UserResponseDto,
   UserResponseDtoWithFollowing,
 } from './dtos/user-response.dto';
-import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
-import { UtilsService } from 'src/utils/utils.service';
+import { ImageUploadResponseDto } from 'src/common/dtos/image-upload-response.dto';
+import { UtilsService } from 'src/modules/utils/utils.service';
 import { UploadImageDto } from './dtos/upload-image.dto';
 import { UsersRepository } from './users.repository';
 import { DataSource, UpdateResult } from 'typeorm';

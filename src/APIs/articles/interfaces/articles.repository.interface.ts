@@ -1,4 +1,3 @@
-import { ArticlesOrderOptionWrap } from 'src/common/enums/articles-order-option';
 import { SortOption } from 'src/common/enums/sort-option';
 import {
   IArticlesServiceFetchArticlesCursor,
@@ -6,9 +5,10 @@ import {
   IArticlesServiceFetchUserArticlesCursor,
 } from './articles.service.interface';
 import { OpenScope } from 'src/common/enums/open-scope.enum';
+import { ArticleOrderOptionWrap } from 'src/common/enums/article-order-option';
 
 export interface IArticlesRepoGetCursorQuery {
-  order: ArticlesOrderOptionWrap;
+  order: ArticleOrderOptionWrap;
   sort: SortOption;
   take: number;
   cursor: string;
@@ -16,18 +16,18 @@ export interface IArticlesRepoGetCursorQuery {
 
 export interface IArticlesRepoFetchArticlesCursor
   extends IArticlesServiceFetchArticlesCursor {
-  date_filter: Date;
+  dateFilter: Date;
 }
 
 export interface IArticlesRepoFetchFriendsArticlesCursor
   extends Pick<IArticlesServiceFetchFriendsArticlesCursor, 'cursorOption'> {
-  date_filter: Date;
+  dateFilter: Date;
   userId: number;
 }
 
 export interface IArticlesRepoFetchUserArticlesCursor
   extends Pick<IArticlesServiceFetchUserArticlesCursor, 'cursorOption'> {
-  date_filter: Date;
+  dateFilter: Date;
   scope: OpenScope[];
   userId: number;
 }

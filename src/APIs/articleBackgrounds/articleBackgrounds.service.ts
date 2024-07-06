@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { UtilsService } from 'src/utils/utils.service';
+import { UtilsService } from 'src/modules/utils/utils.service';
 import { ArticleBackground } from './entities/articleBackground.entity';
 import { Repository } from 'typeorm';
-import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
+import { ImageUploadResponseDto } from 'src/common/dtos/image-upload-response.dto';
 import { AwsService } from 'src/modules/aws/aws.service';
 
 @Injectable()

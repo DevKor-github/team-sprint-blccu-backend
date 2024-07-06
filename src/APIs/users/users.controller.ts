@@ -30,8 +30,8 @@ import {
   UserResponseDtoWithFollowing,
 } from './dtos/user-response.dto';
 import { PatchUserInput } from './dtos/patch-user.input';
-import { ImageUploadResponseDto } from 'src/common/dto/image-upload-response.dto';
-import { ImageUploadDto } from 'src/common/dto/image-upload.dto';
+import { ImageUploadResponseDto } from 'src/common/dtos/image-upload-response.dto';
+import { ImageUploadDto } from 'src/common/dtos/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { DeleteUserInput } from './dtos/delete-user.dto';
