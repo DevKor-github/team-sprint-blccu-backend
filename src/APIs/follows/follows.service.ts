@@ -11,7 +11,6 @@ import {
 } from './interfaces/follows.service.interface';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotType } from 'src/common/enums/not-type.enum';
-import { from, identity } from 'rxjs';
 
 @Injectable()
 export class FollowsService {
@@ -169,7 +168,7 @@ export class FollowsService {
     }
   }
 
-  async getFollows({
+  async findFollowings({
     userId,
     loggedUser,
   }: IFollowsServiceFindList): Promise<UserResponseDtoWithFollowing[]> {
@@ -180,7 +179,7 @@ export class FollowsService {
     return follows;
   }
 
-  async getFollowers({
+  async findFollowers({
     userId,
     loggedUser,
   }: IFollowsServiceFindList): Promise<UserResponseDtoWithFollowing[]> {
