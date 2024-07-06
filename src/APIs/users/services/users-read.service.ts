@@ -3,6 +3,10 @@ import { UsersRepository } from '../users.repository';
 import { USER_SELECT_OPTION, UserDto } from '../dtos/common/user.dto';
 import { User } from '../entities/user.entity';
 import { UserFollowingResponseDto } from '../dtos/response/user-following-response.dto';
+import {
+  IUsersServiceFindUserByHandle,
+  IUsersServiceFindUserById,
+} from '../interfaces/users.service.interface';
 
 @Injectable()
 export class UsersReadService {
@@ -18,7 +22,7 @@ export class UsersReadService {
 
   async findUserByIdWithDelete({
     userId,
-  }: IUsersServiceFindUserByKakaoId): Promise<UserDto> {
+  }: IUsersServiceFindUserById): Promise<UserDto> {
     const result = await this.repo_users.findOne({
       select: USER_SELECT_OPTION,
       where: { id: userId },

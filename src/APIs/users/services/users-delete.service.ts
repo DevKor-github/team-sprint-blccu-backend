@@ -17,7 +17,11 @@ export class UsersDeleteService {
     private readonly repo_users: UsersRepository,
     private readonly db_dataSource: DataSource,
   ) {}
-  async delete({ userId, type, content }: IUsersServiceDelete): Promise<void> {
+  async deleteUser({
+    userId,
+    type,
+    content,
+  }: IUsersServiceDelete): Promise<void> {
     const queryRunner = this.db_dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();

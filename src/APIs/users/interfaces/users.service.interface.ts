@@ -10,7 +10,7 @@ export interface IUsersServiceCreate {
   userId: number;
 }
 
-export interface IUsersServiceFindUserByKakaoId {
+export interface IUsersServiceFindUserById {
   userId: number;
 }
 
@@ -28,5 +28,5 @@ export interface IUsersServiceFindUser {
 
 export interface IUsersServiceImageUpload {
   file: Express.Multer.File;
-  resize: number;
+  userId: number;
 }

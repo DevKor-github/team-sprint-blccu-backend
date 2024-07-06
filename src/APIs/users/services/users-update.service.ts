@@ -28,7 +28,12 @@ export class UsersUpdateService {
     });
   }
 
-  async patchUser({ userId, handle, description, username }): Promise<UserDto> {
+  async updateUser({
+    userId,
+    handle,
+    description,
+    username,
+  }): Promise<UserDto> {
     const user = await this.svc_usersValidate.existCheck({ userId });
     if (description) {
       user.description = description;
@@ -47,7 +52,7 @@ export class UsersUpdateService {
     }
   }
 
-  async uploadProfileImage({
+  async updateProfileImage({
     userId,
     file,
   }: IUsersServiceImageUpload): Promise<ImageUploadResponseDto> {
@@ -64,8 +69,8 @@ export class UsersUpdateService {
     await this.repo_users.save({ ...user, profileImage: imageUrl });
     return { imageUrl };
   }
-  
-  async uploadBackgroundImage({
+
+  async updateBackgroundImage({
     userId,
     file,
   }: IUsersServiceImageUpload): Promise<ImageUploadResponseDto> {
@@ -82,3 +87,4 @@ export class UsersUpdateService {
     await this.repo_users.save({ ...user, backgroundImage: imageUrl });
     return { imageUrl };
   }
+}

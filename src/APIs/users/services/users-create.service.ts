@@ -7,7 +7,7 @@ import { UsersRepository } from '../users.repository';
 export class UsersCreateService {
   constructor(private readonly repo_users: UsersRepository) {}
 
-  async create({ userId }: IUsersServiceCreate) {
+  async createUser({ userId }: IUsersServiceCreate) {
     const userTempName = 'USER' + getUUID().substring(0, 8);
     const result = await this.repo_users.save({
       id: userId,

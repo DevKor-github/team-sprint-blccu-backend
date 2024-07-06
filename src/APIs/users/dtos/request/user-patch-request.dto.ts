@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
-export class PatchUserRequestDto {
+export class UserPatchRequestDto {
   @ApiProperty({
     description: '[optional] 핸들러 변경',
     type: String,
