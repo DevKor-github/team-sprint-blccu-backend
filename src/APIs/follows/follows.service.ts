@@ -6,44 +6,45 @@ import { FollowsRepository } from './follows.repository';
 import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
 import { User } from '../users/entities/user.entity';
 import {
-  IFollowsServiceGetList,
+  IFollowsServiceFindList,
   IFollowsServiceUsers,
 } from './interfaces/follows.service.interface';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotType } from 'src/common/enums/not-type.enum';
+import { from, identity } from 'rxjs';
 
 @Injectable()
 export class FollowsService {
   constructor(
-    private readonly followsRepository: FollowsRepository,
-    private readonly notificationsService: NotificationsService,
-    private readonly dataSource: DataSource,
+    private readonly repo_follows: FollowsRepository,
+    private readonly svc_notifications: NotificationsService,
+    private readonly db_dataSource: DataSource,
   ) {}
 
-  isSame({ from_user, to_user }: IFollowsServiceUsers): boolean {
-    if (from_user == to_user) {
+  isSame({ fromUser, toUser }: IFollowsServiceUsers): boolean {
+    if (fromUser == toUser) {
       return true;
     }
     return false;
   }
 
   async getScope({
-    from_user,
-    to_user,
+    fromUser,
+    toUser,
   }: IFollowsServiceUsers): Promise<OpenScope[]> {
-    if (from_user === to_user)
+    if (fromUser === toUser)
       return [OpenScope.PUBLIC, OpenScope.PROTECTED, OpenScope.PRIVATE];
-    if (from_user !== null && to_user !== null) {
-      const following = await this.followsRepository.findOne({
+    if (fromUser !== null && toUser !== null) {
+      const following = await this.repo_follows.findOne({
         where: {
-          from_user: { kakaoId: from_user },
-          to_user: { kakaoId: to_user },
+          fromUser: { id: fromUser },
+          toUser: { id: toUser },
         },
       });
-      const follower = await this.followsRepository.findOne({
+      const follower = await this.repo_follows.findOne({
         where: {
-          from_user: { kakaoId: to_user },
-          to_user: { kakaoId: from_user },
+          fromUser: { id: toUser },
+          toUser: { id: fromUser },
         },
       });
       if (following && follower) {
@@ -56,14 +57,14 @@ export class FollowsService {
     return [OpenScope.PUBLIC];
   }
 
-  async isExist({
-    from_user,
-    to_user,
+  async existCheck({
+    fromUser,
+    toUser,
   }: IFollowsServiceUsers): Promise<boolean> {
-    const follow = await this.followsRepository.findOne({
+    const follow = await this.repo_follows.findOne({
       where: {
-        from_user: { kakaoId: from_user },
-        to_user: { kakaoId: to_user },
+        fromUser: { id: fromUser },
+        toUser: { id: toUser },
       },
       loadRelationIds: true,
     });
@@ -74,47 +75,47 @@ export class FollowsService {
   }
 
   async followUser({
-    from_user,
-    to_user,
+    fromUser,
+    toUser,
   }: IFollowsServiceUsers): Promise<FollowUserDto> {
-    const queryRunner = this.dataSource.createQueryRunner();
+    const queryRunner = this.db_dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       const toUserData = await queryRunner.manager.findOne(User, {
-        where: { kakaoId: to_user },
+        where: { id: toUser },
       });
       const fromUserData = await queryRunner.manager.findOne(User, {
-        where: { kakaoId: from_user },
+        where: { id: fromUser },
       });
 
-      const isExist = await this.isExist({ from_user, to_user });
+      const isExist = await this.existCheck({ fromUser, toUser });
       if (isExist) {
         throw new ConflictException('already exists');
       }
-      if (this.isSame({ from_user, to_user })) {
+      if (this.isSame({ fromUser, toUser })) {
         throw new ConflictException('you cannot follow yourself!');
       }
-      const follow = await this.followsRepository.save({
-        from_user: { kakaoId: from_user },
-        to_user: { kakaoId: to_user },
+      const follow = await this.repo_follows.save({
+        fromUser: { id: fromUser },
+        toUser: { id: toUser },
       });
-      await queryRunner.manager.update(User, fromUserData.kakaoId, {
-        following_count: () => 'following_count +1',
+      await queryRunner.manager.update(User, fromUserData.id, {
+        followingCount: () => 'following_count +1',
       });
-      await queryRunner.manager.update(User, toUserData.kakaoId, {
-        follower_count: () => 'follower_count +1',
+      await queryRunner.manager.update(User, toUserData.id, {
+        followerCount: () => 'follower_count +1',
       });
 
       await queryRunner.commitTransaction();
       console.log('commited');
-      await this.notificationsService.emitAlarm({
-        userKakaoId: from_user,
-        targetUserKakaoId: to_user,
+      await this.svc_notifications.emitAlarm({
+        userId: fromUser,
+        targetUserId: toUser,
         type: NotType.FOLLOW,
-        postId: null,
+        articleId: null,
       });
-      return await this.followsRepository.findOne({ where: { id: follow.id } });
+      return await this.repo_follows.findOne({ where: { id: follow.id } });
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw e;
@@ -124,39 +125,39 @@ export class FollowsService {
   }
 
   async unfollowUser({
-    from_user,
-    to_user,
+    fromUser,
+    toUser,
   }: IFollowsServiceUsers): Promise<void> {
-    const queryRunner = this.dataSource.createQueryRunner();
+    const queryRunner = this.db_dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       const toUserData = await queryRunner.manager.findOne(User, {
-        where: { kakaoId: to_user },
+        where: { id: toUser },
       });
       const fromUserData = await queryRunner.manager.findOne(User, {
-        where: { kakaoId: from_user },
+        where: { id: fromUser },
       });
 
-      const isExist = await this.isExist({ from_user, to_user });
+      const isExist = await this.existCheck({ fromUser, toUser });
 
       if (!isExist) {
         throw new ConflictException('no data exists');
       }
 
-      if (this.isSame({ from_user, to_user })) {
+      if (this.isSame({ fromUser, toUser })) {
         throw new ConflictException('you cannot unfollow yourself!');
       }
 
-      await queryRunner.manager.update(User, fromUserData.kakaoId, {
-        following_count: () => 'following_count -1',
+      await queryRunner.manager.update(User, fromUserData.id, {
+        followingCount: () => 'following_count -1',
       });
-      await queryRunner.manager.update(User, toUserData.kakaoId, {
-        follower_count: () => 'follower_count -1',
+      await queryRunner.manager.update(User, toUserData.id, {
+        followerCount: () => 'follower_count -1',
       });
-      await this.followsRepository.delete({
-        from_user: { kakaoId: from_user },
-        to_user: { kakaoId: to_user },
+      await this.repo_follows.delete({
+        fromUser: { id: fromUser },
+        toUser: { id: toUser },
       });
       await queryRunner.commitTransaction();
       return;
@@ -169,22 +170,22 @@ export class FollowsService {
   }
 
   async getFollows({
-    kakaoId,
+    userId,
     loggedUser,
-  }: IFollowsServiceGetList): Promise<UserResponseDtoWithFollowing[]> {
-    const follows = await this.followsRepository.getFollowings({
-      kakaoId,
+  }: IFollowsServiceFindList): Promise<UserResponseDtoWithFollowing[]> {
+    const follows = await this.repo_follows.getFollowings({
+      userId,
       loggedUser,
     });
     return follows;
   }
 
   async getFollowers({
-    kakaoId,
+    userId,
     loggedUser,
-  }: IFollowsServiceGetList): Promise<UserResponseDtoWithFollowing[]> {
-    const follows = await this.followsRepository.getFollowers({
-      kakaoId,
+  }: IFollowsServiceFindList): Promise<UserResponseDtoWithFollowing[]> {
+    const follows = await this.repo_follows.getFollowers({
+      userId,
       loggedUser,
     });
     return follows;

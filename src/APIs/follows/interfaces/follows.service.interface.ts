@@ -1,9 +1,9 @@
 export interface IFollowsServiceUsers {
-  from_user: number;
-  to_user: number;
+  fromUser: number;
+  toUser: number;
 }
 
-export interface IFollowsServiceGetList {
-  kakaoId: number;
+export interface IFollowsServiceFindList {
+  userId: number;
   loggedUser: number;
 }

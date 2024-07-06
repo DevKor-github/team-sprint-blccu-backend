@@ -1,4 +1,4 @@
-export interface IFollowsRepositoryGetList {
-  kakaoId: number;
+export interface IFollowsRepositoryFindList {
+  userId: number;
   loggedUser: number;
 }

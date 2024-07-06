@@ -125,7 +125,7 @@ export class User extends CommonEntity {
     description: '연결된 팔로잉',
     nullable: true,
   })
-  @OneToMany(() => Follow, (follow) => follow.from_user)
+  @OneToMany(() => Follow, (follow) => follow.fromUser)
   followings: Follow[];
 
   @ApiProperty({
@@ -133,7 +133,7 @@ export class User extends CommonEntity {
     description: '연결된 팔로워',
     nullable: true,
   })
-  @OneToMany(() => Follow, (follow) => follow.to_user)
+  @OneToMany(() => Follow, (follow) => follow.toUser)
   followers: Follow[];
 
   @ApiProperty({

@@ -1,8 +1,8 @@
 import { DataSource, Repository } from 'typeorm';
 import { Follow } from './entities/follow.entity';
 import { Injectable } from '@nestjs/common';
-import { IFollowsRepositoryGetList } from './interfaces/follows.repository.interface';
 import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
+import { IFollowsRepositoryFindList } from './interfaces/follows.repository.interface';
 
 @Injectable()
 export class FollowsRepository extends Repository<Follow> {
@@ -11,9 +11,9 @@ export class FollowsRepository extends Repository<Follow> {
   }
 
   async getFollowers({
-    kakaoId,
+    userId,
     loggedUser,
-  }: IFollowsRepositoryGetList): Promise<UserResponseDtoWithFollowing[]> {
+  }: IFollowsRepositoryFindList): Promise<UserResponseDtoWithFollowing[]> {
     const followings = await this.createQueryBuilder('follow')
       .innerJoin('follow.from_user', 'user')
       .where('user.date_deleted IS NULL')
@@ -43,7 +43,7 @@ export class FollowsRepository extends Repository<Follow> {
         'user.date_deleted AS date_deleted',
         'CASE WHEN follow2.toUserKakaoId IS NOT NULL THEN true ELSE false END AS isFollowing',
       ])
-      .setParameters({ kakaoId, loggedUser })
+      .setParameters({ userId, loggedUser })
       .getRawMany();
 
     return followings.map((follower) => ({
@@ -63,9 +63,9 @@ export class FollowsRepository extends Repository<Follow> {
   }
 
   async getFollowings({
-    kakaoId,
+    userId,
     loggedUser,
-  }: IFollowsRepositoryGetList): Promise<UserResponseDtoWithFollowing[]> {
+  }: IFollowsRepositoryFindList): Promise<UserResponseDtoWithFollowing[]> {
     const followings = await this.createQueryBuilder('follow')
       .innerJoin('follow.to_user', 'user')
       .where('user.date_deleted IS NULL')
@@ -95,7 +95,7 @@ export class FollowsRepository extends Repository<Follow> {
         'user.date_deleted AS date_deleted',
         'CASE WHEN follow2.toUserKakaoId IS NOT NULL THEN true ELSE false END AS isFollowing',
       ])
-      .setParameters({ kakaoId, loggedUser })
+      .setParameters({ userId, loggedUser })
       .getRawMany();
 
     return followings.map((follower) => ({
