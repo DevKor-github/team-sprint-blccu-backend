@@ -1,46 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-
-import { UtilsService } from 'src/modules/utils/utils.service';
 import { ArticleBackground } from './entities/articleBackground.entity';
 import { Repository } from 'typeorm';
-import { ImageUploadResponseDto } from 'src/common/dtos/image-upload-response.dto';
-import { AwsService } from 'src/modules/aws/aws.service';
+import { ImagesService } from 'src/modules/images/images.service';
+import { ArticleBackgroundDto } from './dtos/common/articleBackground.dto';
+import { ImageUploadResponseDto } from 'src/modules/images/dtos/image-upload-response.dto';
 
 @Injectable()
 export class ArticleBackgroundsService {
   constructor(
-    private readonly awsService: AwsService,
-    private readonly utilsService: UtilsService,
     @InjectRepository(ArticleBackground)
-    private readonly articleBackgroundsRepository: Repository<ArticleBackground>,
+    private readonly repo_articleBackgrounds: Repository<ArticleBackground>,
+    private readonly svc_images: ImagesService,
   ) {}
-  async saveImage(file: Express.Multer.File): Promise<ImageUploadResponseDto> {
-    return await this.imageUpload(file);
-  }
 
-  async imageUpload(
+  async createArticleBackground(
     file: Express.Multer.File,
   ): Promise<ImageUploadResponseDto> {
-    const imageName = this.utilsService.getUUID();
-    const ext = file.originalname.split('.').pop();
-
-    const imageUrl = await this.awsService.imageUploadToS3(
-      `${imageName}.${ext}`,
+    const { imageUrl } = await this.svc_images.imageUpload({
       file,
-      ext,
-      2000,
-    );
-    await this.articleBackgroundsRepository.save({ imageUrl });
+      resize: 2000,
+      ext: 'png',
+    });
+    await this.repo_articleBackgrounds.save({ imageUrl });
     return { imageUrl };
   }
 
-  async fetchAll(): Promise<ArticleBackground[]> {
-    return await this.articleBackgroundsRepository.find();
+  async findArticleBackgrounds(): Promise<ArticleBackgroundDto[]> {
+    return await this.repo_articleBackgrounds.find();
   }
 
-  async delete({ id }) {
-    // s3 서버에서 이미지 삭제하는 것까지 구현하기!!
-    return await this.articleBackgroundsRepository.delete({ id });
+  async deleteArticleBackground({ articleId }) {
+    const articleBackground = await this.repo_articleBackgrounds.findOne({
+      where: { id: articleId },
+    });
+    await this.repo_articleBackgrounds.remove(articleBackground);
+    await this.svc_images.deleteImage({ url: articleBackground.imageUrl });
   }
 }

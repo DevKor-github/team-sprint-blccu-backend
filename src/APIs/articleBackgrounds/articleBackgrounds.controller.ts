@@ -17,10 +17,11 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ImageUploadDto } from '../../modules/images/dtos/image-upload-request.dto';
-import { ImageUploadResponseDto } from 'src/common/dtos/image-upload-response.dto';
 import { ArticleBackground } from './entities/articleBackground.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageUploadRequestDto } from 'src/modules/images/dtos/image-upload-request.dto';
+import { ImageUploadResponseDto } from 'src/modules/images/dtos/image-upload-response.dto';
+import { ArticleBackgroundDto } from './dtos/common/articleBackground.dto';
 
 @Controller('')
 export class ArticleBackgroundsController {
@@ -33,7 +34,7 @@ export class ArticleBackgroundsController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: '업로드 할 파일',
-    type: ImageUploadDto,
+    type: ImageUploadRequestDto,
   })
   @ApiCreatedResponse({
     description: '이미지 서버에 파일 업로드 완료',
@@ -42,10 +43,11 @@ export class ArticleBackgroundsController {
   @Post('users/admin/article/background')
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
-  async uploadImage(
+  async createArticleBackground(
     @UploadedFile() file: Express.Multer.File,
   ): Promise<ImageUploadResponseDto> {
-    const url = await this.articleBackgroundsService.imageUpload(file);
+    const url =
+      await this.articleBackgroundsService.createArticleBackground(file);
     return url;
   }
 
@@ -56,14 +58,16 @@ export class ArticleBackgroundsController {
     type: [ArticleBackground],
   })
   @Get('article/backgrounds')
-  async fetchAll(): Promise<ArticleBackground[]> {
-    return await this.articleBackgroundsService.fetchAll();
+  async getArticleBackgrounds(): Promise<ArticleBackgroundDto[]> {
+    return await this.articleBackgroundsService.findArticleBackgrounds();
   }
 
   @ApiTags('어드민 API')
   @ApiOperation({ summary: '내지 삭제하기' })
-  @Delete('users/admin/article/background/:id')
-  async delete(@Param('id') id: string) {
-    return await this.articleBackgroundsService.delete({ id });
+  @Delete('users/admin/article/background/:articleId')
+  async delete(@Param('articleId') articleId: string) {
+    return await this.articleBackgroundsService.deleteArticleBackground({
+      articleId,
+    });
   }
 }
