@@ -25,7 +25,7 @@ export class ArticleCategory extends CommonEntity {
   @IsString()
   name: string;
 
-  @ApiProperty({ type: User, description: '연결된 유저' })
+  @ApiProperty({ type: () => User, description: '연결된 유저' })
   @JoinColumn()
   @ManyToOne(() => User, { onUpdate: 'NO ACTION', onDelete: 'CASCADE' })
   user: User;

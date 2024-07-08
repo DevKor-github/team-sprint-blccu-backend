@@ -15,11 +15,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { BulkMapCategoryDto } from './dtos/map-category.dto';
 import { StickerCategory } from './entities/stickerCategory.entity';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
-import { CreateStickerCategoryInput } from './dtos/create-sticker-category.dto';
 import { StickerCategoryMapper } from './entities/stickerCategoryMapper.entity';
+import { StickerCategoryCreateRequestDto } from './dtos/request/stickerCategory-create-request.dto';
+import { StickerCategoriesMapDto } from './dtos/request/stickerCategories-map-request.dto';
 
 @ApiTags('스티커 API')
 @Controller()
@@ -63,7 +63,7 @@ export class StickerCategoriesController {
   @Post('users/admin/stickers/categories')
   async createCategory(
     @Req() req: Request,
-    @Body() body: CreateStickerCategoryInput,
+    @Body() body: StickerCategoryCreateRequestDto,
   ): Promise<StickerCategory> {
     const userId = req.user.userId;
     return await this.stickerCategoriesService.createCategory({
@@ -83,7 +83,7 @@ export class StickerCategoriesController {
   @Post('users/admin/stickers/map')
   async mapCategory(
     @Req() req: Request,
-    @Body() mapCategoryDto: BulkMapCategoryDto,
+    @Body() mapCategoryDto: StickerCategoriesMapDto,
   ): Promise<StickerCategoryMapper[]> {
     const userId = req.user.userId;
     return await this.stickerCategoriesService.mapCategory({

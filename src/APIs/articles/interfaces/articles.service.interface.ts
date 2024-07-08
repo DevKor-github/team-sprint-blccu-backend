@@ -1,3 +1,4 @@
+import { ArticleCreateDraftRequestDto } from '../dtos/request/article-create-draft-request.dto';
 import { ArticleCreateRequestDto } from '../dtos/request/article-create-request.dto';
 import { ArticlePatchRequestDto } from '../dtos/request/article-patch-request.dto';
 import { ArticlesGetRequestDto } from '../dtos/request/articles-get-request.dto';
@@ -14,6 +15,11 @@ export interface IArticlesServiceArticleUserIdPair {
 }
 
 export interface IArticlesServiceCreate extends ArticleCreateRequestDto {
+  userId: number;
+  isPublished: boolean;
+}
+export interface IArticlesServiceCreateDraft
+  extends ArticleCreateDraftRequestDto {
   userId: number;
   isPublished: boolean;
 }

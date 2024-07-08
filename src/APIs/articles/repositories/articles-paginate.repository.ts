@@ -10,10 +10,12 @@ import {
   IArticlesRepoGetCursorQuery,
 } from '../interfaces/articles.repository.interface';
 import { Follow } from 'src/APIs/follows/entities/follow.entity';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class ArticlesPaginateRepository extends Repository<Article> {
-  constructor(private dataSource: DataSource) {
-    super(Article, dataSource.createEntityManager());
+  constructor(private db_dataSource: DataSource) {
+    super(Article, db_dataSource.createEntityManager());
   }
   getCursorQuery({ order, sort, take, cursor }: IArticlesRepoGetCursorQuery) {
     const _order = ArticleOrderOption[order];
@@ -77,7 +79,7 @@ export class ArticlesPaginateRepository extends Repository<Article> {
     const { order, cursor, take, sort } = cursorOption;
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
 
-    const mutualFollows = await this.dataSource
+    const mutualFollows = await this.db_dataSource
       .createQueryBuilder(Follow, 'f1')
       .select('f1.from_user_id', 'user1')
       .addSelect('f1.to_user_id', 'user2')

@@ -64,13 +64,13 @@ export class ArticlesCreateController {
   })
   @UseGuards(AuthGuardV2)
   @HttpCode(201)
-  async updateArticle(
+  async createDraft(
     @Req() req: Request,
     @Body() body: ArticleCreateDraftRequestDto,
   ) {
     const userId = req.user.userId;
     const dto = { ...body, userId, isPublished: false };
-    return await this.svc_articlesCreate.save(dto);
+    return await this.svc_articlesCreate.createDraft(dto);
   }
 
   @ApiOperation({

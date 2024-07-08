@@ -20,7 +20,7 @@ export class Notification extends CommonEntity {
   @IsNumber()
   id: number;
 
-  @ApiProperty({ description: '알림을 생성한 유저 정보', type: User })
+  @ApiProperty({ description: '알림을 생성한 유저 정보', type: () => User })
   @JoinColumn()
   @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
   user: User;
@@ -31,7 +31,7 @@ export class Notification extends CommonEntity {
   @IsNumber()
   userId: number;
 
-  @ApiProperty({ description: '알림을 받는 유저 정보', type: User })
+  @ApiProperty({ description: '알림을 받는 유저 정보', type: () => User })
   @JoinColumn()
   @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
   targetUser: User;
@@ -62,7 +62,7 @@ export class Notification extends CommonEntity {
   articleId: number;
 
   @ApiProperty({
-    type: Article,
+    type: () => Article,
     description: '알림이 발생한 게시물',
     nullable: true,
   })

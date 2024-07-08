@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ArticlesValidateService } from './articles-validate.service';
-import { ArticlesPaginateRepository } from '../repositories/articles-paginate.repository.ts';
+import { ArticlesPaginateRepository } from '../repositories/articles-paginate.repository';
 import { ArticleOrderOption } from 'src/common/enums/article-order-option';
 import { CustomCursorPageMetaDto } from 'src/utils/cursor-pages/dtos/cursor-page-meta.dto';
 import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';

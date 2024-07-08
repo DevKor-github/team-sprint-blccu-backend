@@ -33,7 +33,7 @@ export class Report extends CommonEntity {
   @IsNumber()
   userId: number;
 
-  @ApiProperty({ description: '신고를 한 유저', type: User })
+  @ApiProperty({ description: '신고를 한 유저', type: () => User })
   @JoinColumn()
   @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
   user: User;
@@ -44,7 +44,7 @@ export class Report extends CommonEntity {
   @IsNumber()
   targetUserId: number;
 
-  @ApiProperty({ description: '신고를 당한 유저', type: User })
+  @ApiProperty({ description: '신고를 당한 유저', type: () => User })
   @JoinColumn()
   @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
   targetUser: User;
@@ -66,7 +66,11 @@ export class Report extends CommonEntity {
   @IsNumber()
   articleId: number;
 
-  @ApiProperty({ type: Article, description: '신고된 게시물', nullable: true })
+  @ApiProperty({
+    type: () => Article,
+    description: '신고된 게시물',
+    nullable: true,
+  })
   @JoinColumn()
   @ManyToOne(() => Article, {
     nullable: true,
@@ -81,7 +85,11 @@ export class Report extends CommonEntity {
   @IsNumber()
   commentId: number;
 
-  @ApiProperty({ type: Comment, description: '신고된 댓글', nullable: true })
+  @ApiProperty({
+    type: () => Comment,
+    description: '신고된 댓글',
+    nullable: true,
+  })
   @JoinColumn()
   @ManyToOne(() => Comment, {
     nullable: true,

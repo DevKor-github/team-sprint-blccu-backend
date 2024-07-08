@@ -3,6 +3,9 @@ import { Follow } from './entities/follow.entity';
 import { Injectable } from '@nestjs/common';
 import { IFollowsRepositoryFindList } from './interfaces/follows.repository.interface';
 import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
+import { UserDto } from '../users/dtos/common/user.dto';
+import { convertToCamelCase, getClassFields } from 'src/utils/classUtils';
+import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class FollowsRepository extends Repository<Follow> {
@@ -29,37 +32,21 @@ export class FollowsRepository extends Repository<Follow> {
         'follow2.toUserKakaoId = user.kakaoId',
       )
       .select([
-        'user.username AS username',
-        'user.kakaoId AS kakaoId',
-        'user.handle AS handle',
-        'user.follower_count AS follower_count',
-        'user.following_count AS following_count',
-        'user.isAdmin AS isAdmin',
-        'user.username AS username',
-        'user.description AS description',
-        'user.profile_image AS profile_image',
-        'user.background_image AS background_image',
-        'user.date_created AS date_created',
-        'user.date_deleted AS date_deleted',
-        'CASE WHEN follow2.toUserKakaoId IS NOT NULL THEN true ELSE false END AS isFollowing',
+        ...getClassFields(UserDto).map(
+          (column) => `user.${column} AS ${column}`,
+        ),
+        'CASE WHEN follow2.toUserKakaoId IS NOT NULL THEN true ELSE false END AS is_following',
       ])
       .setParameters({ userId, loggedUser })
       .getRawMany();
 
-    return followings.map((follower) => ({
-      username: follower.username,
-      kakaoId: follower.kakaoId,
-      handle: follower.handle,
-      follower_count: follower.follower_count,
-      following_count: follower.following_count,
-      isAdmin: follower.isAdmin === 1,
-      description: follower.description,
-      profile_image: follower.profile_image,
-      background_image: follower.background_image,
-      date_created: follower.date_created,
-      date_deleted: follower.date_deleted,
-      isFollowing: follower.isFollowing === 1, // MySQL에서는 boolean 값이 1 또는 0으로 반환될 수 있음
-    }));
+    return followings.map((follower) =>
+      plainToClass(UserFollowingResponseDto, {
+        ...convertToCamelCase(follower),
+        isAdmin: follower.is_admin === 1,
+        isFollowing: follower.is_following === 1,
+      }),
+    );
   }
 
   async getFollowings({
@@ -81,36 +68,20 @@ export class FollowsRepository extends Repository<Follow> {
         'follow2.toUserKakaoId = user.kakaoId',
       )
       .select([
-        'user.username AS username',
-        'user.kakaoId AS kakaoId',
-        'user.handle AS handle',
-        'user.follower_count AS follower_count',
-        'user.following_count AS following_count',
-        'user.isAdmin AS isAdmin',
-        'user.username AS username',
-        'user.description AS description',
-        'user.profile_image AS profile_image',
-        'user.background_image AS background_image',
-        'user.date_created AS date_created',
-        'user.date_deleted AS date_deleted',
+        ...getClassFields(UserDto).map(
+          (column) => `user.${column} AS ${column}`,
+        ),
         'CASE WHEN follow2.toUserKakaoId IS NOT NULL THEN true ELSE false END AS isFollowing',
       ])
       .setParameters({ userId, loggedUser })
       .getRawMany();
 
-    return followings.map((follower) => ({
-      username: follower.username,
-      kakaoId: follower.kakaoId,
-      handle: follower.handle,
-      follower_count: follower.follower_count,
-      following_count: follower.following_count,
-      isAdmin: follower.isAdmin === 1,
-      description: follower.description,
-      profile_image: follower.profile_image,
-      background_image: follower.background_image,
-      date_created: follower.date_created,
-      date_deleted: follower.date_deleted,
-      isFollowing: follower.isFollowing === 1, // MySQL에서는 boolean 값이 1 또는 0으로 반환될 수 있음
-    }));
+    return followings.map((follower) =>
+      plainToClass(UserFollowingResponseDto, {
+        ...convertToCamelCase(follower),
+        isAdmin: follower.is_admin === 1,
+        isFollowing: follower.is_following === 1,
+      }),
+    );
   }
 }

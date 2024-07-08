@@ -1,6 +1,6 @@
 import { OmitType } from '@nestjs/swagger';
-import { User } from '../../entities/user.entity';
 import { getClassFields } from 'src/utils/classUtils';
+import { User } from '../../entities/user.entity';
 
 // exclude refreshtoken!!
 export class UserDto extends OmitType(User, [

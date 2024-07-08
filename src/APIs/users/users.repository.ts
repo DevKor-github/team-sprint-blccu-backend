@@ -30,7 +30,7 @@ export class UsersRepository extends Repository<User> {
         ...getClassFields(UserDto).map(
           (column) => `user.${column} AS ${column}`,
         ),
-        'CASE WHEN follow.to_user_id IS NOT NULL THEN true ELSE false END AS isFollowing',
+        'CASE WHEN follow.to_user_id IS NOT NULL THEN true ELSE false END AS is_following',
       ])
       .setParameters({ userId });
 
@@ -55,7 +55,7 @@ export class UsersRepository extends Repository<User> {
       plainToClass(UserFollowingResponseDto, {
         ...convertToCamelCase(user),
         isAdmin: user.is_admin === 1,
-        isFollowing: user.isFollowing === 1,
+        isFollowing: user.is_following === 1,
       }),
     );
   }

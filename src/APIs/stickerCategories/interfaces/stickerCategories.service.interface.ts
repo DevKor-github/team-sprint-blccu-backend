@@ -1,8 +1,8 @@
-import { MapCategoryDto } from '../dtos/map-category.dto';
+import { StickerCategoryMapperDto } from '../dtos/common/stickerCategoryMapper.dto';
 
 export interface IStickerCategoriesServiceMapCategory {
   userId: number;
-  maps: MapCategoryDto[];
+  maps: StickerCategoryMapperDto[];
 }
 
 export interface IStickerCategoriesServiceId {

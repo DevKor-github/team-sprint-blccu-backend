@@ -11,6 +11,7 @@ import { UsersCreateController } from './controllers/users-create.controller';
 import { UsersReadController } from './controllers/users-read.controller';
 import { UsersUpdateController } from './controllers/users-update.controller';
 import { UsersDeleteController } from './controllers/users-delete.controller';
+import { UsersValidateService } from './services/users-validate-service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), ImagesModule],
@@ -19,6 +20,7 @@ import { UsersDeleteController } from './controllers/users-delete.controller';
     UsersReadService,
     UsersUpdateService,
     UsersDeleteService,
+    UsersValidateService,
     UsersRepository,
   ],
   controllers: [
@@ -32,6 +34,7 @@ import { UsersDeleteController } from './controllers/users-delete.controller';
     UsersReadService,
     UsersUpdateService,
     UsersDeleteService,
+    UsersValidateService,
   ],
 })
 export class UsersModule {}

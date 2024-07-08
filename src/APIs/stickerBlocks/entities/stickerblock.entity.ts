@@ -25,7 +25,7 @@ export class StickerBlock extends CommonEntity {
   @IsNumber()
   stickerId: number;
 
-  @ApiProperty({ description: '참조하는 스티커', type: Sticker })
+  @ApiProperty({ description: '참조하는 스티커', type: () => Sticker })
   @JoinColumn()
   @ManyToOne(() => Sticker, (stickers) => stickers.id, {
     onDelete: 'CASCADE',
@@ -39,7 +39,7 @@ export class StickerBlock extends CommonEntity {
   @IsNumber()
   articleId: number;
 
-  @ApiProperty({ description: '참조하는 포스트', type: Article })
+  @ApiProperty({ description: '참조하는 포스트', type: () => Article })
   @JoinColumn()
   @ManyToOne(() => Article, (article) => article.id, {
     onDelete: 'CASCADE',

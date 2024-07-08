@@ -33,7 +33,7 @@ export class Feedback extends CommonEntity {
   @IsNumber()
   userId: number;
 
-  @ApiProperty({ type: User, description: '사용자 정보' })
+  @ApiProperty({ type: () => User, description: '사용자 정보' })
   @ManyToOne(() => User, (users) => users.id, {
     nullable: true,
     onUpdate: 'NO ACTION',

@@ -113,8 +113,8 @@ export class Article extends IndexedCommonEntity {
   @IsEnum(OpenScope)
   scope: OpenScope;
 
-  @ApiProperty({ description: '게시글 내용', type: String, default: '' })
-  @Column('longtext', { default: '' })
+  @ApiProperty({ description: '게시글 내용', type: String, nullable: true })
+  @Column('longtext', { nullable: true })
   @IsString()
   content: string;
 
@@ -137,7 +137,7 @@ export class Article extends IndexedCommonEntity {
   @IsUrl()
   mainImageUrl: string;
 
-  @ApiProperty({ description: '연결된 카테고리', type: ArticleCategory })
+  @ApiProperty({ description: '연결된 카테고리', type: () => ArticleCategory })
   @ManyToOne(() => ArticleCategory, {
     nullable: true,
     onUpdate: 'CASCADE',
@@ -146,7 +146,7 @@ export class Article extends IndexedCommonEntity {
   @JoinColumn()
   articleCategory: ArticleCategory;
 
-  @ApiProperty({ description: '연결된 내지', type: ArticleBackground })
+  @ApiProperty({ description: '연결된 내지', type: () => ArticleBackground })
   @JoinColumn()
   @ManyToOne(() => ArticleBackground, {
     nullable: true,
@@ -155,7 +155,7 @@ export class Article extends IndexedCommonEntity {
   })
   articleBackground: ArticleBackground;
 
-  @ApiProperty({ description: '작성자', type: User })
+  @ApiProperty({ description: '작성자', type: () => User })
   @JoinColumn()
   @ManyToOne(() => User, {
     nullable: false,

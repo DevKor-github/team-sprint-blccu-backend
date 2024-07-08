@@ -96,7 +96,7 @@ export class ArticleCategoriesController {
   @ApiCookieAuth()
   @ApiOkResponse({ type: ArticleCategoryDto })
   @UseGuards(AuthGuardV2)
-  @Patch('me/categories/:categoryId')
+  @Patch('me/categories/:articleCategoryId')
   async patchArticleCategory(
     @Req() req: Request,
     @Param('articleCategoryId') articleCategoryId: string,

@@ -27,7 +27,7 @@ export class Comment extends IndexedCommonEntity {
   @IsNumber()
   userId: number;
 
-  @ApiProperty({ type: User, description: '사용자 정보' })
+  @ApiProperty({ type: () => User, description: '사용자 정보' })
   @ManyToOne(() => User, (users) => users.id, { nullable: false })
   @JoinColumn()
   user: User;
@@ -38,7 +38,7 @@ export class Comment extends IndexedCommonEntity {
   @IsNumber()
   articleId: number;
 
-  @ApiProperty({ type: Article, description: '게시글 정보' })
+  @ApiProperty({ type: () => Article, description: '게시글 정보' })
   @ManyToOne(() => Article, (article) => article.id, {
     nullable: false,
     onUpdate: 'NO ACTION',
@@ -57,7 +57,7 @@ export class Comment extends IndexedCommonEntity {
   @IsNumber()
   reportCount: number;
 
-  @ApiProperty({ type: Comment, description: '루트 댓글 정보' })
+  @ApiProperty({ type: () => Comment, description: '루트 댓글 정보' })
   @ManyToOne(() => Comment, (comment) => comment.children, {
     nullable: true,
     onUpdate: 'NO ACTION',
@@ -71,7 +71,7 @@ export class Comment extends IndexedCommonEntity {
   @RelationId((comment: Comment) => comment.parent)
   parentId: number;
 
-  @ApiProperty({ type: [Comment], description: '자식 댓글 정보' })
+  @ApiProperty({ type: () => [Comment], description: '자식 댓글 정보' })
   @OneToMany(() => Comment, (comment) => comment.parent)
   children: Comment[];
 

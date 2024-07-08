@@ -19,6 +19,7 @@ export class Agreement extends CommonEntity {
   @IsNumber()
   id: number;
 
+  @ApiProperty({ type: () => User, description: '약관 동의를 한 유저' })
   @JoinColumn()
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,

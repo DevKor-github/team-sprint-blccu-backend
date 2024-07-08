@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { IArticlesServiceCreate } from '../interfaces/articles.service.interface';
+import {
+  IArticlesServiceCreate,
+  IArticlesServiceCreateDraft,
+} from '../interfaces/articles.service.interface';
 import { DataSource } from 'typeorm';
 import { Article } from '../entities/article.entity';
 import { StickerBlocksService } from 'src/APIs/stickerBlocks/stickerBlocks.service';
@@ -52,6 +55,50 @@ export class ArticlesCreateService {
         {
           articleId: articleData.id,
           stickerBlocks: createArticleDto.stickerBlocks,
+        },
+      );
+      return { articleData, stickerBlockData };
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async createDraft(
+    dto_createDraft: IArticlesServiceCreateDraft,
+  ): Promise<ArticleCreateResponseDto> {
+    const queryRunner = this.db_dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    const article = {};
+    try {
+      Object.keys(dto_createDraft).map((el) => {
+        const value = dto_createDraft[el];
+        if (dto_createDraft[el] != null) {
+          article[el] = value;
+        }
+      });
+      await this.svc_articlesValidate.fkValidCheck({
+        articles: article,
+        passNonEssentail: !dto_createDraft.isPublished,
+      });
+      const queryResult = await queryRunner.manager
+        .createQueryBuilder()
+        .insert()
+        .into(Article, Object.keys(article))
+        .values(article)
+        .execute();
+      await queryRunner.commitTransaction();
+      const articleData = await this.repo_articlesRead.findOne({
+        where: { id: queryResult.identifiers[0].id },
+      });
+      const stickerBlockData = await this.svc_stickerBlocks.createStickerBlocks(
+        {
+          articleId: articleData.id,
+          stickerBlocks: dto_createDraft.stickerBlocks,
         },
       );
       return { articleData, stickerBlockData };

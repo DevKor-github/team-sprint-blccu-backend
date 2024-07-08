@@ -4,6 +4,9 @@ import { Injectable } from '@nestjs/common';
 import { ILikesRepositoryIds } from './interfaces/likes.repository.interface';
 import { Like } from './entities/like.entity';
 import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
+import { convertToCamelCase, getClassFields } from 'src/utils/classUtils';
+import { UserDto } from '../users/dtos/common/user.dto';
+import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class LikesRepository extends Repository<Like> {
@@ -31,35 +34,20 @@ export class LikesRepository extends Repository<Like> {
       .andWhere('posts.date_deleted IS NULL')
       .andWhere('likes.postsId = :id')
       .select([
-        'user.username AS username',
-        'user.kakaoId AS kakaoId',
-        'user.handle AS handle',
-        'user.follower_count AS follower_count',
-        'user.following_count AS following_count',
-        'user.isAdmin AS isAdmin',
-        'user.description AS description',
-        'user.profile_image AS profile_image',
-        'user.background_image AS background_image',
-        'user.date_created AS date_created',
-        'user.date_deleted AS date_deleted',
-        'CASE WHEN follow.toUserKakaoId IS NOT NULL THEN true ELSE false END AS isFollowing',
+        ...getClassFields(UserDto).map(
+          (column) => `user.${column} AS ${column}`,
+        ),
+        'CASE WHEN follow.toUserKakaoId IS NOT NULL THEN true ELSE false END AS is_following',
       ])
       .setParameters({ articleId, userId })
       .getRawMany();
 
-    return users.map((user) => ({
-      username: user.username,
-      kakaoId: user.kakaoId,
-      handle: user.handle,
-      follower_count: user.follower_count,
-      following_count: user.following_count,
-      isAdmin: user.isAdmin === 1,
-      description: user.description,
-      profile_image: user.profile_image,
-      background_image: user.background_image,
-      date_created: user.date_created,
-      date_deleted: user.date_deleted,
-      isFollowing: user.isFollowing === 1,
-    }));
+    return users.map((user) =>
+      plainToClass(UserFollowingResponseDto, {
+        ...convertToCamelCase(user),
+        isAdmin: user.is_admin === 1,
+        isFollowing: user.is_following === 1,
+      }),
+    );
   }
 }
