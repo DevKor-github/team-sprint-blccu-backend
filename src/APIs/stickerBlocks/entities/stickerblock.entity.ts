@@ -26,7 +26,7 @@ export class StickerBlock extends CommonEntity {
   stickerId: number;
 
   @ApiProperty({ description: '참조하는 스티커', type: () => Sticker })
-  @JoinColumn()
+  @JoinColumn({ name: 'sticker_id' })
   @ManyToOne(() => Sticker, (stickers) => stickers.id, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
@@ -40,7 +40,7 @@ export class StickerBlock extends CommonEntity {
   articleId: number;
 
   @ApiProperty({ description: '참조하는 포스트', type: () => Article })
-  @JoinColumn()
+  @JoinColumn({ name: 'article_id' })
   @ManyToOne(() => Article, (article) => article.id, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
@@ -48,11 +48,11 @@ export class StickerBlock extends CommonEntity {
   article: Article;
 
   @ApiProperty({ description: '스티커의 posX', type: Number })
-  @Column({ type: 'float' })
+  @Column({ type: 'float', name: 'pox_x' })
   posX: number;
 
   @ApiProperty({ description: '스티커의 posY', type: Number })
-  @Column({ type: 'float' })
+  @Column({ type: 'float', name: 'pos_y' })
   posY: number;
 
   @ApiProperty({ description: '스티커의 scale', type: Number })
@@ -64,10 +64,10 @@ export class StickerBlock extends CommonEntity {
   angle: number;
 
   @ApiProperty({ description: '스티커의 zindex', type: Number })
-  @Column({ type: 'float' })
+  @Column({ type: 'float', name: 'z_index' })
   zindex: number;
 
   @ApiProperty({ description: '스티커의 clientId', type: String })
-  @Column()
+  @Column({ name: 'client_id' })
   clientId: string;
 }

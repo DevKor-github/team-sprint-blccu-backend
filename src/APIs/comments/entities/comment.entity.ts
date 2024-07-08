@@ -29,7 +29,7 @@ export class Comment extends IndexedCommonEntity {
 
   @ApiProperty({ type: () => User, description: '사용자 정보' })
   @ManyToOne(() => User, (users) => users.id, { nullable: false })
-  @JoinColumn()
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @ApiProperty({ type: Number, description: '게시글 id' })
@@ -44,7 +44,7 @@ export class Comment extends IndexedCommonEntity {
     onUpdate: 'NO ACTION',
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'article_id' })
   article: Article;
 
   @ApiProperty({ type: String, description: '내용 정보', maxLength: 1500 })
@@ -63,7 +63,7 @@ export class Comment extends IndexedCommonEntity {
     onUpdate: 'NO ACTION',
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'parent_id' })
   parent: Comment;
 
   @ApiProperty({ type: Number, description: '루트 댓글 아이디' })

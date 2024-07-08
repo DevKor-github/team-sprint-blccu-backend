@@ -10,7 +10,7 @@ export class ArticleBackground extends CommonEntity {
   id: number;
 
   @ApiProperty({ type: String, description: '이미지가 저장된 url' })
-  @Column({ nullable: false })
+  @Column({ nullable: false, name: 'image_url' })
   imageUrl: string;
 
   @ApiProperty({

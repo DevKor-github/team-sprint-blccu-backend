@@ -20,7 +20,7 @@ export class Like extends CommonEntity {
   id: number;
 
   @ApiProperty({ description: '좋아요를 누른 유저', type: () => User })
-  @JoinColumn()
+  @JoinColumn({ name: 'user_id' })
   @ManyToOne(() => User, { onUpdate: 'NO ACTION', onDelete: 'CASCADE' })
   user: User;
 
@@ -34,7 +34,7 @@ export class Like extends CommonEntity {
     description: '좋아요를 누른 게시글',
     type: () => Article,
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'article_id' })
   @ManyToOne(() => Article, {
     nullable: false,
     onUpdate: 'NO ACTION',

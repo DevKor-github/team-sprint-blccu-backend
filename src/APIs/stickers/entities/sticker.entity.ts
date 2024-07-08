@@ -27,7 +27,7 @@ export class Sticker extends CommonEntity {
   userId: number;
 
   @ApiProperty({ description: '제작한 유저', type: () => User })
-  @JoinColumn()
+  @JoinColumn({ name: 'user_id' })
   @ManyToOne(() => User, {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',

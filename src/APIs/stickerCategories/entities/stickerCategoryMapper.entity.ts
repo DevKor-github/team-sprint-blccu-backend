@@ -22,7 +22,7 @@ export class StickerCategoryMapper extends CommonEntity {
   @IsNumber()
   stickerId: number;
 
-  @JoinColumn()
+  @JoinColumn({ name: 'sticker_id' })
   @ManyToOne(() => Sticker, (stickers) => stickers.id, {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
@@ -38,7 +38,7 @@ export class StickerCategoryMapper extends CommonEntity {
   @IsNumber()
   stickerCategoryId: number;
 
-  @JoinColumn()
+  @JoinColumn({ name: 'sticker_category_id' })
   @ManyToOne(
     () => StickerCategory,
     (stickerCategories) => stickerCategories.id,

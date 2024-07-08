@@ -19,7 +19,7 @@ export class Follow extends CommonEntity {
   id: number;
 
   @ApiProperty({ type: () => User, description: '이웃 추가를 받은 유저' })
-  @JoinColumn()
+  @JoinColumn({ name: 'to_user_id' })
   @ManyToOne(() => User, (users) => users.id, {
     nullable: false,
     onUpdate: 'NO ACTION',
@@ -28,7 +28,7 @@ export class Follow extends CommonEntity {
   toUser: User;
 
   @ApiProperty({ type: () => User, description: '이웃 추가를 한 유저' })
-  @JoinColumn()
+  @JoinColumn({ name: 'from_user_id' })
   @ManyToOne(() => User, (users) => users.id, {
     nullable: false,
     onUpdate: 'NO ACTION',

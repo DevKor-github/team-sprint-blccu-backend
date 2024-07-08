@@ -9,7 +9,10 @@ import {
 export abstract class IndexedCommonEntity {
   @Index()
   @ApiProperty({ type: Date, description: '생성된 날짜' })
-  @CreateDateColumn({ default: () => 'CURRENT_TIMESTAMP(6)' })
+  @CreateDateColumn({
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    name: 'date_created',
+  })
   dateCreated: Date;
 
   @ApiProperty({ type: Date, description: '수정된 날짜' })

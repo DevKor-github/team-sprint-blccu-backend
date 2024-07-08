@@ -143,11 +143,11 @@ export class Article extends IndexedCommonEntity {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'article_category_id' })
   articleCategory: ArticleCategory;
 
   @ApiProperty({ description: '연결된 내지', type: () => ArticleBackground })
-  @JoinColumn()
+  @JoinColumn({ name: 'article_background_id' })
   @ManyToOne(() => ArticleBackground, {
     nullable: true,
     onUpdate: 'SET NULL',
@@ -156,7 +156,7 @@ export class Article extends IndexedCommonEntity {
   articleBackground: ArticleBackground;
 
   @ApiProperty({ description: '작성자', type: () => User })
-  @JoinColumn()
+  @JoinColumn({ name: 'user_id' })
   @ManyToOne(() => User, {
     nullable: false,
     onUpdate: 'CASCADE',

@@ -39,7 +39,7 @@ export class Feedback extends CommonEntity {
     onUpdate: 'NO ACTION',
     onDelete: 'SET NULL',
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @ApiProperty({ description: '피드백 종류', type: 'enum', enum: FeedbackType })
