@@ -1,6 +1,5 @@
 import { PickType } from '@nestjs/swagger';
 import { User } from '../../entities/user.entity';
-import { getClassFields } from 'src/utils/classUtils';
 
 export class UserPrimaryResponseDto extends PickType(User, [
   'id',
@@ -9,11 +8,16 @@ export class UserPrimaryResponseDto extends PickType(User, [
   'handle',
 ]) {}
 
-export const USER_PRIMARY_SELECT_OPTION: { [key: string]: boolean } =
-  getClassFields(UserPrimaryResponseDto).reduce(
-    (options, field) => {
-      options[field] = true;
-      return options;
-    },
-    {} as { [key: string]: boolean },
-  );
+export const USER_PRIMARY_SELECT_OPTION: { [key: string]: boolean } = {
+  id: true,
+  username: true,
+  profileImage: true,
+  handle: true,
+};
+// getEntityFields(User).reduce(
+//   (options, field) => {
+//     options[field] = true;
+//     return options;
+//   },
+//   {} as { [key: string]: boolean },
+// );

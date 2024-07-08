@@ -3,8 +3,7 @@ import { Follow } from './entities/follow.entity';
 import { Injectable } from '@nestjs/common';
 import { IFollowsRepositoryFindList } from './interfaces/follows.repository.interface';
 import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
-import { UserDto } from '../users/dtos/common/user.dto';
-import { convertToCamelCase, getClassFields } from 'src/utils/classUtils';
+import { convertToCamelCase, getUserFields } from 'src/utils/classUtils';
 import { plainToClass } from 'class-transformer';
 
 @Injectable()
@@ -18,24 +17,22 @@ export class FollowsRepository extends Repository<Follow> {
     loggedUser,
   }: IFollowsRepositoryFindList): Promise<UserFollowingResponseDto[]> {
     const followings = await this.createQueryBuilder('follow')
-      .innerJoin('follow.from_user', 'user')
+      .innerJoin('follow.from_user_id', 'user')
       .where('user.date_deleted IS NULL')
-      .andWhere('follow.toUserKakaoId = :kakaoId')
+      .andWhere('follow.to_user_id = :userId')
       .leftJoinAndSelect(
         (subQuery) => {
           return subQuery
-            .select('follow2.toUserKakaoId', 'toUserKakaoId')
+            .select('follow2.to_user_id', 'to_user_id')
             .from(Follow, 'follow2')
-            .where('follow2.fromUserKakaoId = :loggedUser');
+            .where('follow2.from_user_id = :loggedUser');
         },
         'follow2',
-        'follow2.toUserKakaoId = user.kakaoId',
+        'follow2.to_user_id = user.id',
       )
       .select([
-        ...getClassFields(UserDto).map(
-          (column) => `user.${column} AS ${column}`,
-        ),
-        'CASE WHEN follow2.toUserKakaoId IS NOT NULL THEN true ELSE false END AS is_following',
+        ...getUserFields().map((column) => `user.${column} AS ${column}`),
+        'CASE WHEN follow2.to_user_id IS NOT NULL THEN true ELSE false END AS is_following',
       ])
       .setParameters({ userId, loggedUser })
       .getRawMany();
@@ -54,24 +51,22 @@ export class FollowsRepository extends Repository<Follow> {
     loggedUser,
   }: IFollowsRepositoryFindList): Promise<UserFollowingResponseDto[]> {
     const followings = await this.createQueryBuilder('follow')
-      .innerJoin('follow.to_user', 'user')
+      .innerJoin('follow.to_user_id', 'user')
       .where('user.date_deleted IS NULL')
-      .andWhere('follow.fromUserKakaoId = :kakaoId')
+      .andWhere('follow.from_user_id = :userId')
       .leftJoinAndSelect(
         (subQuery) => {
           return subQuery
-            .select('follow2.toUserKakaoId', 'toUserKakaoId')
+            .select('follow2.to_user_id', 'to_user_id')
             .from(Follow, 'follow2')
-            .where('follow2.fromUserKakaoId = :loggedUser');
+            .where('follow2.from_user_id = :loggedUser');
         },
         'follow2',
-        'follow2.toUserKakaoId = user.kakaoId',
+        'follow2.to_user_id = user.id',
       )
       .select([
-        ...getClassFields(UserDto).map(
-          (column) => `user.${column} AS ${column}`,
-        ),
-        'CASE WHEN follow2.toUserKakaoId IS NOT NULL THEN true ELSE false END AS isFollowing',
+        ...getUserFields().map((column) => `user.${column} AS ${column}`),
+        'CASE WHEN follow2.to_user_id IS NOT NULL THEN true ELSE false END AS is_following',
       ])
       .setParameters({ userId, loggedUser })
       .getRawMany();

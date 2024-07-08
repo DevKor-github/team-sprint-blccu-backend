@@ -4,8 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { ILikesRepositoryIds } from './interfaces/likes.repository.interface';
 import { Like } from './entities/like.entity';
 import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
-import { convertToCamelCase, getClassFields } from 'src/utils/classUtils';
-import { UserDto } from '../users/dtos/common/user.dto';
+import { convertToCamelCase, getUserFields } from 'src/utils/classUtils';
 import { plainToClass } from 'class-transformer';
 
 @Injectable()
@@ -34,9 +33,7 @@ export class LikesRepository extends Repository<Like> {
       .andWhere('posts.date_deleted IS NULL')
       .andWhere('likes.postsId = :id')
       .select([
-        ...getClassFields(UserDto).map(
-          (column) => `user.${column} AS ${column}`,
-        ),
+        ...getUserFields().map((column) => `user.${column} AS ${column}`),
         'CASE WHEN follow.toUserKakaoId IS NOT NULL THEN true ELSE false END AS is_following',
       ])
       .setParameters({ articleId, userId })

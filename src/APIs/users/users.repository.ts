@@ -3,8 +3,7 @@ import { User } from './entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Follow } from '../follows/entities/follow.entity';
 import { plainToClass } from 'class-transformer';
-import { convertToCamelCase, getClassFields } from 'src/utils/classUtils';
-import { UserDto } from './dtos/common/user.dto';
+import { convertToCamelCase, getUserFields } from 'src/utils/classUtils';
 import { UserFollowingResponseDto } from './dtos/response/user-following-response.dto';
 
 @Injectable()
@@ -18,7 +17,7 @@ export class UsersRepository extends Repository<User> {
       .leftJoinAndSelect(
         (subQuery) => {
           return subQuery
-            .select('follow.to_user', 'to_user_id')
+            .select('follow.to_user_id', 'to_user_id')
             .from(Follow, 'follow')
             .where('follow.from_user_id = :userId', { userId });
         },
@@ -27,13 +26,13 @@ export class UsersRepository extends Repository<User> {
       )
       .where('user.date_deleted IS NULL')
       .select([
-        ...getClassFields(UserDto).map(
-          (column) => `user.${column} AS ${column}`,
-        ),
+        ...getUserFields().map((column) => {
+          console.log(column);
+          return `user.${column} AS ${column}`;
+        }),
         'CASE WHEN follow.to_user_id IS NOT NULL THEN true ELSE false END AS is_following',
       ])
       .setParameters({ userId });
-
     return queryBuilder;
   }
   // 팔로잉 유무 포함 조회
@@ -51,6 +50,7 @@ export class UsersRepository extends Repository<User> {
       })
       .getRawMany();
 
+    console.log(users);
     return users.map((user) =>
       plainToClass(UserFollowingResponseDto, {
         ...convertToCamelCase(user),
