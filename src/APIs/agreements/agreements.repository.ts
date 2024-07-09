@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AgreementsRepository extends Repository<Agreement> {
-  constructor(private dataSource: DataSource) {
-    super(Agreement, dataSource.createEntityManager());
+  constructor(private db_dataSource: DataSource) {
+    super(Agreement, db_dataSource.createEntityManager());
   }
 }

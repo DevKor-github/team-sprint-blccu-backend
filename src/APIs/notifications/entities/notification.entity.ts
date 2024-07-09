@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Posts } from 'src/APIs/posts/entities/posts.entity';
+import { IsBoolean, IsEnum, IsNumber } from 'class-validator';
+import { Article } from 'src/APIs/articles/entities/article.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import { NotType } from 'src/common/enums/not-type.enum';
 import {
   Column,
-  CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -14,65 +14,63 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Notification {
+export class Notification extends CommonEntity {
   @ApiProperty({ description: 'PK: A_I_', type: Number })
   @PrimaryGeneratedColumn()
+  @IsNumber()
   id: number;
 
-  @ApiProperty({ description: '알림을 생성한 유저 정보', type: User })
-  @JoinColumn()
-  @ManyToOne(() => User)
+  @ApiProperty({ description: '알림을 생성한 유저 정보', type: () => User })
+  @JoinColumn({ name: 'user_id' })
+  @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
   user: User;
 
   @ApiProperty({ description: '알림을 생성한 유저 FK', type: Number })
-  @Column()
+  @Column({ name: 'user_id' })
   @RelationId((notification: Notification) => notification.user)
-  userKakaoId: number;
+  @IsNumber()
+  userId: number;
 
-  @ApiProperty({ description: '알림을 받는 유저 정보', type: User })
-  @JoinColumn()
-  @ManyToOne(() => User)
+  @ApiProperty({ description: '알림을 받는 유저 정보', type: () => User })
+  @JoinColumn({ name: 'target_user_id' })
+  @ManyToOne(() => User, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
   targetUser: User;
 
   @ApiProperty({ description: '알림을 받는 유저 FK', type: Number })
-  @Column()
+  @Column({ name: 'target_user_id' })
   @RelationId((notification: Notification) => notification.targetUser)
-  targetUserKakaoId: number;
+  @IsNumber()
+  targetUserId: number;
 
   @ApiProperty({ description: '알림의 유형', type: 'enum', enum: NotType })
   @Column()
+  @IsEnum(NotType)
   type: NotType;
 
   @ApiProperty({ description: '알림 체크 여부', type: Boolean, default: false })
-  @Column({ default: false })
-  is_checked: boolean;
-
-  @ApiProperty({ description: '생성된 날짜', type: Date })
-  @CreateDateColumn()
-  date_created: Date;
-
-  @ApiProperty({ description: '삭제된 날짜', type: Date })
-  @DeleteDateColumn()
-  date_deleted: Date;
+  @Column({ name: 'is_checked', default: false })
+  @IsBoolean()
+  isChecked: boolean;
 
   @ApiProperty({
     type: Number,
     description: '알림이 발생한 게시글 id(nullable)',
   })
-  @Column({ nullable: true })
-  @RelationId((notification: Notification) => notification.post)
-  postId: number;
+  @Column({ name: 'article_id', nullable: true })
+  @RelationId((notification: Notification) => notification.article)
+  @IsNumber()
+  articleId: number;
 
   @ApiProperty({
-    type: Posts,
+    type: () => Article,
     description: '알림이 발생한 게시물',
     nullable: true,
   })
-  @JoinColumn()
-  @ManyToOne(() => Posts, {
+  @JoinColumn({ name: 'aritcle_id' })
+  @ManyToOne(() => Article, {
     nullable: true,
     onUpdate: 'CASCADE',
     onDelete: 'SET NULL',
   }) // 게시물을 참조하는 경우
-  post: Posts;
+  article: Article;
 }

@@ -1,17 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { Notification } from './entities/notification.entity';
 import { DataSource, Repository } from 'typeorm';
-import { EmitNotiDto } from './dtos/emit-noti.dto';
-import { FetchNotiResponse } from './dtos/fetch-noti.dto';
-import { INotificationsServiceRead } from './interfaces/notifications.service.interface';
+
+import {
+  INotificationsServiceRead,
+  INotificationsSeviceEmitNotification,
+} from './interfaces/notifications.service.interface';
+import { NotificationsGetResponseDto } from './dtos/response/notifications-get-response.dto';
 
 @Injectable()
 export class NotificationsRepository extends Repository<Notification> {
-  constructor(private dataSource: DataSource) {
-    super(Notification, dataSource.createEntityManager());
+  constructor(private db_dataSource: DataSource) {
+    super(Notification, db_dataSource.createEntityManager());
   }
 
-  async createOne(emitNotiDto: EmitNotiDto) {
+  async createOne(emitNotiDto: INotificationsSeviceEmitNotification) {
     return await this.createQueryBuilder()
       .insert()
       .into(Notification, Object.keys(emitNotiDto))
@@ -20,41 +23,37 @@ export class NotificationsRepository extends Repository<Notification> {
   }
 
   async fetchOne({
-    id,
-    targetUserKakaoId,
-  }: INotificationsServiceRead): Promise<FetchNotiResponse> {
+    notificationId,
+    targetUserId,
+  }: INotificationsServiceRead): Promise<NotificationsGetResponseDto> {
     return await this.createQueryBuilder('n')
       .leftJoin('n.user', 'user')
       .addSelect(['user.profile_image', 'user.username', 'user.handle'])
-      .where('n.id = :id', { id })
-      .andWhere('n.targetUserKakaoId = :targetUserKakaoId', {
-        targetUserKakaoId,
+      .where('n.id = :id', { id: notificationId })
+      .andWhere('n.target_user_id = :targetUserId', {
+        targetUserId,
       })
       .getOne();
   }
 
   async fetchAll({
-    kakaoId,
-    date_created,
-    is_checked,
-  }): Promise<FetchNotiResponse[]> {
+    userId,
+    dateCreated,
+    isChecked,
+  }): Promise<NotificationsGetResponseDto[]> {
     const query = this.createQueryBuilder('n')
       .leftJoin('n.user', 'user')
       .addSelect(['user.profile_image', 'user.username', 'user.handle'])
-      .where('n.targetUserKakaoId = :kakaoId', {
-        kakaoId,
+      .where('n.target_user_id = :userId', {
+        userId,
       });
-    if (!is_checked) {
+    if (!isChecked) {
       query.andWhere('n.is_checked = true');
     }
-    if (date_created) {
-      query.andWhere('n.date_created > :date_created', { date_created });
+    if (dateCreated) {
+      query.andWhere('n.date_created > :date_created', { dateCreated });
     }
-    // 열 이름을 별칭으로 지정하여 원래 이름 그대로 출력
-    // const columnNames = (await this.metadata.columns).map(
-    //   (column) => `n.${column.databaseName} AS ${column.propertyName}`,
-    // );
-    // query.addSelect(columnNames);
+
     return await query.getMany();
   }
 }

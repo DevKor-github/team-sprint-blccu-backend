@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   // controller에 요청이 왔을 때 constructor가 실행
-  constructor(private readonly configService: ConfigService) {
+  constructor(private readonly svc_config: ConfigService) {
     super({
       // accessToken 위치
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -19,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET'),
+      secretOrKey: svc_config.get<string>('JWT_SECRET'),
     });
   }
 

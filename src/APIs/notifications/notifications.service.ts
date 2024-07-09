@@ -1,15 +1,16 @@
 import { BadRequestException, Injectable, MessageEvent } from '@nestjs/common';
 import { NotificationsRepository } from './notifications.repository';
 import { Observable, Subject, filter, map } from 'rxjs';
-import { EmitNotiDto } from './dtos/emit-noti.dto';
-import { FetchNotiDto, FetchNotiResponse } from './dtos/fetch-noti.dto';
 import { DateOption } from 'src/common/enums/date-option';
 import {
   INotificationsServiceConnectUser,
+  INotificationsServiceGetNotifications,
   INotificationsServiceRead,
+  INotificationsSeviceEmitNotification,
 } from './interfaces/notifications.service.interface';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { NotificationsGetResponseDto } from './dtos/response/notifications-get-response.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -17,7 +18,7 @@ export class NotificationsService {
     @InjectQueue('audio') private redisQueue: Queue,
     private readonly notificationsRepository: NotificationsRepository,
   ) {}
-  private notis$: Subject<FetchNotiResponse> = new Subject();
+  private notis$: Subject<NotificationsGetResponseDto> = new Subject();
   private observer = this.notis$.asObservable();
   private readonly queueName = 'audio';
 
@@ -33,11 +34,11 @@ export class NotificationsService {
   }
 
   connectUser({
-    targetUserKakaoId,
+    targetUserId,
   }: INotificationsServiceConnectUser): Observable<MessageEvent> {
-    console.log('connected: ' + targetUserKakaoId);
+    console.log('connected: ' + targetUserId);
     const pipe = this.observer.pipe(
-      filter((noti) => noti.targetUserKakaoId == targetUserKakaoId),
+      filter((noti) => noti.targetUserId == targetUserId),
       map((noti) => {
         return {
           data: noti,
@@ -48,19 +49,19 @@ export class NotificationsService {
   }
 
   async emitAlarm({
-    userKakaoId,
-    targetUserKakaoId,
+    userId,
+    targetUserId,
     type,
-  }: EmitNotiDto): Promise<FetchNotiResponse> {
+  }: INotificationsSeviceEmitNotification): Promise<NotificationsGetResponseDto> {
     try {
       const data = await this.notificationsRepository.save({
-        userKakaoId,
-        targetUserKakaoId,
+        userId,
+        targetUserId,
         type,
       });
       const response = await this.notificationsRepository.fetchOne({
-        id: data.id,
-        targetUserKakaoId,
+        notificationId: data.id,
+        targetUserId,
       });
       // Redis 큐에 이벤트를 전송
       await this.redisQueue.add(this.queueName, response);
@@ -70,14 +71,16 @@ export class NotificationsService {
     }
   }
 
-  async fetch({
-    is_checked,
-    kakaoId,
-    date_created,
-  }: FetchNotiDto): Promise<FetchNotiResponse[]> {
+  async findNotifications({
+    isChecked,
+    userId,
+    dateCreated,
+  }: INotificationsServiceGetNotifications): Promise<
+    NotificationsGetResponseDto[]
+  > {
     let currentDate = new Date();
 
-    switch (date_created) {
+    switch (dateCreated) {
       case DateOption.WEEK:
         currentDate.setDate(currentDate.getDate() - 7);
         break;
@@ -91,28 +94,28 @@ export class NotificationsService {
         currentDate = null;
     }
     return await this.notificationsRepository.fetchAll({
-      is_checked,
-      kakaoId,
-      date_created: currentDate,
+      isChecked,
+      userId,
+      dateCreated: currentDate,
     });
   }
 
-  async read({
-    id,
-    targetUserKakaoId,
-  }: INotificationsServiceRead): Promise<FetchNotiResponse> {
+  async readNotification({
+    notificationId,
+    targetUserId,
+  }: INotificationsServiceRead): Promise<NotificationsGetResponseDto> {
     const updateResult = await this.notificationsRepository.update(
-      { id, targetUserKakaoId },
+      { id: notificationId, targetUserId },
       {
-        is_checked: true,
+        isChecked: true,
       },
     );
     if (updateResult.affected < 1) {
       throw new BadRequestException('알림을 찾을 수 없거나 권한이 없습니다.');
     }
     return await this.notificationsRepository.fetchOne({
-      id,
-      targetUserKakaoId,
+      notificationId,
+      targetUserId,
     });
   }
 }

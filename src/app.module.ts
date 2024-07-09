@@ -3,13 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommentsModule } from './APIs/comments/comments.module';
-import { PostsModule } from './APIs/posts/posts.module';
 import { UsersModule } from './APIs/users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './APIs/auth/auth.module';
 import { FollowsModule } from './APIs/follows/follows.module';
-import { PostBackgroundsModule } from './APIs/postBackgrounds/postBackgrounds.module';
-import { PostCategoriesModule } from './APIs/postCategories/PostCategories.module';
 import { LikesModule } from './APIs/likes/likes.module';
 import { StickersModule } from './APIs/stickers/stickers.module';
 import { StickerCategoriesModule } from './APIs/stickerCategories/stickerCategories.module';
@@ -30,6 +27,11 @@ import { redisStore } from 'cache-manager-redis-yet';
 import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
 import { MetricsModule } from './modules/metrics/metrics.module';
+import { DevtoolsModule } from '@nestjs/devtools-integration';
+import { ArticlesModule } from './APIs/articles/articles.module';
+import { ArticleCategoriesModule } from './APIs/articleCategories/articleCategories.module';
+import { ArticleBackgroundsModule } from './APIs/articleBackgrounds/articleBackgrounds.module';
+import { ImagesModule } from './modules/images/images.module';
 
 @Module({
   imports: [
@@ -40,20 +42,24 @@ import { MetricsModule } from './modules/metrics/metrics.module';
     StickersModule,
     StickerCategoriesModule,
     StickerBlocksModule,
-    PostsModule,
+    ArticlesModule,
+    ArticleCategoriesModule,
+    ArticleBackgroundsModule,
+    ImagesModule,
     CommentsModule,
     LikesModule,
     UsersModule,
-    PostCategoriesModule,
     AuthModule,
     FollowsModule,
     NotificationsModule,
-    PostBackgroundsModule,
     ReportsModule,
     TerminusModule,
     HttpModule,
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    DevtoolsModule.register({
+      http: true,
     }),
     JwtModule.registerAsync({
       imports: [ConfigModule],

@@ -1,18 +1,23 @@
 import { FeedbackType } from 'src/common/enums/feedback-type.enum';
 import { User } from '../entities/user.entity';
 
-export interface IUsersServiceCreate {
-  kakaoId: number;
+export interface IUsersServiceImageUpload {
+  userId: number;
+  file: Express.Multer.File;
 }
 
-export interface IUsersServiceFindUserByKakaoId {
-  kakaoId: number;
+export interface IUsersServiceCreate {
+  userId: number;
+}
+
+export interface IUsersServiceFindUserById {
+  userId: number;
 }
 
 export interface IUsersServiceDelete {
   type: FeedbackType;
   content: string;
-  kakaoId: number;
+  userId: number;
 }
 
 export interface IUsersServiceFindUserByHandle extends Pick<User, 'handle'> {}
@@ -23,5 +28,5 @@ export interface IUsersServiceFindUser {
 
 export interface IUsersServiceImageUpload {
   file: Express.Multer.File;
-  resize: number;
+  userId: number;
 }

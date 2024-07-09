@@ -1,10 +1,10 @@
 import { Feedback } from '../entities/feedback.entity';
 
-export interface IFeedbacksServiceCreate
+export interface IFeedbacksServiceCreateFeedback
   extends Pick<Feedback, 'content' | 'type'> {
-  kakaoId: number;
+  userId: number;
 }
 
-export interface IFeedbacksServiceKakaoId {
-  kakaoId: number;
+export interface IFeedbacksServiceUserId {
+  userId: number;
 }

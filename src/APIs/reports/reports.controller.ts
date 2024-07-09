@@ -16,11 +16,11 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CreateReportInput } from './dtos/create-report.dto';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { Request } from 'express';
-import { FetchReportResponse } from './dtos/fetch-report.dto';
 import { ReportTarget } from 'src/common/enums/report-target.enum';
+import { ReportDto } from './dtos/common/report.dto';
+import { ReportCreateRequestDto } from './dtos/request/report-create-request.dto';
 
 @Controller('')
 export class ReportsController {
@@ -31,20 +31,20 @@ export class ReportsController {
     summary: '게시물 신고',
   })
   @ApiCookieAuth()
-  @ApiCreatedResponse({ type: FetchReportResponse })
+  @ApiCreatedResponse({ type: ReportDto })
   @UseGuards(AuthGuardV2)
-  @Post('posts/:postId/report')
+  @Post('articles/:articleId/report')
   @HttpCode(201)
   async reportPost(
     @Req() req: Request,
-    @Body() body: CreateReportInput,
-    @Param('postId') targetId: number,
-  ): Promise<FetchReportResponse> {
-    const userKakaoId = req.user.userId;
-    return await this.reportsService.create({
+    @Body() body: ReportCreateRequestDto,
+    @Param('articleId') targetId: number,
+  ): Promise<ReportDto> {
+    const userId = req.user.userId;
+    return await this.reportsService.createReport({
       targetId,
-      target: ReportTarget.POSTS,
-      userKakaoId,
+      target: ReportTarget.ARTICLES,
+      userId,
       ...body,
     });
   }
@@ -54,20 +54,20 @@ export class ReportsController {
     summary: '댓글 신고',
   })
   @ApiCookieAuth()
-  @ApiCreatedResponse({ type: FetchReportResponse })
+  @ApiCreatedResponse({ type: ReportDto })
   @UseGuards(AuthGuardV2)
-  @Post('posts/comments/:commentId/report')
+  @Post('articles/comments/:commentId/report')
   @HttpCode(201)
   async reportComment(
     @Req() req: Request,
-    @Body() body: CreateReportInput,
+    @Body() body: ReportCreateRequestDto,
     @Param('commentId') targetId: number,
-  ): Promise<FetchReportResponse> {
-    const userKakaoId = req.user.userId;
-    return await this.reportsService.create({
+  ): Promise<ReportDto> {
+    const userId = req.user.userId;
+    return await this.reportsService.createReport({
       targetId,
       target: ReportTarget.COMMENTS,
-      userKakaoId,
+      userId,
       ...body,
     });
   }
@@ -78,11 +78,11 @@ export class ReportsController {
     summary: '[어드민용] 신고 내역 조회',
   })
   @ApiCookieAuth()
-  @ApiOkResponse({ type: [FetchReportResponse] })
+  @ApiOkResponse({ type: [ReportDto] })
   @UseGuards(AuthGuardV2)
   @Get('users/admin/reports')
-  async fetchAll(@Req() req: Request): Promise<FetchReportResponse[]> {
-    const kakaoId = req.user.userId;
-    return await this.reportsService.fetchAll({ kakaoId });
+  async fetchAll(@Req() req: Request): Promise<ReportDto[]> {
+    const userId = req.user.userId;
+    return await this.reportsService.findReports({ userId });
   }
 }

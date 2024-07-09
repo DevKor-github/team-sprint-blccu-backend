@@ -20,13 +20,13 @@ import {
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
-import { FetchLikeResponseDto } from './dtos/fetch-likes.dto';
-import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
+import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
+import { LikesGetResponseDto } from './dtos/response/likes-get-response.dto';
 
 @ApiTags('게시글 API')
-@Controller('posts/:postId')
+@Controller('articles/:articleId')
 export class LikesController {
-  constructor(private readonly likesService: LikesService) {}
+  constructor(private readonly svc_likes: LikesService) {}
 
   @ApiOperation({
     summary: '좋아요',
@@ -35,18 +35,18 @@ export class LikesController {
   @ApiCookieAuth()
   @ApiCreatedResponse({
     description: '좋아요 성공',
-    type: FetchLikeResponseDto,
+    type: LikesGetResponseDto,
   })
   @ApiNotFoundResponse({ description: '게시글을 찾을 수 없는 경우' })
   @UseGuards(AuthGuardV2)
   @HttpCode(201)
   @Post('like')
   async like(
-    @Param('postId') id: number,
+    @Param('articleId') articleId: number,
     @Req() req: Request,
-  ): Promise<FetchLikeResponseDto> {
-    const kakaoId = req.user.userId;
-    return await this.likesService.like({ id, kakaoId });
+  ): Promise<LikesGetResponseDto> {
+    const userId = req.user.userId;
+    return await this.svc_likes.like({ userId, articleId });
   }
 
   @ApiOperation({
@@ -62,11 +62,11 @@ export class LikesController {
   @HttpCode(204)
   @Delete('like')
   async deleteLike(
-    @Param('postId') id: number,
+    @Param('articleId') articleId: number,
     @Req() req: Request,
   ): Promise<void> {
-    const kakaoId = req.user.userId;
-    await this.likesService.cancel_like({ id, kakaoId });
+    const userId = req.user.userId;
+    await this.svc_likes.cancleLike({ articleId, userId });
     return;
   }
 
@@ -79,11 +79,11 @@ export class LikesController {
   @UseGuards(AuthGuardV2)
   @Get('like')
   async fetchIfLiked(
-    @Param('postId') id: number,
+    @Param('articleId') articleId: number,
     @Req() req: Request,
   ): Promise<boolean> {
-    const kakaoId = req.user.userId;
-    return await this.likesService.fetchIfLiked({ kakaoId, id });
+    const userId = req.user.userId;
+    return await this.svc_likes.checkIfLiked({ userId, articleId });
   }
 
   @ApiOperation({
@@ -92,15 +92,15 @@ export class LikesController {
   })
   @ApiOkResponse({
     description: '조회 성공',
-    type: [UserResponseDtoWithFollowing],
+    type: [UserFollowingResponseDto],
   })
   @HttpCode(200)
   @Get('like-users')
   async fetchLikes(
-    @Param('postId') id: number,
+    @Param('articleId') articleId: number,
     @Req() req: Request,
-  ): Promise<UserResponseDtoWithFollowing[]> {
-    const kakaoId = req.user.userId;
-    return await this.likesService.fetchLikes({ id, kakaoId });
+  ): Promise<UserFollowingResponseDto[]> {
+    const userId = req.user.userId;
+    return await this.svc_likes.findLikes({ articleId, userId });
   }
 }

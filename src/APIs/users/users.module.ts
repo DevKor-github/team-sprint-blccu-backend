@@ -1,16 +1,40 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
-import { UsersService } from './users.service';
-import { UsersController } from './users.controller';
-import { UtilsService } from 'src/utils/utils.service';
 import { UsersRepository } from './users.repository';
-import { AwsService } from 'src/modules/aws/aws.service';
+import { ImagesModule } from 'src/modules/images/images.module';
+import { UsersCreateService } from './services/users-create.service';
+import { UsersReadService } from './services/users-read.service';
+import { UsersUpdateService } from './services/users-update.service';
+import { UsersDeleteService } from './services/users-delete.service';
+import { UsersCreateController } from './controllers/users-create.controller';
+import { UsersReadController } from './controllers/users-read.controller';
+import { UsersUpdateController } from './controllers/users-update.controller';
+import { UsersDeleteController } from './controllers/users-delete.controller';
+import { UsersValidateService } from './services/users-validate-service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
-  providers: [UsersService, UsersRepository, AwsService, UtilsService],
-  controllers: [UsersController],
-  exports: [UsersService],
+  imports: [TypeOrmModule.forFeature([User]), ImagesModule],
+  providers: [
+    UsersCreateService,
+    UsersReadService,
+    UsersUpdateService,
+    UsersDeleteService,
+    UsersValidateService,
+    UsersRepository,
+  ],
+  controllers: [
+    UsersCreateController,
+    UsersReadController,
+    UsersUpdateController,
+    UsersDeleteController,
+  ],
+  exports: [
+    UsersCreateService,
+    UsersReadService,
+    UsersUpdateService,
+    UsersDeleteService,
+    UsersValidateService,
+  ],
 })
 export class UsersModule {}

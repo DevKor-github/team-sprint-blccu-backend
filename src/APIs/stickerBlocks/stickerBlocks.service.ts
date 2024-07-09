@@ -2,86 +2,86 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { StickerBlock } from './entities/stickerblock.entity';
 import { Repository } from 'typeorm';
-import { CreateStickerBlockDto } from './dtos/create-stickerBlock.dto';
 import { StickersService } from '../stickers/stickers.service';
 import {
-  CreateStickerBlocksDto,
-  CreateStickerBlocksResponseDto,
-} from './dtos/create-stickerBlocks.dto';
-import {
+  IStickerBlocksServiceCreateStickerBlock,
+  IStickerBlocksServiceCreateStickerBlocks,
   IStikcerBlocksServiceDeleteBlocks,
   IStikcerBlocksServiceFetchBlocks,
 } from './interfaces/stickerBlocks.service.interface';
+import { StickerBlockDto } from './dtos/common/stickerBlock.dto';
 
 @Injectable()
 export class StickerBlocksService {
   constructor(
-    private readonly stickersService: StickersService,
+    private readonly svc_stickers: StickersService,
     @InjectRepository(StickerBlock)
-    private readonly stickerBlocksRepository: Repository<StickerBlock>,
+    private readonly repo_stickerBlocks: Repository<StickerBlock>,
   ) {}
 
-  async create(
-    createStickerBlockDto: CreateStickerBlockDto,
-  ): Promise<StickerBlock> {
-    // 순환참조 막기 위해 자체 에러 헨들링
-    // await this.postsService.existCheck({
-    //   id: createStickerBlockDto.postsId,
-    // });
+  async createStickerBlock({
+    stickerId,
+    articleId,
+    ...rest
+  }: IStickerBlocksServiceCreateStickerBlock): Promise<StickerBlockDto> {
     try {
-      await this.stickersService.existCheck({
-        id: createStickerBlockDto.stickerId,
+      await this.svc_stickers.existCheck({
+        stickerId: stickerId,
       });
 
-      const data = await this.stickerBlocksRepository.save(
-        createStickerBlockDto,
-      );
+      const data = await this.repo_stickerBlocks.save({
+        ...rest,
+        articleId,
+        stickerId,
+      });
       return data;
     } catch (e) {
       throw new NotFoundException('게시글을 찾을 수 없습니다.');
     }
   }
 
-  async bulkInsert({
+  async createStickerBlocks({
     stickerBlocks,
-    postsId,
-    kakaoId,
-  }: CreateStickerBlocksDto): Promise<CreateStickerBlocksResponseDto[]> {
+    articleId,
+  }: IStickerBlocksServiceCreateStickerBlocks): Promise<StickerBlockDto[]> {
     const stickerBlocksToInsert = stickerBlocks.map((stickerBlock) => ({
       ...stickerBlock,
-      postsId,
+      articleId,
     }));
     stickerBlocksToInsert.forEach(async (stickerBlock) => {
-      await this.stickersService.existCheck({
-        id: stickerBlock.stickerId,
+      await this.svc_stickers.existCheck({
+        stickerId: stickerBlock.stickerId,
       });
     });
-    return await this.stickerBlocksRepository.save(stickerBlocksToInsert);
+    return await this.repo_stickerBlocks.save(stickerBlocksToInsert);
   }
 
-  async fetchBlocks({
-    postsId,
-  }: IStikcerBlocksServiceFetchBlocks): Promise<StickerBlock[]> {
-    return await this.stickerBlocksRepository.find({
-      where: { postsId },
+  async findStickerBlocks({
+    articleId,
+  }: IStikcerBlocksServiceFetchBlocks): Promise<StickerBlockDto[]> {
+    return await this.repo_stickerBlocks.find({
+      where: { articleId },
     });
   }
 
-  async deleteBlocks({
-    kakaoId,
-    postsId,
+  async deleteStickerBlocks({
+    userId,
+    articleId,
   }: IStikcerBlocksServiceDeleteBlocks): Promise<void> {
-    const blocksToDelete = await this.stickerBlocksRepository.find({
+    const blocksToDelete = await this.repo_stickerBlocks.find({
       relations: ['sticker'],
-      where: { postsId },
+      where: { articleId },
     });
     for (const block of blocksToDelete) {
       if (block.sticker.isReusable === false)
-        await this.stickersService.delete({ kakaoId, id: block.id });
-      await this.stickerBlocksRepository.remove(block);
+        await this.svc_stickers.deleteSticker({
+          userId,
+          stickerId: block.stickerId,
+        });
+      await this.repo_stickerBlocks.remove(block);
     }
     return;
   }
 
-  async updateBlock() {}
+  async updateStickerBlocks() {}
 }

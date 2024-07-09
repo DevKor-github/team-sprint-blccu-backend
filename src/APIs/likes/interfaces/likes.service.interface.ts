@@ -1,4 +1,4 @@
 export interface ILikesServiceIds {
-  id: number;
-  kakaoId: number;
+  articleId: number;
+  userId: number;
 }

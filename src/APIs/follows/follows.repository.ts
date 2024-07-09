@@ -1,8 +1,10 @@
 import { DataSource, Repository } from 'typeorm';
 import { Follow } from './entities/follow.entity';
 import { Injectable } from '@nestjs/common';
-import { IFollowsRepositoryGetList } from './interfaces/follows.repository.interface';
-import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
+import { IFollowsRepositoryFindList } from './interfaces/follows.repository.interface';
+import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
+import { convertToCamelCase, getUserFields } from 'src/utils/classUtils';
+import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class FollowsRepository extends Repository<Follow> {
@@ -11,106 +13,70 @@ export class FollowsRepository extends Repository<Follow> {
   }
 
   async getFollowers({
-    kakaoId,
+    userId,
     loggedUser,
-  }: IFollowsRepositoryGetList): Promise<UserResponseDtoWithFollowing[]> {
+  }: IFollowsRepositoryFindList): Promise<UserFollowingResponseDto[]> {
     const followings = await this.createQueryBuilder('follow')
-      .innerJoin('follow.from_user', 'user')
+      .innerJoin('follow.fromUser', 'user')
       .where('user.date_deleted IS NULL')
-      .andWhere('follow.toUserKakaoId = :kakaoId')
+      .andWhere('follow.to_user_id = :userId')
       .leftJoinAndSelect(
         (subQuery) => {
           return subQuery
-            .select('follow2.toUserKakaoId', 'toUserKakaoId')
+            .select('follow2.to_user_id', 'to_user_id')
             .from(Follow, 'follow2')
-            .where('follow2.fromUserKakaoId = :loggedUser');
+            .where('follow2.from_user_id = :loggedUser');
         },
         'follow2',
-        'follow2.toUserKakaoId = user.kakaoId',
+        'follow2.to_user_id = user.id',
       )
       .select([
-        'user.username AS username',
-        'user.kakaoId AS kakaoId',
-        'user.handle AS handle',
-        'user.follower_count AS follower_count',
-        'user.following_count AS following_count',
-        'user.isAdmin AS isAdmin',
-        'user.username AS username',
-        'user.description AS description',
-        'user.profile_image AS profile_image',
-        'user.background_image AS background_image',
-        'user.date_created AS date_created',
-        'user.date_deleted AS date_deleted',
-        'CASE WHEN follow2.toUserKakaoId IS NOT NULL THEN true ELSE false END AS isFollowing',
+        ...getUserFields().map((column) => `user.${column} AS ${column}`),
+        'CASE WHEN follow2.to_user_id IS NOT NULL THEN true ELSE false END AS is_following',
       ])
-      .setParameters({ kakaoId, loggedUser })
+      .setParameters({ userId, loggedUser })
       .getRawMany();
 
-    return followings.map((follower) => ({
-      username: follower.username,
-      kakaoId: follower.kakaoId,
-      handle: follower.handle,
-      follower_count: follower.follower_count,
-      following_count: follower.following_count,
-      isAdmin: follower.isAdmin === 1,
-      description: follower.description,
-      profile_image: follower.profile_image,
-      background_image: follower.background_image,
-      date_created: follower.date_created,
-      date_deleted: follower.date_deleted,
-      isFollowing: follower.isFollowing === 1, // MySQL에서는 boolean 값이 1 또는 0으로 반환될 수 있음
-    }));
+    return followings.map((follower) =>
+      plainToClass(UserFollowingResponseDto, {
+        ...convertToCamelCase(follower),
+        isAdmin: follower.is_admin === 1,
+        isFollowing: follower.is_following === 1,
+      }),
+    );
   }
 
   async getFollowings({
-    kakaoId,
+    userId,
     loggedUser,
-  }: IFollowsRepositoryGetList): Promise<UserResponseDtoWithFollowing[]> {
+  }: IFollowsRepositoryFindList): Promise<UserFollowingResponseDto[]> {
     const followings = await this.createQueryBuilder('follow')
-      .innerJoin('follow.to_user', 'user')
+      .innerJoin('follow.toUser', 'user')
       .where('user.date_deleted IS NULL')
-      .andWhere('follow.fromUserKakaoId = :kakaoId')
+      .andWhere('follow.from_user_id = :userId')
       .leftJoinAndSelect(
         (subQuery) => {
           return subQuery
-            .select('follow2.toUserKakaoId', 'toUserKakaoId')
+            .select('follow2.to_user_id', 'to_user_id')
             .from(Follow, 'follow2')
-            .where('follow2.fromUserKakaoId = :loggedUser');
+            .where('follow2.from_user_id = :loggedUser');
         },
         'follow2',
-        'follow2.toUserKakaoId = user.kakaoId',
+        'follow2.to_user_id = user.id',
       )
       .select([
-        'user.username AS username',
-        'user.kakaoId AS kakaoId',
-        'user.handle AS handle',
-        'user.follower_count AS follower_count',
-        'user.following_count AS following_count',
-        'user.isAdmin AS isAdmin',
-        'user.username AS username',
-        'user.description AS description',
-        'user.profile_image AS profile_image',
-        'user.background_image AS background_image',
-        'user.date_created AS date_created',
-        'user.date_deleted AS date_deleted',
-        'CASE WHEN follow2.toUserKakaoId IS NOT NULL THEN true ELSE false END AS isFollowing',
+        ...getUserFields().map((column) => `user.${column} AS ${column}`),
+        'CASE WHEN follow2.to_user_id IS NOT NULL THEN true ELSE false END AS is_following',
       ])
-      .setParameters({ kakaoId, loggedUser })
+      .setParameters({ userId, loggedUser })
       .getRawMany();
 
-    return followings.map((follower) => ({
-      username: follower.username,
-      kakaoId: follower.kakaoId,
-      handle: follower.handle,
-      follower_count: follower.follower_count,
-      following_count: follower.following_count,
-      isAdmin: follower.isAdmin === 1,
-      description: follower.description,
-      profile_image: follower.profile_image,
-      background_image: follower.background_image,
-      date_created: follower.date_created,
-      date_deleted: follower.date_deleted,
-      isFollowing: follower.isFollowing === 1, // MySQL에서는 boolean 값이 1 또는 0으로 반환될 수 있음
-    }));
+    return followings.map((follower) =>
+      plainToClass(UserFollowingResponseDto, {
+        ...convertToCamelCase(follower),
+        isAdmin: follower.is_admin === 1,
+        isFollowing: follower.is_following === 1,
+      }),
+    );
   }
 }

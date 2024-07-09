@@ -19,10 +19,10 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { FollowUserDto } from './dtos/follow-user.dto';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { FollowsService } from './follows.service';
-import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
+import { FollowDto } from './dtos/common/follow.dto';
+import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
 
 @ApiTags('유저 API')
 @Controller('users')
@@ -34,19 +34,19 @@ export class FollowsController {
     description: '로그인된 유저가 userId를 팔로우한다.',
   })
   @ApiCookieAuth()
-  @ApiCreatedResponse({ description: '이웃 추가 성공', type: FollowUserDto })
+  @ApiCreatedResponse({ description: '이웃 추가 성공', type: FollowDto })
   @ApiConflictResponse({ description: '이미 팔로우한 상태이다.' })
   @UseGuards(AuthGuardV2)
   @Post(':userId/follow')
   @HttpCode(201)
   async followUser(
     @Req() req: Request,
-    @Param('userId') to_user: number,
-  ): Promise<FollowUserDto> {
-    const kakaoId = parseInt(req.user.userId);
+    @Param('userId') toUser: number,
+  ): Promise<FollowDto> {
+    const userId = parseInt(req.user.userId);
     return await this.followsService.followUser({
-      from_user: kakaoId,
-      to_user,
+      fromUser: userId,
+      toUser,
     });
   }
 
@@ -62,12 +62,12 @@ export class FollowsController {
   @HttpCode(204)
   unfollowUser(
     @Req() req: Request,
-    @Param('userId') to_user: number,
+    @Param('userId') toUser: number,
   ): Promise<void> {
-    const kakaoId = parseInt(req.user.userId);
+    const userId = parseInt(req.user.userId);
     return this.followsService.unfollowUser({
-      from_user: kakaoId,
-      to_user,
+      fromUser: userId,
+      toUser,
     });
   }
 
@@ -82,10 +82,10 @@ export class FollowsController {
   @Get('me/follower/:userId')
   async checkFollower(
     @Req() req: Request,
-    @Param('userId') to_user: number,
+    @Param('userId') toUser: number,
   ): Promise<boolean> {
-    const from_user = req.user.userId;
-    return await this.followsService.isExist({ from_user, to_user });
+    const fromUser = req.user.userId;
+    return await this.followsService.existCheck({ fromUser, toUser });
   }
 
   @ApiOperation({
@@ -99,10 +99,10 @@ export class FollowsController {
   @Get('me/following/:userId')
   async checkFollowing(
     @Req() req: Request,
-    @Param('userId') from_user: number,
+    @Param('userId') fromUser: number,
   ): Promise<boolean> {
-    const to_user = req.user.userId;
-    return await this.followsService.isExist({ from_user, to_user });
+    const toUser = req.user.userId;
+    return await this.followsService.existCheck({ fromUser, toUser });
   }
   @ApiOperation({
     summary: '팔로워 목록 조회',
@@ -110,16 +110,16 @@ export class FollowsController {
   })
   @ApiOkResponse({
     description: '팔로워 목록 조회 성공',
-    type: [UserResponseDtoWithFollowing],
+    type: [UserFollowingResponseDto],
   })
   @HttpCode(200)
   @Get(':userId/followers')
   getFollowers(
     @Req() req: Request,
-    @Param('userId') kakaoId: number,
-  ): Promise<UserResponseDtoWithFollowing[]> {
+    @Param('userId') userId: number,
+  ): Promise<UserFollowingResponseDto[]> {
     const loggedUser = req.user.userId;
-    return this.followsService.getFollowers({ kakaoId, loggedUser });
+    return this.followsService.findFollowers({ userId, loggedUser });
   }
 
   @ApiOperation({
@@ -128,15 +128,15 @@ export class FollowsController {
   })
   @ApiOkResponse({
     description: '팔로잉 목록 조회 성공',
-    type: [UserResponseDtoWithFollowing],
+    type: [UserFollowingResponseDto],
   })
   @HttpCode(200)
   @Get(':userId/followings')
   getFollows(
     @Req() req: Request,
-    @Param('userId') kakaoId: number,
-  ): Promise<UserResponseDtoWithFollowing[]> {
+    @Param('userId') userId: number,
+  ): Promise<UserFollowingResponseDto[]> {
     const loggedUser = req.user.userId;
-    return this.followsService.getFollows({ kakaoId, loggedUser });
+    return this.followsService.findFollowings({ userId, loggedUser });
   }
 }

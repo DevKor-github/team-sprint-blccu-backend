@@ -1,13 +1,13 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { Likes } from './entities/like.entity';
-import { Posts } from '../posts/entities/posts.entity';
-import { FetchLikeResponseDto } from './dtos/fetch-likes.dto';
 import { LikesRepository } from './likes.repository';
-import { UserResponseDtoWithFollowing } from '../users/dtos/user-response.dto';
 import { ILikesServiceIds } from './interfaces/likes.service.interface';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotType } from 'src/common/enums/not-type.enum';
+import { LikesGetResponseDto } from './dtos/response/likes-get-response.dto';
+import { Article } from '../articles/entities/article.entity';
+import { Like } from './entities/like.entity';
+import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
 
 @Injectable()
 export class LikesService {
@@ -17,42 +17,48 @@ export class LikesService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
-  async fetchIfLiked({ kakaoId, id }: ILikesServiceIds): Promise<boolean> {
+  async checkIfLiked({
+    userId,
+    articleId,
+  }: ILikesServiceIds): Promise<boolean> {
     const alreadyLiked = await this.likesRepository.findOne({
-      where: { posts: { id }, user: { kakaoId } },
+      where: { article: { id: articleId }, user: { id: userId } },
     });
     if (alreadyLiked) return true;
     return false;
   }
 
-  async like({ id, kakaoId }: ILikesServiceIds): Promise<FetchLikeResponseDto> {
+  async like({
+    articleId,
+    userId,
+  }: ILikesServiceIds): Promise<LikesGetResponseDto> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const postData = await queryRunner.manager.findOne(Posts, {
-        where: { id },
+      const articleData = await queryRunner.manager.findOne(Article, {
+        where: { id: articleId },
       });
       const alreadyLiked = await this.likesRepository.findOne({
-        where: { posts: { id }, user: { kakaoId } },
+        where: { articleId, userId },
       });
       if (alreadyLiked) {
         throw new ConflictException('이미 좋아요 한 게시글입니다.');
       } else {
-        const likeData = await queryRunner.manager.save(Likes, {
-          userKakaoId: kakaoId,
-          posts: postData,
+        const likeData = await queryRunner.manager.save(Like, {
+          userId,
+          articleId,
         });
-        await queryRunner.manager.update(Posts, postData.id, {
-          like_count: () => 'like_count +1',
+        await queryRunner.manager.update(Article, articleData.id, {
+          likeCount: () => 'like_count +1',
         });
         await await queryRunner.commitTransaction();
-        if (kakaoId != postData.userKakaoId) {
+        if (userId != articleData.userId) {
           await this.notificationsService.emitAlarm({
-            userKakaoId: kakaoId,
-            targetUserKakaoId: postData.userKakaoId,
+            userId,
+            targetUserId: articleData.userId,
             type: NotType.LIKE,
-            postId: postData.id,
+            articleId: articleData.id,
           });
         }
         return likeData;
@@ -65,25 +71,25 @@ export class LikesService {
     }
   }
 
-  async cancel_like({ id, kakaoId }: ILikesServiceIds): Promise<void> {
+  async cancleLike({ articleId, userId }: ILikesServiceIds): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const postData = await queryRunner.manager.findOne(Posts, {
-        where: { id },
+      const articleData = await queryRunner.manager.findOne(Article, {
+        where: { id: articleId },
       });
       const alreadyLiked = await this.likesRepository.findOne({
-        where: { posts: { id }, user: { kakaoId } },
+        where: { articleId, userId },
       });
       if (!alreadyLiked) {
         throw new ConflictException('좋아요 내역을 찾을 수 없습니다.');
       } else {
-        await queryRunner.manager.delete(Likes, {
+        await queryRunner.manager.delete(Like, {
           id: alreadyLiked.id,
         });
-        await queryRunner.manager.update(Posts, postData.id, {
-          like_count: () => 'like_count -1',
+        await queryRunner.manager.update(Article, articleData.id, {
+          likeCount: () => 'like_count -1',
         });
         await queryRunner.commitTransaction();
         return;
@@ -96,10 +102,10 @@ export class LikesService {
     }
   }
 
-  async fetchLikes({
-    id,
-    kakaoId,
-  }: ILikesServiceIds): Promise<UserResponseDtoWithFollowing[]> {
-    return await this.likesRepository.getLikes({ id, kakaoId });
+  async findLikes({
+    articleId,
+    userId,
+  }: ILikesServiceIds): Promise<UserFollowingResponseDto[]> {
+    return await this.likesRepository.getLikes({ articleId, userId });
   }
 }

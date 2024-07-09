@@ -6,49 +6,55 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Report } from './entities/report.entity';
 import { DataSource, Repository } from 'typeorm';
-import { CreateReportDto } from './dtos/create-report.dto';
-import { UsersService } from '../users/users.service';
-import { FetchReportResponse } from './dtos/fetch-report.dto';
 import { ReportTarget } from 'src/common/enums/report-target.enum';
-import { Posts } from '../posts/entities/posts.entity';
+import { Article } from '../articles/entities/article.entity';
 import { Comment } from '../comments/entities/comment.entity';
+import { IReportsServiceCreateReport } from './interfaces/reports.service.interface';
+import { ReportDto } from './dtos/common/report.dto';
+import { UsersValidateService } from '../users/services/users-validate-service';
 
 @Injectable()
 export class ReportsService {
   constructor(
     @InjectRepository(Report)
-    private readonly reportsRepository: Repository<Report>,
-    private readonly usersService: UsersService,
-    private readonly dataSource: DataSource,
+    private readonly repo_reports: Repository<Report>,
+    private readonly svc_userValidate: UsersValidateService,
+    private readonly db_dataSource: DataSource,
   ) {}
 
-  async create(dto: CreateReportDto): Promise<FetchReportResponse> {
-    const queryRunner = this.dataSource.createQueryRunner();
+  async createReport(
+    dto_createReport: IReportsServiceCreateReport,
+  ): Promise<ReportDto> {
+    const { target, userId, content, targetId, type } = dto_createReport;
+    const queryRunner = this.db_dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    const { targetId, ...rest } = dto;
     try {
       let data;
-      switch (dto.target) {
-        case ReportTarget.POSTS:
-          const postData = await queryRunner.manager.findOne(Posts, {
+      switch (target) {
+        case ReportTarget.ARTICLES:
+          const articleData = await queryRunner.manager.findOne(Article, {
             where: { id: targetId },
           });
-          if (!postData)
+          if (!articleData)
             throw new BadRequestException('게시글이 존재하지 않습니다.');
 
-          const reportPost = await this.reportsRepository.findOne({
-            where: { userKakaoId: dto.userKakaoId, postId: targetId },
+          const reportPost = await this.repo_reports.findOne({
+            where: { userId, articleId: targetId },
           });
           if (reportPost)
             throw new ConflictException('이미 신고한 게시물입니다.');
 
-          await queryRunner.manager.update(Posts, postData.id, {
-            report_count: () => 'report_count +1',
+          await queryRunner.manager.update(Article, articleData.id, {
+            reportCount: () => 'report_count +1',
           });
           data = await queryRunner.manager.save(Report, {
-            ...rest,
-            postId: targetId,
+            target,
+            type,
+            userId,
+            targetUserId: articleData.userId,
+            content,
+            articleId: targetId,
           });
           break;
 
@@ -59,17 +65,21 @@ export class ReportsService {
           if (!commentData)
             throw new BadRequestException('댓글이 존재하지 않습니다.');
 
-          const reportComment = await this.reportsRepository.findOne({
-            where: { userKakaoId: dto.userKakaoId, commentId: targetId },
+          const reportComment = await this.repo_reports.findOne({
+            where: { userId, commentId: targetId },
           });
           if (reportComment)
             throw new ConflictException('이미 신고한 게시물입니다.');
 
           await queryRunner.manager.update(Comment, commentData.id, {
-            report_count: () => 'report_count +1',
+            reportCount: () => 'report_count +1',
           });
           data = await queryRunner.manager.save(Report, {
-            ...rest,
+            target,
+            type,
+            userId,
+            targetUserId: commentData.userId,
+            content,
             commentId: targetId,
           });
           break;
@@ -87,9 +97,9 @@ export class ReportsService {
     }
   }
 
-  async fetchAll({ kakaoId }): Promise<FetchReportResponse[]> {
-    await this.usersService.adminCheck({ kakaoId });
-    const result = await this.reportsRepository.find();
+  async findReports({ userId }): Promise<ReportDto[]> {
+    await this.svc_userValidate.adminCheck({ userId });
+    const result = await this.repo_reports.find();
     return result;
   }
 }

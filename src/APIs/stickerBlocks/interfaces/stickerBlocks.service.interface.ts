@@ -1,8 +1,20 @@
+import { StickerBlockCreateRequestDto } from '../dtos/request/stickerBlock-create-request.dto';
+import { StickerBlocksCreateRequestDto } from '../dtos/request/stickerBlocks-create-request.dto';
+
 export interface IStikcerBlocksServiceFetchBlocks {
-  postsId: number;
+  articleId: number;
 }
 
 export interface IStikcerBlocksServiceDeleteBlocks {
-  kakaoId: number;
-  postsId: number;
+  userId: number;
+  articleId: number;
+}
+export interface IStickerBlocksServiceCreateStickerBlock
+  extends StickerBlockCreateRequestDto {
+  stickerId: number;
+  articleId: number;
+}
+export interface IStickerBlocksServiceCreateStickerBlocks
+  extends StickerBlocksCreateRequestDto {
+  articleId: number;
 }

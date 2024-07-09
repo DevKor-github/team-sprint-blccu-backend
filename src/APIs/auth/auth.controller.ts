@@ -39,7 +39,7 @@ export class AuthController {
   @HttpCode(301)
   async kakaoLogin(@Req() req: Request, @Res() res: Response) {
     const { accessToken, refreshToken } = await this.authService.getJWT({
-      kakaoId: req.user.kakaoId,
+      userId: req.user.kakaoId,
     });
 
     // 클라이언트 도메인 설정

@@ -88,6 +88,6 @@ ssh -i $PEM_PATH $SERVER "sudo docker stop $OLD_SERVICE_NAME"
 ssh -i $PEM_PATH $SERVER "sudo docker rm $OLD_SERVICE_NAME"
 echo -e "$ECR_URL/$SERVICE_NAME:$DOCKER_TAG"
 ssh -i $PEM_PATH $SERVER "docker images --format "{{.ID}} {{.Repository}}:{{.Tag}}" | grep -v ':latest' | awk '{print $1}' | xargs -r docker rmi"
-ssh -i $PEM_PATH $SERVER "yes | sudo docker system prune -a"
+ssh -i $PEM_PATH $SERVER "y | sudo docker system prune -a"
 
 echo -e "\n## 배포 완료. $NEW_SERVICE_NAME ##\n"

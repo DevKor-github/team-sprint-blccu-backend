@@ -1,17 +1,17 @@
 import { DataSource, InsertResult, Repository } from 'typeorm';
 import { Comment } from './entities/comment.entity';
 import { Injectable } from '@nestjs/common';
-import { FetchCommentsDto } from './dtos/fetch-comments.dto';
 import {
   ICommentsRepositoryId,
   ICommentsRepositoryInsertComment,
   ICommentsRepositoryfetchComments,
 } from './interfaces/comments.repository.interface';
+import { CommentsGetResponseDto } from './dtos/response/comments-get-response.dto';
 
 @Injectable()
 export class CommentsRepository extends Repository<Comment> {
-  constructor(private dataSource: DataSource) {
-    super(Comment, dataSource.createEntityManager());
+  constructor(private db_dataSource: DataSource) {
+    super(Comment, db_dataSource.createEntityManager());
   }
   async insertComment({
     createCommentDto,
@@ -24,31 +24,38 @@ export class CommentsRepository extends Repository<Comment> {
   }
 
   async fetchCommentWithNotiInfo({
-    id,
+    commentId,
   }: ICommentsRepositoryId): Promise<Comment> {
     return await this.createQueryBuilder('c')
-      .leftJoinAndSelect('c.user', 'user')
-      .leftJoinAndSelect('c.posts', 'posts')
+      .leftJoin('c.user', 'user')
+      .addSelect([
+        'user.handle',
+        'user.id',
+        'user.description',
+        'user.profile_image',
+        'user.username',
+      ])
+      .leftJoinAndSelect('c.article', 'article')
       .leftJoinAndSelect('c.parent', 'parent')
-      .where('c.id = :id', { id })
+      .where('c.id = :commentId', { commentId })
       .getOne();
   }
 
   async fetchComments({
-    postsId,
-  }: ICommentsRepositoryfetchComments): Promise<FetchCommentsDto[]> {
+    articleId,
+  }: ICommentsRepositoryfetchComments): Promise<CommentsGetResponseDto[]> {
     let comments = await this.createQueryBuilder('c')
       .withDeleted()
       .innerJoin('c.user', 'u')
       .addSelect([
-        'u.kakaoId',
+        'u.id',
         'u.username',
         'u.description',
         'u.profile_image',
         'u.handle',
       ])
       .addSelect([
-        'childrenUser.kakaoId',
+        'childrenUser.id',
         'childrenUser.username',
         'childrenUser.description',
         'childrenUser.profile_image',
@@ -56,18 +63,18 @@ export class CommentsRepository extends Repository<Comment> {
       ])
       .leftJoinAndSelect('c.children', 'children')
       .leftJoin('children.user', 'childrenUser')
-      .where('c.postsId = :postsId', { postsId })
-      .andWhere('c.parentId IS NULL')
+      .where('c.article_id = :articleId', { articleId })
+      .andWhere('c.parent_id IS NULL')
       .orderBy('c.date_created', 'ASC')
       .addOrderBy('children.date_created', 'ASC')
       .getMany();
 
     comments = comments.filter((comment) => {
       comment.children = comment.children.filter(
-        (child) => child.date_deleted === null,
+        (child) => child.dateDeleted === null,
       );
       // comment.children.length가 0이고 comment.date_deleted가 null이 아닌 경우를 제외
-      return !(comment.children.length === 0 && comment.date_deleted !== null);
+      return !(comment.children.length === 0 && comment.dateDeleted !== null);
     });
 
     return comments;

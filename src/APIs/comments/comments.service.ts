@@ -4,40 +4,38 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateCommentDto } from './dtos/create-comment.dto';
 import { CommentsRepository } from './comments.repository';
 import { DataSource, EntityManager, UpdateResult } from 'typeorm';
-import { Posts } from '../posts/entities/posts.entity';
 import {
-  ChildrenComment,
-  FetchCommentDto,
-  FetchCommentsDto,
-} from './dtos/fetch-comments.dto';
-import {
-  ICommentsServiceDelete,
-  ICommentsServiceFetch,
+  ICommentsServiceArticleIdValidCheck,
+  ICommentsServiceCreateComment,
+  ICommentsServiceDeleteComment,
+  ICommentsServiceFindComments,
   ICommentsServiceId,
-  ICommentsServicePatch,
-  ICommentsServicePostsIdValidCheck,
+  ICommentsServicePatchComment,
 } from './interfaces/comments.service.interface';
 import { Comment } from './entities/comment.entity';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotType } from 'src/common/enums/not-type.enum';
+import { CommentDto } from './dtos/common/comment.dto';
+import { CommentChildrenDto } from './dtos/common/comment-children.dto';
+import { Article } from '../articles/entities/article.entity';
+import { CommentsGetResponseDto } from './dtos/response/comments-get-response.dto';
 
 @Injectable()
 export class CommentsService {
   constructor(
-    private readonly commentsRepository: CommentsRepository,
-    private readonly dataSource: DataSource,
-    private readonly notificationsService: NotificationsService,
+    private readonly svc_notifications: NotificationsService,
+    private readonly repo_comments: CommentsRepository,
+    private readonly db_dataSource: DataSource,
   ) {}
 
   async postsIdValidCheck({
     parentId,
-    postsId,
-  }: ICommentsServicePostsIdValidCheck): Promise<void> {
-    const parent = await this.existCheck({ id: parentId });
-    if (parent.postsId != postsId)
+    articleId,
+  }: ICommentsServiceArticleIdValidCheck): Promise<void> {
+    const parent = await this.existCheck({ commentId: parentId });
+    if (parent.articleId != articleId)
       throw new BadRequestException(
         '게시글 아이디가 루트 댓글이 작성된 게시글 아이디와 일치하지 않습니다.',
       );
@@ -45,8 +43,10 @@ export class CommentsService {
       throw new BadRequestException('부모 댓글이 루트 댓글이 아닙니다.');
   }
 
-  async existCheck({ id }: ICommentsServiceId): Promise<Comment> {
-    const comment = await this.commentsRepository.findOne({ where: { id } });
+  async existCheck({ commentId }: ICommentsServiceId): Promise<CommentDto> {
+    const comment = await this.repo_comments.findOne({
+      where: { id: commentId },
+    });
     if (!comment) {
       throw new NotFoundException(
         '댓글의 아이디를 찾을 수 없습니다. 존재하지 않거나 이미 삭제되었습니다.',
@@ -55,43 +55,51 @@ export class CommentsService {
     return comment;
   }
 
-  async insert(createCommentDto: CreateCommentDto): Promise<ChildrenComment> {
-    const post = await this.dataSource.manager.findOne(Posts, {
-      where: { id: createCommentDto.postsId },
+  async createComment(
+    createCommentDto: ICommentsServiceCreateComment,
+  ): Promise<CommentChildrenDto> {
+    const post = await this.db_dataSource.manager.findOne(Article, {
+      where: { id: createCommentDto.articleId },
     });
-    if (post.allow_comment === false)
+    if (post.allowComment === false)
       throw new ForbiddenException('댓글이 허용되지 않은 게시물 입니다.');
     if (createCommentDto.parentId)
       await this.postsIdValidCheck({
         parentId: createCommentDto.parentId,
-        postsId: createCommentDto.postsId,
+        articleId: createCommentDto.articleId,
       });
-    await this.dataSource.manager.update(Posts, createCommentDto.postsId, {
-      comment_count: () => 'comment_count +1',
-    });
+    await this.db_dataSource.manager.update(
+      Article,
+      createCommentDto.articleId,
+      {
+        commentCount: () => 'comment_count +1',
+      },
+    );
 
-    const commentData = await this.commentsRepository.insertComment({
+    const commentData = await this.repo_comments.insertComment({
       createCommentDto,
     });
-    const { id } = commentData.identifiers[0];
-    const { posts, parent, ...result } =
-      await this.commentsRepository.fetchCommentWithNotiInfo({ id });
+    console.log(commentData);
+    const commentId = commentData.identifiers[0].id;
 
-    if (result.parentId && parent.userKakaoId != result.userKakaoId) {
-      await this.notificationsService.emitAlarm({
-        userKakaoId: result.userKakaoId,
-        targetUserKakaoId: parent.userKakaoId,
+    const { article, parent, ...result } =
+      await this.repo_comments.fetchCommentWithNotiInfo({ commentId });
+
+    if (result.parentId && parent.userId != result.userId) {
+      await this.svc_notifications.emitAlarm({
+        userId: result.userId,
+        targetUserId: parent.userId,
         type: NotType.REPLY,
-        postId: result.postsId,
+        articleId: result.articleId,
       });
     }
     // 자신에게 알림 보내는 경우 생략
-    if (result.userKakaoId != posts.userKakaoId) {
-      await this.notificationsService.emitAlarm({
-        userKakaoId: result.userKakaoId,
-        targetUserKakaoId: posts.userKakaoId,
+    if (result.userId != article.userId) {
+      await this.svc_notifications.emitAlarm({
+        userId: result.userId,
+        targetUserId: article.userId,
         type: NotType.COMMENT,
-        postId: result.postsId,
+        articleId: result.articleId,
       });
     }
 
@@ -99,37 +107,37 @@ export class CommentsService {
   }
 
   async patchComment({
-    kakaoId,
-    postsId,
-    id,
+    userId,
+    articleId,
+    commentId,
     content,
-  }: ICommentsServicePatch): Promise<FetchCommentDto> {
-    const commentData = await this.existCheck({ id });
+  }: ICommentsServicePatchComment): Promise<CommentDto> {
+    const commentData = await this.existCheck({ commentId });
     if (!commentData) throw new NotFoundException('댓글을 찾을 수 없습니다.');
-    if (commentData.postsId != postsId)
+    if (commentData.articleId != articleId)
       throw new NotFoundException('루트 게시글의 아이디가 일치하지 않습니다.');
-    if (commentData.userKakaoId != kakaoId)
+    if (commentData.userId != userId)
       throw new ForbiddenException('댓글을 수정할 권한이 없습니다.');
     commentData.content = content;
-    return await this.commentsRepository.save(commentData);
+    return await this.repo_comments.save(commentData);
   }
 
   async fetchComments({
-    postsId,
-  }: ICommentsServiceFetch): Promise<FetchCommentsDto[]> {
-    return await this.commentsRepository.fetchComments({ postsId });
+    articleId,
+  }: ICommentsServiceFindComments): Promise<CommentsGetResponseDto[]> {
+    return await this.repo_comments.fetchComments({ articleId });
   }
 
   async delete({
-    id,
-    userKakaoId,
-    postsId,
-  }: ICommentsServiceDelete): Promise<void> {
-    await this.dataSource.transaction(async (manager: EntityManager) => {
-      const data = await this.existCheck({ id });
+    commentId,
+    userId,
+    articleId,
+  }: ICommentsServiceDeleteComment): Promise<void> {
+    await this.db_dataSource.transaction(async (manager: EntityManager) => {
+      const data = await this.existCheck({ commentId });
       let childrenData = [];
       let deletedResult: UpdateResult;
-      if (data.postsId !== postsId) {
+      if (data.articleId !== articleId) {
         throw new NotFoundException('게시글을 찾을 수 없습니다.');
       }
       if (data.parentId == null)
@@ -137,14 +145,14 @@ export class CommentsService {
           where: { parentId: data.id },
         });
       if (childrenData.length == 0) {
-        await manager.delete(Comment, { user: { kakaoId: userKakaoId }, id });
-        await manager.update(Posts, data.postsId, {
-          comment_count: () => 'comment_count - 1',
+        await manager.delete(Comment, { user: { id: userId }, id: commentId });
+        await manager.update(Article, data.articleId, {
+          commentCount: () => 'comment_count - 1',
         });
       } else {
         deletedResult = await manager.softDelete(Comment, {
-          user: { kakaoId: userKakaoId },
-          id,
+          user: { id: userId },
+          id: commentId,
         });
         if (deletedResult.affected < 1)
           throw new NotFoundException('삭제할 댓글이 존재하지 않습니다');
