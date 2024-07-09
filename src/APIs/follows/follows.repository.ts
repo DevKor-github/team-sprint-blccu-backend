@@ -17,7 +17,7 @@ export class FollowsRepository extends Repository<Follow> {
     loggedUser,
   }: IFollowsRepositoryFindList): Promise<UserFollowingResponseDto[]> {
     const followings = await this.createQueryBuilder('follow')
-      .innerJoin('follow.from_user_id', 'user')
+      .innerJoin('follow.fromUser', 'user')
       .where('user.date_deleted IS NULL')
       .andWhere('follow.to_user_id = :userId')
       .leftJoinAndSelect(
@@ -51,7 +51,7 @@ export class FollowsRepository extends Repository<Follow> {
     loggedUser,
   }: IFollowsRepositoryFindList): Promise<UserFollowingResponseDto[]> {
     const followings = await this.createQueryBuilder('follow')
-      .innerJoin('follow.to_user_id', 'user')
+      .innerJoin('follow.toUser', 'user')
       .where('user.date_deleted IS NULL')
       .andWhere('follow.from_user_id = :userId')
       .leftJoinAndSelect(
