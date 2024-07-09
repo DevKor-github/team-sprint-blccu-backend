@@ -24,6 +24,7 @@ import { ArticlesGetRequestDto } from '../dtos/request/articles-get-request.dto'
 import { ArticlesPaginateService } from '../services/articles-paginate.service';
 import { SortOption } from 'src/common/enums/sort-option';
 import { CustomCursorPageDto } from 'src/utils/cursor-pages/dtos/cursor-page.dto';
+import { ArticlesGetUserRequestDto } from '../dtos/request/articles-get-user-request.dto';
 
 @ApiTags('게시글 API')
 @Controller('articles')
@@ -151,7 +152,7 @@ export class ArticlesReadController {
   async fetchUserArticles(
     @Param('userId') targetUserId: number,
     @Req() req: Request,
-    @Query() cursorOption: ArticlesGetRequestDto,
+    @Query() cursorOption: ArticlesGetUserRequestDto,
   ): Promise<CustomCursorPageDto<ArticleDto>> {
     const userId = req.user.userId;
     if (!cursorOption.cursor && cursorOption.sort === SortOption.ASC) {

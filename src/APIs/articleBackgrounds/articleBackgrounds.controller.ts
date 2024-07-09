@@ -39,7 +39,7 @@ export class ArticleBackgroundsController {
     description: '이미지 서버에 파일 업로드 완료',
     type: ImageUploadResponseDto,
   })
-  @Post('users/admin/article/background')
+  @Post('users/admin/articles/background')
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
   async createArticleBackground(
@@ -56,14 +56,14 @@ export class ArticleBackgroundsController {
     description: '모든 내지 fetch 완료',
     type: [ArticleBackgroundDto],
   })
-  @Get('article/backgrounds')
+  @Get('articles/backgrounds')
   async getArticleBackgrounds(): Promise<ArticleBackgroundDto[]> {
     return await this.articleBackgroundsService.findArticleBackgrounds();
   }
 
   @ApiTags('어드민 API')
   @ApiOperation({ summary: '내지 삭제하기' })
-  @Delete('users/admin/article/background/:articleBackgroundId')
+  @Delete('users/admin/articles/background/:articleBackgroundId')
   async delete(@Param('articleBackgroundId') articleBackgroundId: string) {
     return await this.articleBackgroundsService.deleteArticleBackground({
       articleBackgroundId,

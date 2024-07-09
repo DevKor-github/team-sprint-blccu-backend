@@ -25,7 +25,7 @@ export class ArticlesPaginateRepository extends Repository<Article> {
       sort === SortOption.ASC
         ? `CONCAT(LPAD(p.${_order}, 7, '0'), LPAD(p.id, 7, '0')) > :customCursor`
         : `CONCAT(LPAD(p.${_order}, 7, '0'), LPAD(p.id, 7, '0')) < :customCursor`;
-
+    console.log(`p.${_order}`, sort as any);
     queryBuilder
       .take(take + 1)
       .innerJoin('p.user', 'user')
@@ -43,8 +43,9 @@ export class ArticlesPaginateRepository extends Repository<Article> {
         customCursor: cursor,
       })
       .andWhere('p.date_deleted IS NULL')
-      .orderBy(`p.${_order}`, sort as any)
-      .addOrderBy('p.id', sort as any);
+      // .orderBy('p.commentCount', sort as 'ASC' | 'DESC')
+      .orderBy(`p.${_order}`, sort as 'ASC' | 'DESC')
+      .addOrderBy('p.id', 'DESC');
 
     return queryBuilder;
   }

@@ -1,7 +1,7 @@
 export enum ArticleOrderOption {
-  LIKE = 'like_count',
-  VIEW = 'view_count',
-  COMMENT = 'comment_count',
+  LIKE = 'likeCount',
+  VIEW = 'viewCount',
+  COMMENT = 'commentCount',
   DATE = 'id',
 }
 
