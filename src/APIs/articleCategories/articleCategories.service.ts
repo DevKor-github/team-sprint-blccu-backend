@@ -30,7 +30,7 @@ export class ArticleCategoriesService {
       throw new BadRequestException('이미 동명의 카테고리가 존재합니다.');
     }
     const result = await this.repo_articleCategories.save({
-      user: { id: userId },
+      userId,
       name,
     });
     return result;

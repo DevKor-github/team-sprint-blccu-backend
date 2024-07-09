@@ -1,9 +1,10 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ArticlesValidateService } from './articles-validate.service';
 import { ArticlesCreateRepository } from '../repositories/articles-create.repository';
 import { IArticlesServicePatchArticle } from '../interfaces/articles.service.interface';
 import { ArticleDto } from '../dtos/common/article.dto';
 
+@Injectable()
 export class ArticlesUpdateService {
   constructor(
     private readonly svc_articlesValidate: ArticlesValidateService,

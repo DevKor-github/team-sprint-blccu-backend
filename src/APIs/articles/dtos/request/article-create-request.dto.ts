@@ -1,6 +1,6 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, ValidateNested } from 'class-validator';
+import { IsArray, IsOptional, ValidateNested } from 'class-validator';
 import { ArticleDto } from '../common/article.dto';
 import { StickerBlocksCreateDto } from 'src/APIs/stickerBlocks/dtos/common/stickerBlocks-create.dto';
 
@@ -17,8 +17,9 @@ export class ArticleCreateRequestDto extends OmitType(ArticleDto, [
   'dateUpdated',
 ]) {
   @ApiProperty({ type: [StickerBlocksCreateDto] })
-  @IsArray()
+  @IsArray({ message: 'stickerBlocks는 배열이여야 합니다.' })
   @ValidateNested({ each: true })
   @Type(() => StickerBlocksCreateDto)
+  @IsOptional()
   stickerBlocks: StickerBlocksCreateDto[];
 }

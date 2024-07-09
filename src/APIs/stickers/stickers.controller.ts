@@ -84,7 +84,7 @@ export class StickersController {
     description:
       '본인이 만든 스티커를 patch한다. image_url 변경 시 기존의 이미지는 s3에서 제거된다.',
   })
-  @Patch('stickers/:id')
+  @Patch('stickers/:stickerId')
   @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
   @ApiOkResponse({ type: StickerDto })

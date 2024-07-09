@@ -47,9 +47,6 @@ export class StickersService {
       .insert()
       .into(Sticker, ['user_id', 'image_url', 'is_default'])
       .values({ userId, imageUrl, isDefault: false })
-      .orUpdate(['image_url', 'isDefault'], ['id'], {
-        skipUpdateIfNoValuesChanged: true,
-      })
       .execute();
     const id = insertData.identifiers[0].id;
     const data = await this.repo_stickers.findOne({ where: { id } });
@@ -70,9 +67,6 @@ export class StickersService {
       .insert()
       .into(Sticker, ['user_id', 'image_url', 'is_default', 'is_reusable'])
       .values({ userId, imageUrl, isDefault: true, isReusable: true })
-      .orUpdate(['image_url', 'isDefault', 'isReusable'], ['id'], {
-        skipUpdateIfNoValuesChanged: true,
-      })
       .execute();
     const id = insertData.identifiers[0].id;
     const data = await this.repo_stickers.findOne({ where: { id } });

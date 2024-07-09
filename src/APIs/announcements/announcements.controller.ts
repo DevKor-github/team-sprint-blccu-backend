@@ -57,14 +57,14 @@ export class AnnouncementsController {
   @ApiTags('어드민 API')
   @ApiOperation({ summary: '[어드민용] 공지사항 수정' })
   @ApiCookieAuth()
-  @ApiOkResponse({ type: [AnnouncementDto] })
+  @ApiOkResponse({ type: AnnouncementDto })
   @UseGuards(AuthGuardV2)
   @Patch('users/admin/anmts/:announcementId')
   async patchAnmt(
     @Req() req: Request,
     @Body() body: AnnouncementPatchRequestDto,
     @Param('announcementId') announcementId: number,
-  ): Promise<AnnouncementDto[]> {
+  ): Promise<AnnouncementDto> {
     const userId = req.user.userId;
     return await this.announcementsService.patchAnnouncement({
       ...body,

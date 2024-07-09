@@ -30,9 +30,9 @@ export class ArticleBackgroundsService {
     return await this.repo_articleBackgrounds.find();
   }
 
-  async deleteArticleBackground({ articleId }) {
+  async deleteArticleBackground({ articleBackgroundId }) {
     const articleBackground = await this.repo_articleBackgrounds.findOne({
-      where: { id: articleId },
+      where: { id: articleBackgroundId },
     });
     await this.repo_articleBackgrounds.remove(articleBackground);
     await this.svc_images.deleteImage({ url: articleBackground.imageUrl });

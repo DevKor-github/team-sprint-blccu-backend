@@ -29,8 +29,8 @@ export class ArticlesPaginateRepository extends Repository<Article> {
     queryBuilder
       .take(take + 1)
       .innerJoin('p.user', 'user')
-      .leftJoinAndSelect('p.article_background', 'article_background')
-      .leftJoinAndSelect('p.article_category', 'article_category')
+      // .leftJoinAndSelect('p.articleBackground', 'article_background')
+      // .leftJoinAndSelect('p.articleCategory', 'article_category')
       .addSelect([
         'user.handle',
         'user.id',
@@ -133,7 +133,7 @@ export class ArticlesPaginateRepository extends Repository<Article> {
       });
     }
     queryBuilder
-      .andWhere('p.user_id = :user_id', {
+      .andWhere('p.user_id = :userId', {
         userId,
       })
       .andWhere('p.scope IN (:scope)', { scope });

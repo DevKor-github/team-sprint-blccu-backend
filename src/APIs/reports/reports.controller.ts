@@ -43,7 +43,7 @@ export class ReportsController {
     const userId = req.user.userId;
     return await this.reportsService.createReport({
       targetId,
-      target: ReportTarget.POSTS,
+      target: ReportTarget.ARTICLES,
       userId,
       ...body,
     });

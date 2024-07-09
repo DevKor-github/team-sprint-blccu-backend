@@ -1,17 +1,18 @@
 import 'reflect-metadata';
 import { User } from 'src/APIs/users/entities/user.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import { getMetadataArgsStorage } from 'typeorm';
 
 export function getUserFields(): string[] {
   const metadata = getMetadataArgsStorage();
-
-  // 클래스의 모든 멤버 변수를 담을 배열
-  const members: string[] = [];
-
-  const entityMetadata = metadata.filterColumns(User);
-  entityMetadata.forEach((meta) => {
-    members.push(meta.propertyName);
-  });
+  // Get columns from the User entity
+  const userColumns = metadata.filterColumns(User);
+  // Get columns from the CommonEntity (superclass)
+  const commonEntityColumns = metadata.filterColumns(CommonEntity);
+  // Combine both sets of columns
+  const allColumns = [...userColumns, ...commonEntityColumns];
+  // Extract property names
+  const members: string[] = allColumns.map((col) => col.propertyName);
 
   return members;
 }

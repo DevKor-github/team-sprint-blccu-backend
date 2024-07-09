@@ -1,4 +1,4 @@
 export enum ReportTarget {
-  POSTS = 'ARTICLES',
+  ARTICLES = 'ARTICLES',
   COMMENTS = 'COMMENTS',
 }

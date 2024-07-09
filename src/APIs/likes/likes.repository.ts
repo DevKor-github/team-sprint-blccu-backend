@@ -16,25 +16,25 @@ export class LikesRepository extends Repository<Like> {
     userId,
     articleId,
   }: ILikesRepositoryIds): Promise<UserFollowingResponseDto[]> {
-    const users = await this.createQueryBuilder('likes')
-      .innerJoin('likes.posts', 'posts')
-      .leftJoin('likes.user', 'user')
+    const users = await this.createQueryBuilder('like')
+      .innerJoin('like.article', 'article')
+      .leftJoin('like.user', 'user')
       .leftJoinAndSelect(
         (subQuery) => {
           return subQuery
-            .select('follow.toUserKakaoId', 'toUserKakaoId')
+            .select('follow.to_user_id', 'to_user_id')
             .from(Follow, 'follow')
-            .where('follow.fromUserKakaoId = :kakaoId');
+            .where('follow.from_user_id = :userId');
         },
         'follow',
-        'follow.toUserKakaoId = user.kakaoId',
+        'follow.to_user_id = user.id',
       )
       .where('user.date_deleted IS NULL')
-      .andWhere('posts.date_deleted IS NULL')
-      .andWhere('likes.postsId = :id')
+      .andWhere('article.date_deleted IS NULL')
+      .andWhere('like.articleId = :articleId')
       .select([
         ...getUserFields().map((column) => `user.${column} AS ${column}`),
-        'CASE WHEN follow.toUserKakaoId IS NOT NULL THEN true ELSE false END AS is_following',
+        'CASE WHEN follow.to_user_id IS NOT NULL THEN true ELSE false END AS is_following',
       ])
       .setParameters({ articleId, userId })
       .getRawMany();

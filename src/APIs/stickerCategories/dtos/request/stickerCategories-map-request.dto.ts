@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { StickerCategoryMapperDto } from '../common/stickerCategoryMapper.dto';
+import { StickerCategoryMapperCreateRequestDto } from './stickerCategoryMapper-create-request.dto';
 
 export class StickerCategoriesMapDto {
   @ApiProperty({
     description: '매핑할 카테고리 및 스티커 배열',
-    type: [StickerCategoryMapperDto],
+    type: [StickerCategoryMapperCreateRequestDto],
   })
-  maps: StickerCategoryMapperDto[];
+  maps: StickerCategoryMapperCreateRequestDto[];
 }

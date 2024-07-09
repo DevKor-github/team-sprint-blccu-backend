@@ -25,14 +25,14 @@ export class ReportsService {
   async createReport(
     dto_createReport: IReportsServiceCreateReport,
   ): Promise<ReportDto> {
-    const { target, userId, content, targetId } = dto_createReport;
+    const { target, userId, content, targetId, type } = dto_createReport;
     const queryRunner = this.db_dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       let data;
       switch (target) {
-        case ReportTarget.POSTS:
+        case ReportTarget.ARTICLES:
           const articleData = await queryRunner.manager.findOne(Article, {
             where: { id: targetId },
           });
@@ -50,6 +50,7 @@ export class ReportsService {
           });
           data = await queryRunner.manager.save(Report, {
             target,
+            type,
             userId,
             targetUserId: articleData.userId,
             content,
@@ -75,6 +76,7 @@ export class ReportsService {
           });
           data = await queryRunner.manager.save(Report, {
             target,
+            type,
             userId,
             targetUserId: commentData.userId,
             content,

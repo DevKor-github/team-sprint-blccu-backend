@@ -9,7 +9,6 @@ import { StickerBlocksService } from 'src/APIs/stickerBlocks/stickerBlocks.servi
 import { ArticlesValidateService } from './articles-validate.service';
 import { ArticlesReadRepository } from '../repositories/articles-read.repository';
 import { ArticleCreateResponseDto } from '../dtos/response/article-create-response.dto';
-import { getUUID } from 'src/utils/uuidUtils';
 import { ImagesService } from 'src/modules/images/images.service';
 import { ImageUploadResponseDto } from 'src/modules/images/dtos/image-upload-response.dto';
 

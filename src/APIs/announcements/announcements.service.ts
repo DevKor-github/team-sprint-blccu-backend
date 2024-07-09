@@ -36,7 +36,7 @@ export class AnnouncementsService {
     announcementId,
     title,
     content,
-  }: IAnnouncementsSercicePatchAnnouncement): Promise<AnnouncementDto[]> {
+  }: IAnnouncementsSercicePatchAnnouncement): Promise<AnnouncementDto> {
     await this.svc_usersValidate.adminCheck({ userId });
     const anmt = await this.repo_announcements.findOne({
       where: { id: announcementId },
@@ -45,7 +45,7 @@ export class AnnouncementsService {
     if (title) anmt.title = title;
     if (content) anmt.content = content;
     await this.repo_announcements.save(anmt);
-    return await this.repo_announcements.find({ where: { id: anmt.id } });
+    return await this.repo_announcements.findOne({ where: { id: anmt.id } });
   }
 
   async removeAnnouncement({

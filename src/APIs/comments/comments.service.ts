@@ -79,7 +79,9 @@ export class CommentsService {
     const commentData = await this.repo_comments.insertComment({
       createCommentDto,
     });
-    const { commentId } = commentData.identifiers[0];
+    console.log(commentData);
+    const commentId = commentData.identifiers[0].id;
+
     const { article, parent, ...result } =
       await this.repo_comments.fetchCommentWithNotiInfo({ commentId });
 

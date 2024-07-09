@@ -78,8 +78,8 @@ export class UsersDeleteService {
       for (const following of followingsToDelete) {
         await queryRunner.manager.decrement(
           User,
-          { kakaoId: following.toUserId },
-          'follower_count',
+          { id: following.toUserId },
+          'followerCount',
           1,
         );
       }
@@ -92,7 +92,7 @@ export class UsersDeleteService {
         await queryRunner.manager.decrement(
           User,
           { userId: following.fromUserId },
-          'following_count',
+          'followingCount',
           1,
         );
       }

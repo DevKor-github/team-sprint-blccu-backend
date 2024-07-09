@@ -2,6 +2,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Article } from '../entities/article.entity';
 import { Injectable } from '@nestjs/common';
 import { ArticleDetailResponseDto } from '../dtos/response/article-detail-response.dto';
+import { ArticleDto } from '../dtos/common/article.dto';
 
 @Injectable()
 export class ArticlesReadRepository extends Repository<Article> {
@@ -14,8 +15,8 @@ export class ArticlesReadRepository extends Repository<Article> {
     });
     return await this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')
-      .leftJoinAndSelect('p.article_background', 'article_background')
-      .leftJoinAndSelect('p.article_category', 'article_category')
+      .leftJoinAndSelect('p.articleBackground', 'article_background')
+      .leftJoinAndSelect('p.articleCategory', 'article_category')
       .addSelect([
         'user.handle',
         'user.id',
@@ -29,11 +30,11 @@ export class ArticlesReadRepository extends Repository<Article> {
       .getOne();
   }
 
-  async readUpdateDetail({ articleId }) {
+  async readUpdateDetail({ articleId }): Promise<ArticleDetailResponseDto> {
     return await this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')
-      .leftJoinAndSelect('p.article_background', 'article_background')
-      .leftJoinAndSelect('p.article_category', 'article_category')
+      .leftJoinAndSelect('p.articleBackground', 'article_background')
+      .leftJoinAndSelect('p.articleCategory', 'article_category')
       .addSelect([
         'user.handle',
         'user.id',
@@ -46,11 +47,11 @@ export class ArticlesReadRepository extends Repository<Article> {
       .getOne();
   }
 
-  async readTemp({ userId }): Promise<ArticleDetailResponseDto[]> {
+  async readTemp({ userId }): Promise<ArticleDto[]> {
     return this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')
-      .leftJoinAndSelect('p.article_background', 'article_background')
-      .leftJoinAndSelect('p.article_category', 'article_category')
+      .leftJoinAndSelect('p.articleBackground', 'article_background')
+      .leftJoinAndSelect('p.articleCategory', 'article_category')
       .addSelect([
         'user.handle',
         'user.id',

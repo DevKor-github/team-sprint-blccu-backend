@@ -27,7 +27,14 @@ export class CommentsRepository extends Repository<Comment> {
     commentId,
   }: ICommentsRepositoryId): Promise<Comment> {
     return await this.createQueryBuilder('c')
-      .leftJoinAndSelect('c.user', 'user')
+      .leftJoin('c.user', 'user')
+      .addSelect([
+        'user.handle',
+        'user.id',
+        'user.description',
+        'user.profile_image',
+        'user.username',
+      ])
       .leftJoinAndSelect('c.article', 'article')
       .leftJoinAndSelect('c.parent', 'parent')
       .where('c.id = :commentId', { commentId })

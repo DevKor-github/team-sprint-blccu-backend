@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber } from 'class-validator';
 import { Article } from 'src/APIs/articles/entities/article.entity';
 import { CommonEntity } from 'src/common/entities/common.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
@@ -7,6 +8,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 export class ArticleBackground extends CommonEntity {
   @ApiProperty({ description: 'PK: A_I_', type: Number })
   @PrimaryGeneratedColumn()
+  @IsNumber()
   id: number;
 
   @ApiProperty({ type: String, description: '이미지가 저장된 url' })

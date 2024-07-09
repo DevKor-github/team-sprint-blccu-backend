@@ -147,7 +147,7 @@ export class ArticlesReadController {
       '로그인 된 유저의 경우 private/protected 게시글 조회 권한 체크 후 조회. 카테고리 이름으로 필터링 가능',
   })
   @Get('/cursor/user/:userId')
-  @ApiOkResponse({ type: ArticlesGetRequestDto })
+  @ApiOkResponse({ type: ArticlesGetResponseDto })
   async fetchUserArticles(
     @Param('userId') targetUserId: number,
     @Req() req: Request,

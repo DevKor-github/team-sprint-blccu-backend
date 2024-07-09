@@ -17,7 +17,6 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ArticleBackground } from './entities/articleBackground.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageUploadRequestDto } from 'src/modules/images/dtos/image-upload-request.dto';
 import { ImageUploadResponseDto } from 'src/modules/images/dtos/image-upload-response.dto';
@@ -55,7 +54,7 @@ export class ArticleBackgroundsController {
   @ApiOperation({ summary: '내지 모두 불러오기' })
   @ApiOkResponse({
     description: '모든 내지 fetch 완료',
-    type: [ArticleBackground],
+    type: [ArticleBackgroundDto],
   })
   @Get('article/backgrounds')
   async getArticleBackgrounds(): Promise<ArticleBackgroundDto[]> {
@@ -64,10 +63,10 @@ export class ArticleBackgroundsController {
 
   @ApiTags('어드민 API')
   @ApiOperation({ summary: '내지 삭제하기' })
-  @Delete('users/admin/article/background/:articleId')
-  async delete(@Param('articleId') articleId: string) {
+  @Delete('users/admin/article/background/:articleBackgroundId')
+  async delete(@Param('articleBackgroundId') articleBackgroundId: string) {
     return await this.articleBackgroundsService.deleteArticleBackground({
-      articleId,
+      articleBackgroundId,
     });
   }
 }
