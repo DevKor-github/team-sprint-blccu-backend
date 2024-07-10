@@ -7,6 +7,8 @@ import {
   INotificationsSeviceEmitNotification,
 } from './interfaces/notifications.service.interface';
 import { NotificationsGetResponseDto } from './dtos/response/notifications-get-response.dto';
+import { transformKeysToArgsFormat } from 'src/utils/classUtils';
+import { USER_PRIMARY_RESPONSE_DTO_KEYS } from '../users/dtos/response/user-primary-response.dto';
 
 @Injectable()
 export class NotificationsRepository extends Repository<Notification> {
@@ -28,7 +30,12 @@ export class NotificationsRepository extends Repository<Notification> {
   }: INotificationsServiceRead): Promise<NotificationsGetResponseDto> {
     return await this.createQueryBuilder('n')
       .leftJoin('n.user', 'user')
-      .addSelect(['user.profileImage', 'user.username', 'user.handle'])
+      .addSelect(
+        transformKeysToArgsFormat({
+          args: 'user',
+          keys: USER_PRIMARY_RESPONSE_DTO_KEYS,
+        }),
+      )
       .where('n.id = :id', { id: notificationId })
       .andWhere('n.targetUserId = :targetUserId', {
         targetUserId,
@@ -43,7 +50,12 @@ export class NotificationsRepository extends Repository<Notification> {
   }): Promise<NotificationsGetResponseDto[]> {
     const query = this.createQueryBuilder('n')
       .leftJoin('n.user', 'user')
-      .addSelect(['user.profileImage', 'user.username', 'user.handle'])
+      .addSelect(
+        transformKeysToArgsFormat({
+          args: 'user',
+          keys: USER_PRIMARY_RESPONSE_DTO_KEYS,
+        }),
+      )
       .where('n.targetUserId = :userId', {
         userId,
       });

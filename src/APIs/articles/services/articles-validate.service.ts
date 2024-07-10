@@ -33,13 +33,17 @@ export class ArticlesValidateService {
       .getOne();
     if (pc == null && !passNonEssentail)
       throw new BadRequestException('존재하지 않는 article_category입니다.');
-    const pg = await this.dataSource
-      .getRepository(ArticleBackground)
-      .createQueryBuilder('pg')
-      .where('pg.id = :id', { id: articles.articleBackgroundId })
-      .getOne();
-    if (pg == null && !passNonEssentail)
-      throw new BadRequestException('존재하지 않는 article_background입니다.');
+    if (articles.articleBackgroundId != null) {
+      const pg = await this.dataSource
+        .getRepository(ArticleBackground)
+        .createQueryBuilder('pg')
+        .where('pg.id = :id', { id: articles.articleBackgroundId })
+        .getOne();
+      if (pg == null && !passNonEssentail)
+        throw new BadRequestException(
+          '존재하지 않는 article_background입니다.',
+        );
+    }
     const us = await this.dataSource
       .getRepository(User)
       .createQueryBuilder('us')

@@ -3,6 +3,8 @@ import { Article } from '../entities/article.entity';
 import { Injectable } from '@nestjs/common';
 import { ArticleDetailResponseDto } from '../dtos/response/article-detail-response.dto';
 import { ArticleDto } from '../dtos/common/article.dto';
+import { transformKeysToArgsFormat } from 'src/utils/classUtils';
+import { USER_PRIMARY_RESPONSE_DTO_KEYS } from 'src/APIs/users/dtos/response/user-primary-response.dto';
 
 @Injectable()
 export class ArticlesReadRepository extends Repository<Article> {
@@ -17,13 +19,12 @@ export class ArticlesReadRepository extends Repository<Article> {
       .innerJoin('p.user', 'user')
       .leftJoinAndSelect('p.articleBackground', 'article_background')
       .leftJoinAndSelect('p.articleCategory', 'article_category')
-      .addSelect([
-        'user.handle',
-        'user.id',
-        'user.description',
-        'user.profileImage',
-        'user.username',
-      ])
+      .addSelect(
+        transformKeysToArgsFormat({
+          args: 'user',
+          keys: USER_PRIMARY_RESPONSE_DTO_KEYS,
+        }),
+      )
       .where('p.id = :articleId', { articleId })
       .andWhere('p.scope IN (:scope)', { scope })
       .andWhere('p.dateDeleted IS NULL')
@@ -35,12 +36,12 @@ export class ArticlesReadRepository extends Repository<Article> {
       .innerJoin('p.user', 'user')
       .leftJoinAndSelect('p.articleBackground', 'article_background')
       .leftJoinAndSelect('p.articleCategory', 'article_category')
-      .addSelect([
-        'user.handle',
-        'user.id',
-        'user.profileImage',
-        'user.username',
-      ])
+      .addSelect(
+        transformKeysToArgsFormat({
+          args: 'user',
+          keys: USER_PRIMARY_RESPONSE_DTO_KEYS,
+        }),
+      )
       .where('p.id = :articleId', { articleId })
       .andWhere('p.dateDeleted IS NULL')
       .getOne();
@@ -51,12 +52,12 @@ export class ArticlesReadRepository extends Repository<Article> {
       .innerJoin('p.user', 'user')
       .leftJoinAndSelect('p.articleBackground', 'article_background')
       .leftJoinAndSelect('p.articleCategory', 'article_category')
-      .addSelect([
-        'user.handle',
-        'user.id',
-        'user.profileImage',
-        'user.username',
-      ])
+      .addSelect(
+        transformKeysToArgsFormat({
+          args: 'user',
+          keys: USER_PRIMARY_RESPONSE_DTO_KEYS,
+        }),
+      )
       .where('p.userId = :userId', { userId })
       .andWhere(`p.isPublished = false`)
       .andWhere('p.dateDeleted IS NULL')

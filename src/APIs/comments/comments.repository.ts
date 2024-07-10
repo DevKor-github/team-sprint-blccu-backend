@@ -7,6 +7,8 @@ import {
   ICommentsRepositoryfetchComments,
 } from './interfaces/comments.repository.interface';
 import { CommentsGetResponseDto } from './dtos/response/comments-get-response.dto';
+import { USER_PRIMARY_RESPONSE_DTO_KEYS } from '../users/dtos/response/user-primary-response.dto';
+import { transformKeysToArgsFormat } from 'src/utils/classUtils';
 
 @Injectable()
 export class CommentsRepository extends Repository<Comment> {
@@ -28,12 +30,12 @@ export class CommentsRepository extends Repository<Comment> {
   }: ICommentsRepositoryId): Promise<Comment> {
     return await this.createQueryBuilder('c')
       .leftJoin('c.user', 'user')
-      .addSelect([
-        'user.handle',
-        'user.id',
-        'user.profileImage',
-        'user.username',
-      ])
+      .addSelect(
+        transformKeysToArgsFormat({
+          args: 'user',
+          keys: USER_PRIMARY_RESPONSE_DTO_KEYS,
+        }),
+      )
       .leftJoinAndSelect('c.article', 'article')
       .leftJoinAndSelect('c.parent', 'parent')
       .where('c.id = :commentId', { commentId })
@@ -46,13 +48,18 @@ export class CommentsRepository extends Repository<Comment> {
     let comments = await this.createQueryBuilder('c')
       .withDeleted()
       .innerJoin('c.user', 'u')
-      .addSelect(['u.id', 'u.username', 'u.profileImage', 'u.handle'])
-      .addSelect([
-        'childrenUser.id',
-        'childrenUser.username',
-        'childrenUser.profileImage',
-        'childrenUser.handle',
-      ])
+      .addSelect(
+        transformKeysToArgsFormat({
+          args: 'u',
+          keys: USER_PRIMARY_RESPONSE_DTO_KEYS,
+        }),
+      )
+      .addSelect(
+        transformKeysToArgsFormat({
+          args: 'childrenUser',
+          keys: USER_PRIMARY_RESPONSE_DTO_KEYS,
+        }),
+      )
       .leftJoinAndSelect('c.children', 'children')
       .leftJoin('children.user', 'childrenUser')
       .where('c.articleId = :articleId', { articleId })

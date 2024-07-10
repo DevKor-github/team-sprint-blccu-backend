@@ -11,6 +11,8 @@ import {
 } from '../interfaces/articles.repository.interface';
 import { Follow } from 'src/APIs/follows/entities/follow.entity';
 import { Injectable } from '@nestjs/common';
+import { transformKeysToArgsFormat } from 'src/utils/classUtils';
+import { USER_PRIMARY_RESPONSE_DTO_KEYS } from 'src/APIs/users/dtos/response/user-primary-response.dto';
 
 @Injectable()
 export class ArticlesPaginateRepository extends Repository<Article> {
@@ -31,12 +33,12 @@ export class ArticlesPaginateRepository extends Repository<Article> {
       .innerJoin('p.user', 'user')
       // .leftJoinAndSelect('p.articleBackground', 'article_background')
       // .leftJoinAndSelect('p.articleCategory', 'article_category')
-      .addSelect([
-        'user.handle',
-        'user.id',
-        'user.profileImage',
-        'user.username',
-      ])
+      .addSelect(
+        transformKeysToArgsFormat({
+          args: 'user',
+          keys: USER_PRIMARY_RESPONSE_DTO_KEYS,
+        }),
+      )
       .where('p.isPublished = true')
       .andWhere(queryByOrderSort, {
         customCursor: cursor,

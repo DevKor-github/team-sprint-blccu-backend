@@ -21,6 +21,17 @@ export function toCamelCase(snakeCase: string): string {
   return snakeCase.replace(/_([a-z])/g, (group) => group[1].toUpperCase());
 }
 
+interface ITransformKeysToArgsFormat {
+  keys: string[];
+  args: string;
+}
+export function transformKeysToArgsFormat({
+  keys,
+  args,
+}: ITransformKeysToArgsFormat): string[] {
+  return keys.map((key) => `${args}.${key}`);
+}
+
 export function convertToCamelCase(obj: any): any {
   if (Array.isArray(obj)) {
     return obj.map((v) => convertToCamelCase(v));

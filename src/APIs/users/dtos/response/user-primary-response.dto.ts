@@ -5,6 +5,7 @@ export const USER_PRIMARY_RESPONSE_DTO_KEYS: (keyof User)[] = [
   'username',
   'profileImage',
   'handle',
+  'description',
 ];
 export class UserPrimaryResponseDto extends PickType(
   User,
