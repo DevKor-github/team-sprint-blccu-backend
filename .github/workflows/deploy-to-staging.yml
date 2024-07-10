@@ -27,8 +27,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_STAGING_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
 
       - name: Login to ECR
@@ -43,9 +43,13 @@ jobs:
       - name: Push Docker image to ECR
         run: docker push 637423583546.dkr.ecr.ap-northeast-2.amazonaws.com/blccu-ecr:latest
 
+      - name: Create PEM file from secret
+        run: echo "${{ secrets.BLCCU_DEV_RSA_PEM }}" > blccu-dev-rsa.pem
+
       - name: Deploy to server
         run: |
-          ssh -o StrictHostKeyChecking=no -i ./keys/blccu-dev-rsa.pem ubuntu@api.blccu.com << 'EOF'
+          chmod 400 blccu-dev-rsa.pem
+          ssh -o StrictHostKeyChecking=no -i blccu-dev-rsa.pem ubuntu@api.blccu.com << 'EOF'
             set -e
             NEW_PORT=3001
             CURRENT_PORT=$(grep 'server localhost:' /etc/nginx/nginx.conf | awk '{print $2}' | cut -d ':' -f 2 | sed 's/;//')
@@ -71,3 +75,6 @@ jobs:
             docker images --format "{{.ID}} {{.Repository}}:{{.Tag}}" | grep -v ':latest' | awk '{print $1}' | xargs -r docker rmi
             yes | sudo docker system prune -a
           EOF
+
+      - name: Remove PEM file
+        run: rm blccu-dev-rsa.pem
