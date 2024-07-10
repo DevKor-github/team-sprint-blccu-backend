@@ -34,15 +34,14 @@ export class ArticlesPaginateRepository extends Repository<Article> {
       .addSelect([
         'user.handle',
         'user.id',
-        'user.description',
-        'user.profile_image',
+        'user.profileImage',
         'user.username',
       ])
-      .where('p.is_published = true')
+      .where('p.isPublished = true')
       .andWhere(queryByOrderSort, {
         customCursor: cursor,
       })
-      .andWhere('p.date_deleted IS NULL')
+      .andWhere('p.dateDeleted IS NULL')
       // .orderBy('p.commentCount', sort as 'ASC' | 'DESC')
       .orderBy(`p.${_order}`, sort as 'ASC' | 'DESC')
       .addOrderBy('p.id', 'DESC');
@@ -62,7 +61,7 @@ export class ArticlesPaginateRepository extends Repository<Article> {
     });
 
     if (dateFilter) {
-      queryBuilder.andWhere('p.date_created > :dateFilter', {
+      queryBuilder.andWhere('p.dateCreated > :dateFilter', {
         dateFilter,
       });
     }
@@ -82,22 +81,22 @@ export class ArticlesPaginateRepository extends Repository<Article> {
 
     const mutualFollows = await this.db_dataSource
       .createQueryBuilder(Follow, 'f1')
-      .select('f1.from_user_id', 'user1')
-      .addSelect('f1.to_user_id', 'user2')
+      .select('f1.fromUserId', 'user1')
+      .addSelect('f1.toUserId', 'user2')
       .innerJoin(
         Follow,
         'f2',
-        'f1.from_user_id = f2.to_user_id AND f1.to_user_id = f2.from_user_id',
+        'f1.fromUserId = f2.toUserId AND f1.toUserId = f2.fromUserId',
       );
 
     queryBuilder
-      .innerJoin(Follow, 'f', 'p.user_id = f.to_user_id')
+      .innerJoin(Follow, 'f', 'p.userId = f.toUserId')
       .leftJoin(
         `(${mutualFollows.getQuery()})`,
         'mf',
-        'p.user_id = mf.user1 AND f.from_user_id = mf.user2',
+        'p.userId = mf.user1 AND f.fromUserId = mf.user2',
       )
-      .where('f.from_user_id = :userId', { userId })
+      .where('f.fromUserId = :userId', { userId })
       .andWhere(
         new Brackets((qb) => {
           qb.where('mf.user1 IS NOT NULL AND p.scope IN (:...scopes)', {
@@ -109,7 +108,7 @@ export class ArticlesPaginateRepository extends Repository<Article> {
       );
 
     if (dateFilter) {
-      queryBuilder.andWhere('p.date_created > :dateFilter', {
+      queryBuilder.andWhere('p.dateCreated > :dateFilter', {
         dateFilter,
       });
     }
@@ -129,18 +128,18 @@ export class ArticlesPaginateRepository extends Repository<Article> {
     const queryBuilder = this.getCursorQuery({ order, cursor, take, sort });
 
     if (cursorOption.categoryId) {
-      queryBuilder.andWhere('article_category.id = :categoryId', {
+      queryBuilder.andWhere('articleCategory.id = :categoryId', {
         categoryId: cursorOption.categoryId,
       });
     }
     queryBuilder
-      .andWhere('p.user_id = :userId', {
+      .andWhere('p.userId = :userId', {
         userId,
       })
       .andWhere('p.scope IN (:scope)', { scope });
 
     if (dateFilter) {
-      queryBuilder.andWhere('p.date_created > :date_filter', {
+      queryBuilder.andWhere('p.dateCreated > :date_filter', {
         date_filter: dateFilter,
       });
     }

@@ -35,7 +35,7 @@ export class ReportsController {
   @UseGuards(AuthGuardV2)
   @Post('articles/:articleId/report')
   @HttpCode(201)
-  async reportPost(
+  async reportArticle(
     @Req() req: Request,
     @Body() body: ReportCreateRequestDto,
     @Param('articleId') targetId: number,

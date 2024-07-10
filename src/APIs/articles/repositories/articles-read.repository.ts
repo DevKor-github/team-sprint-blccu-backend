@@ -21,12 +21,12 @@ export class ArticlesReadRepository extends Repository<Article> {
         'user.handle',
         'user.id',
         'user.description',
-        'user.profile_image',
+        'user.profileImage',
         'user.username',
       ])
       .where('p.id = :articleId', { articleId })
       .andWhere('p.scope IN (:scope)', { scope })
-      .andWhere('p.date_deleted IS NULL')
+      .andWhere('p.dateDeleted IS NULL')
       .getOne();
   }
 
@@ -38,12 +38,11 @@ export class ArticlesReadRepository extends Repository<Article> {
       .addSelect([
         'user.handle',
         'user.id',
-        'user.description',
-        'user.profile_image',
+        'user.profileImage',
         'user.username',
       ])
       .where('p.id = :articleId', { articleId })
-      .andWhere('p.date_deleted IS NULL')
+      .andWhere('p.dateDeleted IS NULL')
       .getOne();
   }
 
@@ -55,13 +54,12 @@ export class ArticlesReadRepository extends Repository<Article> {
       .addSelect([
         'user.handle',
         'user.id',
-        'user.description',
-        'user.profile_image',
+        'user.profileImage',
         'user.username',
       ])
-      .where('p.user_id = :userId', { userId })
-      .andWhere(`p.is_published = false`)
-      .andWhere('p.date_deleted IS NULL')
+      .where('p.userId = :userId', { userId })
+      .andWhere(`p.isPublished = false`)
+      .andWhere('p.dateDeleted IS NULL')
       .orderBy('p.id', 'DESC')
       .getMany();
   }

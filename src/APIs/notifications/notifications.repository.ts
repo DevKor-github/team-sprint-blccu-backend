@@ -28,9 +28,9 @@ export class NotificationsRepository extends Repository<Notification> {
   }: INotificationsServiceRead): Promise<NotificationsGetResponseDto> {
     return await this.createQueryBuilder('n')
       .leftJoin('n.user', 'user')
-      .addSelect(['user.profile_image', 'user.username', 'user.handle'])
+      .addSelect(['user.profileImage', 'user.username', 'user.handle'])
       .where('n.id = :id', { id: notificationId })
-      .andWhere('n.target_user_id = :targetUserId', {
+      .andWhere('n.targetUserId = :targetUserId', {
         targetUserId,
       })
       .getOne();
@@ -43,15 +43,15 @@ export class NotificationsRepository extends Repository<Notification> {
   }): Promise<NotificationsGetResponseDto[]> {
     const query = this.createQueryBuilder('n')
       .leftJoin('n.user', 'user')
-      .addSelect(['user.profile_image', 'user.username', 'user.handle'])
-      .where('n.target_user_id = :userId', {
+      .addSelect(['user.profileImage', 'user.username', 'user.handle'])
+      .where('n.targetUserId = :userId', {
         userId,
       });
     if (!isChecked) {
-      query.andWhere('n.is_checked = true');
+      query.andWhere('n.isChecked = true');
     }
     if (dateCreated) {
-      query.andWhere('n.date_created > :date_created', { dateCreated });
+      query.andWhere('n.dateCreated > :date_created', { dateCreated });
     }
 
     return await query.getMany();

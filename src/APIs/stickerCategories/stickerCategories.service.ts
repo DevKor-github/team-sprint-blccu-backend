@@ -18,6 +18,7 @@ import {
 import { UsersValidateService } from '../users/services/users-validate-service';
 import { StickerCategoryDto } from './dtos/common/stickerCategory.dto';
 import { StickerCategoryMapperDto } from './dtos/common/stickerCategoryMapper.dto';
+import { StickersCategoryFetchStickersResponseDto } from './dtos/response/stickerCategories-fetch-stickers-response.dto';
 
 @Injectable()
 export class StickerCategoriesService {
@@ -100,10 +101,12 @@ export class StickerCategoriesService {
 
   async fetchStickersByCategoryId({
     stickerCategoryId,
-  }: IStickerCategoriesServiceId): Promise<StickerCategoryMapperDto[]> {
+  }: IStickerCategoriesServiceId): Promise<
+    StickersCategoryFetchStickersResponseDto[]
+  > {
     await this.existCheckById({ stickerCategoryId });
     return await this.repo_stickerCategoryMappers.find({
-      // relations: { sticker: true, stickerCategory: true },
+      relations: { sticker: true },
       where: {
         stickerCategory: { id: stickerCategoryId },
         sticker: { isDefault: true },

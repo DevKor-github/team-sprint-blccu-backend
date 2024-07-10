@@ -15,7 +15,7 @@ import {
 
 @Entity()
 export class ArticleCategory extends CommonEntity {
-  @ApiProperty({ type: String, description: 'PK: A_I_' })
+  @ApiProperty({ type: Number, description: 'PK: A_I_' })
   @PrimaryGeneratedColumn()
   @IsNumber()
   id: number;

@@ -31,20 +31,20 @@ export class ArticlesValidateService {
       .createQueryBuilder('pc')
       .where('pc.id = :id', { id: articles.articleCategoryId })
       .getOne();
-    if (!pc && !passNonEssentail)
+    if (pc == null && !passNonEssentail)
       throw new BadRequestException('존재하지 않는 article_category입니다.');
     const pg = await this.dataSource
       .getRepository(ArticleBackground)
       .createQueryBuilder('pg')
       .where('pg.id = :id', { id: articles.articleBackgroundId })
       .getOne();
-    if (!pg && articles.articleBackgroundId && !passNonEssentail)
+    if (pg == null && !passNonEssentail)
       throw new BadRequestException('존재하지 않는 article_background입니다.');
     const us = await this.dataSource
       .getRepository(User)
       .createQueryBuilder('us')
       .where('us.id = :id', { id: articles.userId })
       .getOne();
-    if (!us) throw new BadRequestException('존재하지 않는 user입니다.');
+    if (us == null) throw new BadRequestException('존재하지 않는 user입니다.');
   }
 }

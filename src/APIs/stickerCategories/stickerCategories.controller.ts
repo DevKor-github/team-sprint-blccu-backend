@@ -20,6 +20,7 @@ import { StickerCategoryCreateRequestDto } from './dtos/request/stickerCategory-
 import { StickerCategoriesMapDto } from './dtos/request/stickerCategories-map-request.dto';
 import { StickerCategoryMapperDto } from './dtos/common/stickerCategoryMapper.dto';
 import { StickerCategoryDto } from './dtos/common/stickerCategory.dto';
+import { StickersCategoryFetchStickersResponseDto } from './dtos/response/stickerCategories-fetch-stickers-response.dto';
 
 @ApiTags('스티커 API')
 @Controller()
@@ -42,11 +43,11 @@ export class StickerCategoriesController {
     summary: '카테고리 id에 해당하는 스티커를 fetchAll',
     description: '카테고리를 id로 찾고, 이에 매핑된 스티커들을 가져온다',
   })
-  @ApiOkResponse({ type: [StickerCategoryMapperDto] })
+  @ApiOkResponse({ type: [StickersCategoryFetchStickersResponseDto] })
   @Get('stickers/categories/:stickerCategoryId')
   async fetchStickersByCategoryName(
     @Param('stickerCategoryId') stickerCategoryId: number,
-  ): Promise<StickerCategoryMapperDto[]> {
+  ): Promise<StickersCategoryFetchStickersResponseDto[]> {
     return await this.stickerCategoriesService.fetchStickersByCategoryId({
       stickerCategoryId,
     });

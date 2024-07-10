@@ -5,9 +5,14 @@ import { ArticleBackgroundsController } from './articleBackgrounds.controller';
 import { ArticleBackgroundsService } from './articleBackgrounds.service';
 import { ArticleBackground } from './entities/articleBackground.entity';
 import { ImagesModule } from 'src/modules/images/images.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ArticleBackground]), ImagesModule],
+  imports: [
+    UsersModule,
+    TypeOrmModule.forFeature([ArticleBackground]),
+    ImagesModule,
+  ],
   providers: [JwtStrategy, ArticleBackgroundsService],
   controllers: [ArticleBackgroundsController],
 })

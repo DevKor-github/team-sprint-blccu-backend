@@ -33,7 +33,11 @@ export class Article extends IndexedCommonEntity {
   @IsNumber()
   id: number;
 
-  @ApiProperty({ description: '연결된 카테고리 fk', type: Number })
+  @ApiProperty({
+    description: '연결된 카테고리 fk',
+    type: Number,
+    nullable: true,
+  })
   @Column({ name: 'article_category_id', nullable: true })
   @RelationId((article: Article) => article.articleCategory)
   @IsNumber()

@@ -31,8 +31,7 @@ export class CommentsRepository extends Repository<Comment> {
       .addSelect([
         'user.handle',
         'user.id',
-        'user.description',
-        'user.profile_image',
+        'user.profileImage',
         'user.username',
       ])
       .leftJoinAndSelect('c.article', 'article')
@@ -47,26 +46,19 @@ export class CommentsRepository extends Repository<Comment> {
     let comments = await this.createQueryBuilder('c')
       .withDeleted()
       .innerJoin('c.user', 'u')
-      .addSelect([
-        'u.id',
-        'u.username',
-        'u.description',
-        'u.profile_image',
-        'u.handle',
-      ])
+      .addSelect(['u.id', 'u.username', 'u.profileImage', 'u.handle'])
       .addSelect([
         'childrenUser.id',
         'childrenUser.username',
-        'childrenUser.description',
-        'childrenUser.profile_image',
+        'childrenUser.profileImage',
         'childrenUser.handle',
       ])
       .leftJoinAndSelect('c.children', 'children')
       .leftJoin('children.user', 'childrenUser')
-      .where('c.article_id = :articleId', { articleId })
-      .andWhere('c.parent_id IS NULL')
-      .orderBy('c.date_created', 'ASC')
-      .addOrderBy('children.date_created', 'ASC')
+      .where('c.articleId = :articleId', { articleId })
+      .andWhere('c.parentId IS NULL')
+      .orderBy('c.dateCreated', 'ASC')
+      .addOrderBy('children.dateCreated', 'ASC')
       .getMany();
 
     comments = comments.filter((comment) => {

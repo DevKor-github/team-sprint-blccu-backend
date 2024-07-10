@@ -5,18 +5,22 @@ import { Repository } from 'typeorm';
 import { ImagesService } from 'src/modules/images/images.service';
 import { ArticleBackgroundDto } from './dtos/common/articleBackground.dto';
 import { ImageUploadResponseDto } from 'src/modules/images/dtos/image-upload-response.dto';
+import { UsersValidateService } from '../users/services/users-validate-service';
 
 @Injectable()
 export class ArticleBackgroundsService {
   constructor(
+    private readonly svc_images: ImagesService,
+    private readonly svc_usersValidate: UsersValidateService,
     @InjectRepository(ArticleBackground)
     private readonly repo_articleBackgrounds: Repository<ArticleBackground>,
-    private readonly svc_images: ImagesService,
   ) {}
 
   async createArticleBackground(
+    userId: number,
     file: Express.Multer.File,
   ): Promise<ImageUploadResponseDto> {
+    await this.svc_usersValidate.adminCheck({ userId });
     const { imageUrl } = await this.svc_images.imageUpload({
       file,
       resize: 2000,
@@ -30,7 +34,9 @@ export class ArticleBackgroundsService {
     return await this.repo_articleBackgrounds.find();
   }
 
-  async deleteArticleBackground({ articleBackgroundId }) {
+  async deleteArticleBackground({ articleBackgroundId, userId }) {
+    await this.svc_usersValidate.adminCheck({ userId });
+
     const articleBackground = await this.repo_articleBackgrounds.findOne({
       where: { id: articleBackgroundId },
     });

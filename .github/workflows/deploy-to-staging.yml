@@ -1,0 +1,73 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16' # 필요한 Node.js 버전으로 설정
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Login to ECR
+        run: aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 637423583546.dkr.ecr.ap-northeast-2.amazonaws.com
+
+      - name: Build Docker image
+        run: docker buildx build --platform linux/amd64 -t blccu-ecr . --load
+
+      - name: Tag Docker image
+        run: docker tag blccu-ecr:latest 637423583546.dkr.ecr.ap-northeast-2.amazonaws.com/blccu-ecr:latest
+
+      - name: Push Docker image to ECR
+        run: docker push 637423583546.dkr.ecr.ap-northeast-2.amazonaws.com/blccu-ecr:latest
+
+      - name: Deploy to server
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ./keys/blccu-dev-rsa.pem ubuntu@api.blccu.com << 'EOF'
+            set -e
+            NEW_PORT=3001
+            CURRENT_PORT=$(grep 'server localhost:' /etc/nginx/nginx.conf | awk '{print $2}' | cut -d ':' -f 2 | sed 's/;//')
+            if [ "$CURRENT_PORT" = "3001" ]; then
+              NEW_PORT=3000
+            fi
+            docker pull 637423583546.dkr.ecr.ap-northeast-2.amazonaws.com/blccu-ecr:latest
+            docker run --env-file .env.prod -d --memory="512m" --cpus="0.5" -p $NEW_PORT:3000 --name blccu-ecr-$NEW_PORT -e TZ=Asia/Seoul 637423583546.dkr.ecr.ap-northeast-2.amazonaws.com/blccu-ecr:latest
+            for i in {1..20}; do
+              HEALTH_CHECK=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health)
+              if [ "$HEALTH_CHECK" -eq 200 ]; then
+                break
+              fi
+              sleep 5
+            done
+            if [ "$HEALTH_CHECK" -ne 200 ]; then
+              docker stop blccu-ecr-$NEW_PORT && docker rm blccu-ecr-$NEW_PORT
+              exit 1
+            fi
+            sudo sed -i "s/server localhost:$CURRENT_PORT;/server localhost:$NEW_PORT;/g" /etc/nginx/nginx.conf
+            sudo systemctl restart nginx
+            docker stop blccu-ecr-$CURRENT_PORT && docker rm blccu-ecr-$CURRENT_PORT
+            docker images --format "{{.ID}} {{.Repository}}:{{.Tag}}" | grep -v ':latest' | awk '{print $1}' | xargs -r docker rmi
+            yes | sudo docker system prune -a
+          EOF

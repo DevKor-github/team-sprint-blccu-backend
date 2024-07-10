@@ -4,8 +4,9 @@ import { Injectable } from '@nestjs/common';
 import { ILikesRepositoryIds } from './interfaces/likes.repository.interface';
 import { Like } from './entities/like.entity';
 import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
-import { convertToCamelCase, getUserFields } from 'src/utils/classUtils';
+import { convertToCamelCase } from 'src/utils/classUtils';
 import { plainToClass } from 'class-transformer';
+import { USER_PRIMARY_RESPONSE_DTO_KEYS } from '../users/dtos/response/user-primary-response.dto';
 
 @Injectable()
 export class LikesRepository extends Repository<Like> {
@@ -29,11 +30,13 @@ export class LikesRepository extends Repository<Like> {
         'follow',
         'follow.to_user_id = user.id',
       )
-      .where('user.date_deleted IS NULL')
-      .andWhere('article.date_deleted IS NULL')
+      .where('user.dateDeleted IS NULL')
+      .andWhere('article.dateDeleted IS NULL')
       .andWhere('like.articleId = :articleId')
       .select([
-        ...getUserFields().map((column) => `user.${column} AS ${column}`),
+        ...USER_PRIMARY_RESPONSE_DTO_KEYS.map(
+          (column) => `user.${column} AS ${column}`,
+        ),
         'CASE WHEN follow.to_user_id IS NOT NULL THEN true ELSE false END AS is_following',
       ])
       .setParameters({ articleId, userId })
@@ -42,7 +45,6 @@ export class LikesRepository extends Repository<Like> {
     return users.map((user) =>
       plainToClass(UserFollowingResponseDto, {
         ...convertToCamelCase(user),
-        isAdmin: user.is_admin === 1,
         isFollowing: user.is_following === 1,
       }),
     );

@@ -61,7 +61,7 @@ export class ArticleCategoriesController {
   @Get('categories/:articleCategoryId')
   async fetchMyCategory(
     @Req() req: Request,
-    @Param('articleCategoryId') articleCategoryId: string,
+    @Param('articleCategoryId') articleCategoryId: number,
   ): Promise<ArticleCategoryDto> {
     return await this.svc_articleCategories.findArticleCategoryById({
       articleCategoryId,
@@ -99,7 +99,7 @@ export class ArticleCategoriesController {
   @Patch('me/categories/:articleCategoryId')
   async patchArticleCategory(
     @Req() req: Request,
-    @Param('articleCategoryId') articleCategoryId: string,
+    @Param('articleCategoryId') articleCategoryId: number,
     @Body() body: ArticleCategoryPatchRequestDto,
   ): Promise<ArticleCategoryDto> {
     const userId = req.user.userId;
@@ -120,7 +120,7 @@ export class ArticleCategoriesController {
   @UseGuards(AuthGuardV2)
   async deleteArticleCategory(
     @Req() req: Request,
-    @Param('articleCategoryId') articleCategoryId: string,
+    @Param('articleCategoryId') articleCategoryId: number,
   ) {
     const userId = req.user.userId;
     return await this.svc_articleCategories.deleteArticleCategory({

@@ -5,6 +5,7 @@ import { IFollowsRepositoryFindList } from './interfaces/follows.repository.inte
 import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
 import { convertToCamelCase, getUserFields } from 'src/utils/classUtils';
 import { plainToClass } from 'class-transformer';
+import { USER_PRIMARY_RESPONSE_DTO_KEYS } from '../users/dtos/response/user-primary-response.dto';
 
 @Injectable()
 export class FollowsRepository extends Repository<Follow> {
@@ -18,8 +19,8 @@ export class FollowsRepository extends Repository<Follow> {
   }: IFollowsRepositoryFindList): Promise<UserFollowingResponseDto[]> {
     const followings = await this.createQueryBuilder('follow')
       .innerJoin('follow.fromUser', 'user')
-      .where('user.date_deleted IS NULL')
-      .andWhere('follow.to_user_id = :userId')
+      .where('user.dateDeleted IS NULL')
+      .andWhere('follow.toUserId = :userId')
       .leftJoinAndSelect(
         (subQuery) => {
           return subQuery
@@ -31,7 +32,9 @@ export class FollowsRepository extends Repository<Follow> {
         'follow2.to_user_id = user.id',
       )
       .select([
-        ...getUserFields().map((column) => `user.${column} AS ${column}`),
+        ...USER_PRIMARY_RESPONSE_DTO_KEYS.map(
+          (column) => `user.${column} AS ${column}`,
+        ),
         'CASE WHEN follow2.to_user_id IS NOT NULL THEN true ELSE false END AS is_following',
       ])
       .setParameters({ userId, loggedUser })
@@ -40,7 +43,6 @@ export class FollowsRepository extends Repository<Follow> {
     return followings.map((follower) =>
       plainToClass(UserFollowingResponseDto, {
         ...convertToCamelCase(follower),
-        isAdmin: follower.is_admin === 1,
         isFollowing: follower.is_following === 1,
       }),
     );
@@ -52,8 +54,8 @@ export class FollowsRepository extends Repository<Follow> {
   }: IFollowsRepositoryFindList): Promise<UserFollowingResponseDto[]> {
     const followings = await this.createQueryBuilder('follow')
       .innerJoin('follow.toUser', 'user')
-      .where('user.date_deleted IS NULL')
-      .andWhere('follow.from_user_id = :userId')
+      .where('user.dateDeleted IS NULL')
+      .andWhere('follow.fromUserId = :userId')
       .leftJoinAndSelect(
         (subQuery) => {
           return subQuery
@@ -65,7 +67,9 @@ export class FollowsRepository extends Repository<Follow> {
         'follow2.to_user_id = user.id',
       )
       .select([
-        ...getUserFields().map((column) => `user.${column} AS ${column}`),
+        ...USER_PRIMARY_RESPONSE_DTO_KEYS.map(
+          (column) => `user.${column} AS ${column}`,
+        ),
         'CASE WHEN follow2.to_user_id IS NOT NULL THEN true ELSE false END AS is_following',
       ])
       .setParameters({ userId, loggedUser })
@@ -74,7 +78,6 @@ export class FollowsRepository extends Repository<Follow> {
     return followings.map((follower) =>
       plainToClass(UserFollowingResponseDto, {
         ...convertToCamelCase(follower),
-        isAdmin: follower.is_admin === 1,
         isFollowing: follower.is_following === 1,
       }),
     );
