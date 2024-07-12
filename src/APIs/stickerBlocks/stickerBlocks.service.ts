@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { StickerBlock } from './entities/stickerblock.entity';
 import { Repository } from 'typeorm';
@@ -10,6 +10,7 @@ import {
   IStikcerBlocksServiceFetchBlocks,
 } from './interfaces/stickerBlocks.service.interface';
 import { StickerBlockDto } from './dtos/common/stickerBlock.dto';
+import { StickerBlocksWithStickerResponseDto } from './dtos/response/stickerBlocks-with-sticker-response.dto';
 
 @Injectable()
 export class StickerBlocksService {
@@ -25,9 +26,9 @@ export class StickerBlocksService {
     ...rest
   }: IStickerBlocksServiceCreateStickerBlock): Promise<StickerBlockDto> {
     try {
-      await this.svc_stickers.existCheck({
-        stickerId: stickerId,
-      });
+      // await this.svc_stickers.existCheck({
+      //   stickerId: stickerId,
+      // });
 
       const data = await this.repo_stickerBlocks.save({
         ...rest,
@@ -36,7 +37,7 @@ export class StickerBlocksService {
       });
       return data;
     } catch (e) {
-      throw new NotFoundException('게시글을 찾을 수 없습니다.');
+      throw e;
     }
   }
 
@@ -58,8 +59,11 @@ export class StickerBlocksService {
 
   async findStickerBlocks({
     articleId,
-  }: IStikcerBlocksServiceFetchBlocks): Promise<StickerBlockDto[]> {
+  }: IStikcerBlocksServiceFetchBlocks): Promise<
+    StickerBlocksWithStickerResponseDto[]
+  > {
     return await this.repo_stickerBlocks.find({
+      relations: ['sticker'],
       where: { articleId },
     });
   }

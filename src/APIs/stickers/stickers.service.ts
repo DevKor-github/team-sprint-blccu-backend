@@ -28,9 +28,17 @@ export class StickersService {
     return await this.repo_stickers.findOne({ where: { id: stickerId } });
   }
 
-  async existCheck({ stickerId }: IStickersServiceId): Promise<void> {
-    const data = await this.findStickerById({ stickerId });
-    if (!data) throw new NotFoundException('스티커를 찾을 수 없습니다.');
+  async existCheck({ stickerId }: IStickersServiceId): Promise<StickerDto> {
+    try {
+      const data = await this.findStickerById({ stickerId });
+      if (!data) {
+        throw new NotFoundException('스티커를 찾을 수 없습니다.');
+      }
+
+      return data;
+    } catch (e) {
+      throw e;
+    }
   }
 
   async createPrivateSticker({

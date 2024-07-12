@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ArticleDetailResponseDto } from './article-detail-response.dto';
-import { StickerBlockDto } from 'src/APIs/stickerBlocks/dtos/common/stickerBlock.dto';
+import { StickerBlocksWithStickerResponseDto } from 'src/APIs/stickerBlocks/dtos/response/stickerBlocks-with-sticker-response.dto';
 
 export class ArticleDetailForUpdateResponseDto {
   @ApiProperty({ type: ArticleDetailResponseDto })
-  article;
+  article: ArticleDetailResponseDto;
 
-  @ApiProperty({ type: [StickerBlockDto] })
-  stickerBlocks;
+  @ApiProperty({ type: [StickerBlocksWithStickerResponseDto] })
+  stickerBlocks: StickerBlocksWithStickerResponseDto[];
 }

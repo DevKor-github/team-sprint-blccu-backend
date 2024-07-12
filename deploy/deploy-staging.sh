@@ -12,12 +12,13 @@ fi
 # PEM 파일 권한 확인 및 수정
 chmod 400 "$PEM_PATH"
 
-HOST="api.blccu.com"
+HOST="staging.api.blccu.com"
 ACCOUNT=ubuntu
 SERVICE_NAME=blccu-ecr
 DOCKER_TAG=latest
 ECR_URL="637423583546.dkr.ecr.ap-northeast-2.amazonaws.com"
 SERVER=$ACCOUNT@$HOST
+AWS_PROFILE=staging  # 배포 프로파일 사용
 
 NGINX_CONFIG=/etc/nginx/nginx.conf
 BLUE_PORT="3000"
@@ -28,7 +29,7 @@ echo -e "\n## Docker build & push ##\n"
 
 
 npm run build
-aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 637423583546.dkr.ecr.ap-northeast-2.amazonaws.com
+aws ecr get-login-password --region ap-northeast-2 --profile $AWS_PROFILE | docker login --username AWS --password-stdin $ECR_URL
 docker buildx build --platform linux/amd64 -t $SERVICE_NAME . --load
 docker tag $SERVICE_NAME:$DOCKER_TAG $ECR_URL/$SERVICE_NAME:$DOCKER_TAG
 docker push $ECR_URL/$SERVICE_NAME:$DOCKER_TAG
@@ -54,7 +55,7 @@ OLD_SERVICE_NAME=$SERVICE_NAME-$CURRENT_PORT
 
 # docker pull & run
 echo -e "\n## new docker pull & run ##\n"
-ssh -i $PEM_PATH $SERVER "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 637423583546.dkr.ecr.ap-northeast-2.amazonaws.com"
+ssh -i $PEM_PATH $SERVER "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $ECR_URL"
 ssh -i $PEM_PATH $SERVER "docker pull $ECR_URL/$SERVICE_NAME:$DOCKER_TAG"
 ssh -i $PEM_PATH $SERVER "docker run  --env-file .env.staging -d --memory="512m" --cpus="0.5" -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul $ECR_URL/$SERVICE_NAME"
 # memory랑 cpu 사용량 조절
