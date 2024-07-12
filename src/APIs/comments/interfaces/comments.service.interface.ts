@@ -20,6 +20,10 @@ export interface ICommentsServiceFindComments {
   articleId: number;
 }
 
+export interface ICommentsServiceFindUserComments {
+  userId: number;
+}
+
 export interface ICommentsServiceDeleteComment {
   commentId: number;
   userId: number;

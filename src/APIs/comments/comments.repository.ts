@@ -42,7 +42,7 @@ export class CommentsRepository extends Repository<Comment> {
       .getOne();
   }
 
-  async fetchComments({
+  async fetchAll({
     articleId,
   }: ICommentsRepositoryfetchComments): Promise<CommentsGetResponseDto[]> {
     let comments = await this.createQueryBuilder('c')

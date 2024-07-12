@@ -11,6 +11,7 @@ import {
   ICommentsServiceCreateComment,
   ICommentsServiceDeleteComment,
   ICommentsServiceFindComments,
+  ICommentsServiceFindUserComments,
   ICommentsServiceId,
   ICommentsServicePatchComment,
 } from './interfaces/comments.service.interface';
@@ -125,7 +126,17 @@ export class CommentsService {
   async fetchComments({
     articleId,
   }: ICommentsServiceFindComments): Promise<CommentsGetResponseDto[]> {
-    return await this.repo_comments.fetchComments({ articleId });
+    return await this.repo_comments.fetchAll({ articleId });
+  }
+
+  async fetchUserComments({
+    userId,
+  }: ICommentsServiceFindUserComments): Promise<CommentDto[]> {
+    return await this.repo_comments.find({
+      where: { userId },
+      order: { dateCreated: 'DESC' },
+      take: 10,
+    });
   }
 
   async delete({
