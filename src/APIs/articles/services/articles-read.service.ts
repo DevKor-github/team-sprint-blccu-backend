@@ -46,7 +46,7 @@ export class ArticlesReadService {
     return { article, stickerBlocks };
   }
 
-  async readTempArticles({ userId }): Promise<ArticleDto[]> {
+  async readTempArticles({ userId }): Promise<ArticleDetailResponseDto[]> {
     return await this.repo_articlesRead.readTemp({ userId });
   }
 

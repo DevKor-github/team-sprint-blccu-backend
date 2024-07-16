@@ -39,10 +39,12 @@ export class ArticlesReadController {
     description: '로그인된 유저의 임시작성 게시글을 조회한다.',
   })
   @ApiCookieAuth()
-  @ApiOkResponse({ type: [ArticleDto] })
+  @ApiOkResponse({ type: [ArticleDetailResponseDto] })
   @UseGuards(AuthGuardV2)
   @Get('temp')
-  async fetchTempArticles(@Req() req: Request): Promise<ArticleDto[]> {
+  async fetchTempArticles(
+    @Req() req: Request,
+  ): Promise<ArticleDetailResponseDto[]> {
     const userId = req.user.userId;
     return await this.svc_articlesRead.readTempArticles({ userId });
   }

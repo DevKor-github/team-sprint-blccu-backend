@@ -47,7 +47,7 @@ export class ArticlesReadRepository extends Repository<Article> {
       .getOne();
   }
 
-  async readTemp({ userId }): Promise<ArticleDto[]> {
+  async readTemp({ userId }): Promise<ArticleDetailResponseDto[]> {
     return this.createQueryBuilder('p')
       .innerJoin('p.user', 'user')
       .leftJoinAndSelect('p.articleBackground', 'article_background')
