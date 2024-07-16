@@ -31,7 +31,6 @@ export class AwsService {
       Bucket: this.configService.get('AWS_S3_BUCKET_NAME'), // S3 버킷 이름
       Key: fileName, // 업로드될 파일의 이름
       Body: resizedImageBuffer, // 업로드할 파일
-      ACL: 'public-read', // 파일 접근 권한
       ContentType: `image/${ext}`, // 파일 타입,
     });
     await this.s3Client.send(command);
@@ -67,7 +66,6 @@ export class AwsService {
       Bucket: this.configService.get('AWS_S3_BUCKET_NAME'), // S3 버킷 이름
       Key: fileName, // 업로드될 파일의 이름
       Body: resizedImageBuffer, // 업로드할 파일
-      ACL: 'public-read', // 파일 접근 권한
       ContentType: `image/${ext}`, // 파일 타입
     });
 
