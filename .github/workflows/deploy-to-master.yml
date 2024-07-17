@@ -5,7 +5,7 @@ on:
     branches:
       - master
 
-permission:
+permissions:
   id-token: write
 
 jobs:
