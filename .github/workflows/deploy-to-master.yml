@@ -1,0 +1,106 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      ECR_URL: ${{ secrets.AWS_PRODUCTION_ECR_URL }}
+      HOSTS: ${{ secrets.AWS_PRODUCTUON_HOSTS }}
+      AWS_PROFILE: production
+      ACCOUNT: 'ubuntu'
+      DOCKER_TAG: 'latest'
+      SERVICE_NAME: 'blccu'
+      BLUE_PORT: '3000'
+      GREEN_PORT: '3001'
+      NGINX_CONFIG: '/etc/nginx/nginx.conf'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Log in to ECR
+        run: |
+          aws ecr get-login-password --region ap-northeast-2 --profile $AWS_PROFILE | docker login --username AWS --password-stdin $ECR_URL
+
+      - name: Build and push Docker image
+        run: |
+          docker buildx build --platform linux/amd64 -t $SERVICE_NAME . --load
+          docker tag $SERVICE_NAME:$DOCKER_TAG $ECR_URL/$SERVICE_NAME:$DOCKER_TAG
+          docker push $ECR_URL/$SERVICE_NAME:$DOCKER_TAG
+
+      - name: Create PEM file
+        run: echo "${{ secrets.PEM_KEY }}" > deploy_key.pem
+
+      - name: Set PEM file permissions
+        run: chmod 400 deploy_key.pem
+
+      - name: Deploy to servers
+        run: |
+          IFS=',' read -r -a HOST_ARRAY <<< "$HOSTS"
+          for HOST in "${HOST_ARRAY[@]}"; do
+            SERVER=$ACCOUNT@$HOST
+
+            scp -i deploy_key.pem "$GITHUB_WORKSPACE/.env.prod" $SERVER:/home/$ACCOUNT/upload/.env.prod
+
+            CURRENT_PORT=$(ssh -i deploy_key.pem -o StrictHostKeyChecking=no $SERVER "grep 'server localhost:' $NGINX_CONFIG | awk '{print \$2}' | cut -d ':' -f 2 | sed 's/;//'")
+
+            if [ "$CURRENT_PORT" = "$BLUE_PORT" ]; then
+              NEW_PORT=$GREEN_PORT
+            elif [ "$CURRENT_PORT" = "$GREEN_PORT" ]; then
+              NEW_PORT=$BLUE_PORT
+            else
+              echo "서버의 blue green 포트 확인 실패 on $HOST"
+              exit 1
+            fi
+
+            NEW_SERVICE_NAME=$SERVICE_NAME-$NEW_PORT
+            OLD_SERVICE_NAME=$SERVICE_NAME-$CURRENT_PORT
+
+            ssh -i deploy_key.pem $SERVER "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $ECR_URL"
+            ssh -i deploy_key.pem $SERVER "docker pull $ECR_URL/$SERVICE_NAME:$DOCKER_TAG"
+            ssh -i deploy_key.pem $SERVER "docker run --env-file /home/$ACCOUNT/upload/.env.prod -d -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul $ECR_URL/$SERVICE_NAME"
+
+            for i in {1..20}; do
+              HEALTH_CHECK=$(ssh -i deploy_key.pem $SERVER "curl -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health")
+              if [ "$HEALTH_CHECK" -eq 200 ]; then
+                break
+              fi
+              sleep 5
+            done
+
+            if [ "$HEALTH_CHECK" -ne 200 ]; then
+              ssh -i deploy_key.pem $SERVER "docker stop $NEW_SERVICE_NAME && docker rm $NEW_SERVICE_NAME"
+              exit 1
+            fi
+
+            ssh -i deploy_key.pem $SERVER "sudo sed -i 's/server localhost:$CURRENT_PORT;/server localhost:$NEW_PORT;/g' $NGINX_CONFIG"
+            ssh -i deploy_key.pem $SERVER "sudo systemctl restart nginx"
+
+            ssh -i deploy_key.pem $SERVER "sudo docker stop $OLD_SERVICE_NAME"
+            ssh -i deploy_key.pem $SERVER "sudo docker rm $OLD_SERVICE_NAME"
+            ssh -i deploy_key.pem $SERVER "docker images --format \"{{.ID}} {{.Repository}}:{{.Tag}}\" | grep -v ':latest' | awk '{print \$1}' | xargs -r docker rmi"
+            ssh -i deploy_key.pem $SERVER "y | sudo docker system prune -a"
+
+            echo "배포 완료 on $HOST. $NEW_SERVICE_NAME"
+          done
+
+      - name: Cleanup PEM file
+        run: rm deploy_key.pem
+        if: always()
