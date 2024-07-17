@@ -35,6 +35,12 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Print AWS environment variables
+        run: |
+          echo ${{ secrets.AWS_PRODUCTION_ACCESS_KEY }}
+          echo ${{ secrets.AWS_PRODUCTION_SECRET_ACCESS_KEY }}
+          echo ${{ secrets.AWS_REGION }}
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
