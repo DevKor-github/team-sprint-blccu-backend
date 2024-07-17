@@ -12,6 +12,9 @@ jobs:
     env:
       ECR_URL: ${{ secrets.AWS_PRODUCTION_ECR_URL }}
       HOSTS: ${{ secrets.AWS_PRODUCTUON_HOSTS }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCESS_KEY: $$ { secrets:AWS_PRODUCTION_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: $${ secrets.AWS_PRODUCTION_SECRET_ACCESS_KEY }}
       AWS_PROFILE: production
       ACCOUNT: 'ubuntu'
       DOCKER_TAG: 'latest'
@@ -35,18 +38,12 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Print AWS environment variables
-        run: |
-          echo ${{ secrets.AWS_PRODUCTION_ACCESS_KEY }}
-          echo ${{ secrets.AWS_PRODUCTION_SECRET_ACCESS_KEY }}
-          echo ${{ secrets.AWS_REGION }}
-
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_PRODUCTION_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_PRODUCTION_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Log in to ECR
         run: |
