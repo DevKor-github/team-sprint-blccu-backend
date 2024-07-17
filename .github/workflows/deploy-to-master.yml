@@ -5,12 +5,13 @@ on:
     branches:
       - master
 
-permissions:
-  id-token: write
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
 
     env:
       ECR_URL: ${{ secrets.AWS_PRODUCTION_ECR_URL }}
