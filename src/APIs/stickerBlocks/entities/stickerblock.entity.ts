@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Posts } from 'src/APIs/posts/entities/posts.entity';
+import { IsNumber } from 'class-validator';
+import { Article } from 'src/APIs/articles/entities/article.entity';
 import { Sticker } from 'src/APIs/stickers/entities/sticker.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import {
   Column,
   Entity,
@@ -11,18 +13,20 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class StickerBlock {
+export class StickerBlock extends CommonEntity {
   @ApiProperty({ description: 'PK: A_I_', type: Number })
   @PrimaryGeneratedColumn()
+  @IsNumber()
   id: number;
 
   @ApiProperty({ description: '참조하는 스티커의 아이디', type: Number })
-  @Column()
+  @Column({ name: 'sticker_id' })
   @RelationId((stickerBlock: StickerBlock) => stickerBlock.sticker)
+  @IsNumber()
   stickerId: number;
 
-  @ApiProperty({ description: '참조하는 스티커', type: Sticker })
-  @JoinColumn()
+  @ApiProperty({ description: '참조하는 스티커', type: () => Sticker })
+  @JoinColumn({ name: 'sticker_id' })
   @ManyToOne(() => Sticker, (stickers) => stickers.id, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
@@ -30,39 +34,40 @@ export class StickerBlock {
   sticker: Sticker;
 
   @ApiProperty({ description: '참조하는 포스트 아이디', type: Number })
-  @Column()
-  @RelationId((stickerBlock: StickerBlock) => stickerBlock.posts)
-  postsId: number;
+  @Column({ name: 'article_id' })
+  @RelationId((stickerBlock: StickerBlock) => stickerBlock.article)
+  @IsNumber()
+  articleId: number;
 
-  @ApiProperty({ description: '참조하는 포스트', type: Posts })
-  @JoinColumn()
-  @ManyToOne(() => Posts, (posts) => posts.id, {
+  @ApiProperty({ description: '참조하는 포스트', type: () => Article })
+  @JoinColumn({ name: 'article_id' })
+  @ManyToOne(() => Article, (article) => article.id, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  posts: Posts;
+  article: Article;
 
-  @ApiProperty({ description: '스티커의 depth', type: Number })
-  @Column()
-  depth: number;
+  @ApiProperty({ description: '스티커의 posX', type: Number })
+  @Column({ type: 'float', name: 'pox_x' })
+  posX: number;
 
-  @ApiProperty({ description: '스티커의 fill', type: String })
-  @Column()
-  fill: string;
+  @ApiProperty({ description: '스티커의 posY', type: Number })
+  @Column({ type: 'float', name: 'pos_y' })
+  posY: number;
 
-  @ApiProperty({ description: '스티커의 x좌표', type: String })
-  @Column()
-  x: string;
+  @ApiProperty({ description: '스티커의 scale', type: Number })
+  @Column({ type: 'float' })
+  scale: number;
 
-  @ApiProperty({ description: '스티커의 y좌표', type: String })
-  @Column()
-  y: string;
+  @ApiProperty({ description: '스티커의 angle', type: Number })
+  @Column({ type: 'float' })
+  angle: number;
 
-  @ApiProperty({ description: '스티커의 가로 폭', type: String })
-  @Column()
-  width: string;
+  @ApiProperty({ description: '스티커의 zindex', type: Number })
+  @Column({ type: 'float', name: 'z_index' })
+  zindex: number;
 
-  @ApiProperty({ description: '스티커의 세로 폭', type: String })
-  @Column()
-  height: string;
+  @ApiProperty({ description: '스티커의 clientId', type: String })
+  @Column({ name: 'client_id' })
+  clientId: string;
 }

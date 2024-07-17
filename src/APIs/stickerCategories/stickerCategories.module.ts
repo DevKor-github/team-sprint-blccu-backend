@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtStrategy } from '../auth/strategies/jwt.strategy';
 import { StickerCategory } from './entities/stickerCategory.entity';
 import { StickerCategoryMapper } from './entities/stickerCategoryMapper.entity';
 import { StickerCategoriesService } from './stickerCategories.service';
@@ -14,7 +13,7 @@ import { StickersModule } from '../stickers/stickers.module';
     UsersModule,
     StickersModule,
   ],
-  providers: [JwtStrategy, StickerCategoriesService],
+  providers: [StickerCategoriesService],
   controllers: [StickerCategoriesController],
 })
 export class StickerCategoriesModule {}

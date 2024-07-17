@@ -1,35 +1,94 @@
-import { Controller, Get, Param, Req, Sse } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+  Req,
+  Res,
+  Sse,
+  UseGuards,
+} from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
+import {
+  ApiCookieAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiProduces,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Request, Response } from 'express';
+
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
+import { interval, map, merge } from 'rxjs';
+import { NotificationsGetResponseDto } from './dtos/response/notifications-get-response.dto';
+import { NotificationsGetRequestDto } from './dtos/request/notifications-get-request.dto';
 
 @ApiTags('알림 API')
-@Controller('nots')
+@Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
-  /*
-  로직: 유저가 접속하면 알림을 구독한다.
-  최초 구독 시 알림을 한번 fetch 한다. getManyAndCount로 개수 체크해서 메인에 띄워줌
-  댓글을 달거나 등 알림이 생기면 kakaoId 옵저버에 next로 이벤트 갱신해준다.
-  갱신이 발생하면 sub해둔 프론트가 refetching을 한다.
-  브라우저를 끄거나 refetching이 한동안 일어나지 않으면 sse를 끊는다.
-  */
   @ApiOperation({
-    summary: '[SSE] kakaoId로 오는 알림을 구독한다.',
-    description: '[swagger 불가능, postman 권장]',
+    summary: '[SSE] 알림을 구독한다.',
+    description:
+      '[swagger 불가능, postman 권장] sse를 연결한다. 로그인된 유저를 타겟으로 하는 알림이 보내졌을경우 sse를 통해 전달받는다.',
   })
-  @Sse(':kakaoId')
-  sendClientAlarm(@Param('kakaoId') kakaoId: number, @Req() req: Request) {
-    // this.notificationsService.addStream(this.users$, this.observer, userId);
-    // req.on('close', () =>
-    //   this.notificationsService.removeStream(req['user'].id.toString()),
-    // );
-    // return this.notificationsService.sendClientAlarm(+kakaoId);
+  @ApiCookieAuth()
+  @ApiProduces('text/event-stream')
+  @UseGuards(AuthGuardV2)
+  @Sse('subscribe')
+  connectUser(@Req() req: Request, @Res() res: Response) {
+    const targetUserId = req.user.userId;
+    res.setTimeout(0); // 600초로 설정, 필요에 따라 변경 가능 nginx도 함께 변경할 것.
+    // res.setTimeout(15 * 1000);
+    const sseStream = this.notificationsService.connectUser({
+      targetUserId,
+    });
+    const pingStream = interval(30000).pipe(
+      map(() => ({ type: 'ping', data: 'keep-alive' })),
+    );
+    return merge(sseStream, pingStream);
   }
 
-  @Get('send/:kakaoId')
-  test(@Param('kakaoId') kakaoId: number) {
-    // this.notificationsService.emitAlarm(kakaoId);
+  @ApiOperation({
+    summary: '알림 조회',
+    description:
+      '로그인된 유저들에게 보내진 알림들을 조회한다. query를 통해 알림 조회 옵션 설정. sse 연결 이전 이니셜 데이터 fetch 시 사용',
+  })
+  @ApiOkResponse({ type: [NotificationsGetResponseDto] })
+  @Get()
+  @ApiCookieAuth()
+  @UseGuards(AuthGuardV2)
+  async getNotifications(
+    @Req() req: Request,
+    @Query() fetchNotiInput: NotificationsGetRequestDto,
+  ): Promise<NotificationsGetResponseDto[]> {
+    const userId = req.user.userId;
+    return await this.notificationsService.findNotifications({
+      userId,
+      ...fetchNotiInput,
+    });
+  }
+
+  @ApiOperation({
+    summary: '알림 읽기',
+    description: '알림을 읽음 처리한다.',
+  })
+  @ApiCookieAuth()
+  @UseGuards(AuthGuardV2)
+  @ApiOkResponse({ type: NotificationsGetResponseDto })
+  @HttpCode(200)
+  @Post(':notificationId/read')
+  async readNotification(
+    @Req() req: Request,
+    @Param('notificationId') notificationId: number,
+  ): Promise<NotificationsGetResponseDto> {
+    const targetUserId = req.user.userId;
+    return await this.notificationsService.readNotification({
+      notificationId,
+      targetUserId,
+    });
   }
 }

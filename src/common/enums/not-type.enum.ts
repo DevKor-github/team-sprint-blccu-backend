@@ -1,0 +1,8 @@
+export enum NotType {
+  COMMENT = 'COMMENT',
+  REPLY = 'REPLY',
+  LIKE = 'LIKE',
+  FOLLOW = 'FOLLOW',
+  ANNOUNCEMENT = 'ANNOUNCEMENT',
+  REPORT = 'REPORT',
+}

@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Post,
   Req,
   Res,
   UnauthorizedException,
@@ -18,6 +19,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 
 @ApiTags('인증 API')
 @Controller('auth')
@@ -32,20 +34,33 @@ export class AuthController {
   @ApiMovedPermanentlyResponse({
     description: `카카오에서 인증 완료 후 클라이언트 루트 url로 리다이렉트 한다.`,
   })
-  @Get('kakao') // 카카오 서버를 거쳐서 도착하게 될 엔드포인트
+  @Get('login/kakao') // 카카오 서버를 거쳐서 도착하게 될 엔드포인트
   @UseGuards(AuthGuard('kakao')) // kakao.strategy를 실행시켜 줍니다.
   @HttpCode(301)
   async kakaoLogin(@Req() req: Request, @Res() res: Response) {
-    // console.log(req.user);
     const { accessToken, refreshToken } = await this.authService.getJWT({
-      kakaoId: req.user.kakaoId,
-      username: req.user.username,
-      profile_image: req.user.profile_image,
+      userId: req.user.kakaoId,
     });
-    res.cookie('accessToken', accessToken, { httpOnly: true });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true });
-    res.cookie('isLoggedIn', true, { httpOnly: false });
+
+    // 클라이언트 도메인 설정
+    const clientDomain = process.env.CLIENT_DOMAIN;
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      domain: clientDomain,
+      sameSite: 'none',
+      secure: true,
+    });
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      domain: clientDomain,
+      sameSite: 'none',
+      secure: true,
+    });
+    res.cookie('isLoggedIn', true, { httpOnly: false, domain: clientDomain });
+
     return res.redirect(process.env.CLIENT_URL);
+    // return res.send();
   }
 
   @ApiOperation({
@@ -60,23 +75,68 @@ export class AuthController {
       'refresh 토큰이 만료되었거나 없을 경우 cookie를 모두 clear한다.',
   })
   @ApiCookieAuth()
-  @Get('refresh')
+  @Get('refresh-token')
   @HttpCode(201)
   async refresh(@Req() req: Request, @Res() res: Response) {
     try {
       const newAccessToken = await this.authService.refresh(
         req.cookies.refreshToken,
       );
+      const clientDomain = process.env.CLIENT_DOMAIN;
+
       res.cookie('accessToken', newAccessToken, {
         httpOnly: true,
+        domain: clientDomain,
+        sameSite: 'none',
+        secure: true,
       });
       return res.send();
     } catch (e) {
-      res.clearCookie('accessToken');
-      res.clearCookie('refreshToken');
-      res.clearCookie('isLoggedIn');
+      const clientDomain = process.env.CLIENT_DOMAIN;
+
+      res.clearCookie('accessToken', {
+        httpOnly: true,
+        domain: clientDomain,
+        sameSite: 'none',
+        secure: true,
+      });
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        domain: clientDomain,
+        sameSite: 'none',
+        secure: true,
+      });
+      res.clearCookie('isLoggedIn', { httpOnly: false, domain: clientDomain });
+
       throw new UnauthorizedException(e.message);
     }
+  }
+
+  @ApiOperation({
+    summary: '로그아웃(clear cookie)',
+    description: '클라이언트의 로그인 관련 쿠키를 초기화한다.',
+  })
+  @ApiCookieAuth()
+  @UseGuards(AuthGuardV2)
+  @Post('logout')
+  @HttpCode(204)
+  async logout(@Res() res: Response) {
+    const clientDomain = process.env.CLIENT_DOMAIN;
+
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      domain: clientDomain,
+      sameSite: 'none',
+      secure: true,
+    });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      domain: clientDomain,
+      sameSite: 'none',
+      secure: true,
+    });
+    res.clearCookie('isLoggedIn', { httpOnly: false, domain: clientDomain });
+    return res.send();
   }
 }
 

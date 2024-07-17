@@ -1,7 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Posts } from 'src/APIs/posts/entities/posts.entity';
+import { IsNumber } from 'class-validator';
+import { Article } from 'src/APIs/articles/entities/article.entity';
 import { User } from 'src/APIs/users/entities/user.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import {
+  Column,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -10,28 +13,41 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Likes {
-  // refactoring => pk 예측가능 값이어도 상관 없는 경우 A_I_로 하기
-  @ApiProperty({ description: 'PK: uuid', type: String })
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class Like extends CommonEntity {
+  @ApiProperty({ description: 'PK: number', type: Number })
+  @PrimaryGeneratedColumn()
+  @IsNumber()
+  id: number;
 
-  @ApiProperty({ description: '좋아요를 누른 유저', type: User })
-  @JoinColumn()
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ApiProperty({ description: '좋아요를 누른 유저', type: () => User })
+  @JoinColumn({ name: 'user_id' })
+  @ManyToOne(() => User, { onUpdate: 'NO ACTION', onDelete: 'CASCADE' })
   user: User;
 
-  @RelationId((like: Likes) => like.user)
-  userKakaoId: number;
+  @ApiProperty({ description: '유저 아이디', type: Number })
+  @Column({ name: 'user_id' })
+  @RelationId((like: Like) => like.user)
+  @IsNumber()
+  userId: number;
 
   @ApiProperty({
-    description: '좋아요를 누른 포스트',
-    type: Posts,
+    description: '좋아요를 누른 게시글',
+    type: () => Article,
   })
-  @JoinColumn()
-  @ManyToOne(() => Posts, { nullable: false, onDelete: 'CASCADE' })
-  posts: Posts;
+  @JoinColumn({ name: 'article_id' })
+  @ManyToOne(() => Article, {
+    nullable: false,
+    onUpdate: 'NO ACTION',
+    onDelete: 'CASCADE',
+  })
+  article: Article;
 
-  @RelationId((like: Likes) => like.posts)
-  postsId: number;
+  @ApiProperty({
+    type: Number,
+    description: '게시글 아이디',
+  })
+  @Column({ name: 'article_id' })
+  @RelationId((like: Like) => like.article)
+  @IsNumber()
+  articleId: number;
 }

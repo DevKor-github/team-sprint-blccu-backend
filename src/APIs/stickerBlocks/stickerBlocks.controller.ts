@@ -1,20 +1,38 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { StickerBlocksService } from './stickerBlocks.service';
-import { CreateStickerBlockDto } from './dto/create-stickerBlock.dto';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
+import { StickerBlockDto } from './dtos/common/stickerBlock.dto';
+import { StickerBlocksCreateRequestDto } from './dtos/request/stickerBlocks-create-request.dto';
 
-@ApiTags('스티커 블록 API')
-@Controller('stickerBlocks')
+@ApiTags('게시글 API')
+@Controller('articles/:articleId/stickers')
 export class StickerBlocksController {
-  constructor(private readonly stickerBlocksService: StickerBlocksService) {}
+  constructor(private readonly svc_stickerBlocks: StickerBlocksService) {}
 
   @ApiOperation({
     summary: '게시글 속 스티커 생성',
     description:
       '게시글과 스티커 아이디를 매핑한 스티커 블록을 생성한다. 세부 스타일 좌표값을 저장한다.',
   })
-  @Post()
-  async createStickerBlock(@Body() body: CreateStickerBlockDto) {
-    return await this.stickerBlocksService.create(body);
+  @ApiCookieAuth()
+  @UseGuards(AuthGuardV2)
+  @ApiCreatedResponse({ type: [StickerBlockDto] })
+  @Post('bulk')
+  async createStickerBlocks(
+    @Body() body: StickerBlocksCreateRequestDto,
+    @Param('articleId') articleId: number,
+    // @Req() req: Request,
+  ): Promise<StickerBlockDto[]> {
+    // const userId = req.user.userId;
+    return await this.svc_stickerBlocks.createStickerBlocks({
+      ...body,
+      articleId,
+    });
   }
 }

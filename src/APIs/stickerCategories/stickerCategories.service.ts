@@ -1,65 +1,116 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { StickerCategory } from './entities/stickerCategory.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { StickerCategoryMapper } from './entities/stickerCategoryMapper.entity';
-import { UsersService } from '../users/users.service';
 import { StickersService } from '../stickers/stickers.service';
+import {
+  IStickerCategoriesServiceCreateCategory,
+  IStickerCategoriesServiceId,
+  IStickerCategoriesServiceIds,
+  IStickerCategoriesServiceMapCategory,
+  IStickerCategoriesServiceName,
+} from './interfaces/stickerCategories.service.interface';
+import { UsersValidateService } from '../users/services/users-validate-service';
+import { StickerCategoryDto } from './dtos/common/stickerCategory.dto';
+import { StickerCategoryMapperDto } from './dtos/common/stickerCategoryMapper.dto';
+import { StickersCategoryFetchStickersResponseDto } from './dtos/response/stickerCategories-fetch-stickers-response.dto';
 
 @Injectable()
 export class StickerCategoriesService {
   constructor(
     @InjectRepository(StickerCategory)
-    private readonly stickerCategoriesRepository: Repository<StickerCategory>,
+    private readonly repo_stickerCategories: Repository<StickerCategory>,
     @InjectRepository(StickerCategoryMapper)
-    private readonly stickerCategoryMappersRepository: Repository<StickerCategoryMapper>,
-    private readonly usersService: UsersService,
-    private readonly stickersService: StickersService,
+    private readonly repo_stickerCategoryMappers: Repository<StickerCategoryMapper>,
+    private readonly svc_usersValidate: UsersValidateService,
+    private readonly svc_stickers: StickersService,
   ) {}
 
-  async findCategoryByName({ name }) {
-    return await this.stickerCategoriesRepository.findOne({ where: { name } });
+  async findCategoryByName({
+    name,
+  }: IStickerCategoriesServiceName): Promise<StickerCategoryDto> {
+    return await this.repo_stickerCategories.findOne({ where: { name } });
   }
 
-  async findCategoryById({ id }) {
-    return await this.stickerCategoriesRepository.findOne({ where: { id } });
+  async findCategoryById({
+    stickerCategoryId,
+  }: IStickerCategoriesServiceId): Promise<StickerCategoryDto> {
+    return await this.repo_stickerCategories.findOne({
+      where: { id: stickerCategoryId },
+    });
   }
-  async existCheckByName({ name }) {
+  async existCheckByName({
+    name,
+  }: IStickerCategoriesServiceName): Promise<void> {
     const data = await this.findCategoryByName({ name });
+    if (data) throw new ConflictException('동명의 카테고리가 존재합니다.');
+  }
+  async existCheckById({
+    stickerCategoryId,
+  }: IStickerCategoriesServiceId): Promise<void> {
+    const data = await this.findCategoryById({ stickerCategoryId });
     if (!data) throw new NotFoundException('스티커 카테고리가 없습니다.');
   }
-  async existCheckById({ id }) {
-    const data = await this.findCategoryById({ id });
-    if (!data) throw new NotFoundException('스티커 카테고리가 없습니다.');
+
+  async existCheckMapper({
+    stickerId,
+    stickerCategoryId,
+  }: IStickerCategoriesServiceIds): Promise<void> {
+    const data = await this.repo_stickerCategoryMappers.findOne({
+      where: { stickerId, stickerCategoryId },
+    });
+    if (data) throw new ConflictException('이미 매핑 된 카테고리입니다.');
+  }
+  async fetchCategories(): Promise<StickerCategoryDto[]> {
+    return await this.repo_stickerCategories.find();
   }
 
-  async fetchCategories() {
-    return await this.stickerCategoriesRepository.find();
-  }
-
-  async createCategory({ kakaoId, name }) {
-    await this.usersService.adminCheck({ kakaoId });
-    return await this.stickerCategoriesRepository.save({ name });
-  }
-
-  async mapCategory({ kakaoId, stickerId, stickerCategoryId }) {
-    await this.usersService.adminCheck({ kakaoId });
-    await this.stickersService.existCheck({ id: stickerId });
-    await this.existCheckById({ id: stickerCategoryId });
-    return await this.stickerCategoryMappersRepository
-      .createQueryBuilder()
-      .insert()
-      .into(StickerCategoryMapper, ['stickerId', 'stickerCategoryId'])
-      .values({ stickerId, stickerCategoryId })
-      .orIgnore()
-      .execute();
-  }
-
-  async fetchStickersByCategoryName({ name }) {
+  async createCategory({
+    userId,
+    name,
+  }: IStickerCategoriesServiceCreateCategory): Promise<StickerCategoryDto> {
+    await this.svc_usersValidate.adminCheck({ userId });
     await this.existCheckByName({ name });
-    return this.stickerCategoryMappersRepository.find({
-      relations: { sticker: true, stickerCategory: true },
-      where: { stickerCategory: { name }, sticker: { isDefault: true } },
+    return await this.repo_stickerCategories.save({ name });
+  }
+
+  async mapCategory({
+    userId,
+    maps,
+  }: IStickerCategoriesServiceMapCategory): Promise<
+    StickerCategoryMapperDto[]
+  > {
+    await this.svc_usersValidate.adminCheck({ userId });
+    for (const map of maps) {
+      await this.existCheckById({ stickerCategoryId: map.stickerCategoryId });
+      await this.svc_stickers.existCheck({
+        stickerId: map.stickerId,
+      });
+      await this.existCheckMapper({
+        stickerCategoryId: map.stickerCategoryId,
+        stickerId: map.stickerId,
+      });
+    }
+    return await this.repo_stickerCategoryMappers.save(maps);
+  }
+
+  async fetchStickersByCategoryId({
+    stickerCategoryId,
+  }: IStickerCategoriesServiceId): Promise<
+    StickersCategoryFetchStickersResponseDto[]
+  > {
+    await this.existCheckById({ stickerCategoryId });
+    return await this.repo_stickerCategoryMappers.find({
+      relations: { sticker: true },
+      where: {
+        stickerCategory: { id: stickerCategoryId },
+        sticker: { isDefault: true },
+      },
     });
   }
 }

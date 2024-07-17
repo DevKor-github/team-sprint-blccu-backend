@@ -1,0 +1,80 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16' # 필요한 Node.js 버전으로 설정
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_STAGING_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to ECR
+        run: aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_STAGING_ECR_URL }}
+
+      - name: Build Docker image
+        run: docker buildx build --platform linux/amd64 -t blccu-ecr . --load
+
+      - name: Tag Docker image
+        run: docker tag blccu-ecr:latest ${{ secrets.AWS_STAGING_ECR_URL }}:staging-latest
+
+      - name: Push Docker image to ECR
+        run: docker push ${{ secrets.AWS_STAGING_ECR_URL }}:staging-latest
+
+      - name: Create PEM file from secret
+        run: echo "${{ secrets.BLCCU_STAGING_RSA_PEM }}" > blccu-staging-rsa.pem
+
+      - name: Deploy to server
+        run: |
+          chmod 400 blccu-staging-rsa.pem
+          ssh -o StrictHostKeyChecking=no -i blccu-staging-rsa.pem ubuntu@${{ secrets.BLCCU_STAGING_HOST }} << 'EOF'
+            set -e
+            NEW_PORT=3001
+            CURRENT_PORT=$(grep 'server localhost:' /etc/nginx/nginx.conf | awk '{print $2}' | cut -d ':' -f 2 | sed 's/;//')
+            if [ "$CURRENT_PORT" = "3001" ]; then
+              NEW_PORT=3000
+            fi
+            docker pull ${{ secrets.AWS_STAGING_ECR_URL }}:staging-latest
+            docker run --env-file .env.staging -d --memory="512m" --cpus="0.5" -p $NEW_PORT:3000 --name blccu-ecr-$NEW_PORT -e TZ=Asia/Seoul ${{ secrets.AWS_STAGING_ECR_URL }}:staging-latest
+            for i in {1..20}; do
+              HEALTH_CHECK=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health)
+              if [ "$HEALTH_CHECK" -eq 200 ]; then
+                break
+              fi
+              sleep 5
+            done
+            if [ "$HEALTH_CHECK" -ne 200 ]; then
+              docker stop blccu-ecr-$NEW_PORT && docker rm blccu-ecr-$NEW_PORT
+              exit 1
+            fi
+            sudo sed -i "s/server localhost:$CURRENT_PORT;/server localhost:$NEW_PORT;/g" /etc/nginx/nginx.conf
+            sudo systemctl restart nginx
+            docker stop blccu-ecr-$CURRENT_PORT && docker rm blccu-ecr-$CURRENT_PORT
+            docker images --format "{{.ID}} {{.Repository}}:{{.Tag}}" | grep -v ':staging-latest' | awk '{print $1}' | xargs -r docker rmi
+            yes | sudo docker system prune -a
+          EOF
+
+      - name: Remove PEM file
+        run: rm blccu-staging-rsa.pem

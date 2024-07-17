@@ -1,8 +1,11 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Req,
   UploadedFile,
@@ -15,19 +18,20 @@ import {
   ApiConsumes,
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
-  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ImageUploadDto } from 'src/commons/dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { Sticker } from './entities/sticker.entity';
+import { AuthGuardV2 } from 'src/common/guards/auth.guard';
+import { ImageUploadRequestDto } from 'src/modules/images/dtos/image-upload-request.dto';
+import { StickerDto } from './dtos/common/sticker.dto';
+import { StickerPatchRequestDto } from './dtos/request/sticker-patch-request.dto';
 
 @ApiTags('스티커 API')
-@Controller('stickers')
+@Controller()
 export class StickersController {
   constructor(private readonly stickersService: StickersService) {}
 
@@ -38,28 +42,78 @@ export class StickersController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: '업로드 할 파일',
-    type: ImageUploadDto,
+    type: ImageUploadRequestDto,
   })
   @ApiCreatedResponse({
     description: '이미지 서버에 파일 업로드 완료',
-    type: Sticker,
+    type: StickerDto,
   })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
-  @Post('private')
+  @Post('stickers/private')
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
   async createPrivateSticker(
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
-  ): Promise<Sticker> {
-    const userKakaoId = req.user.userId;
+  ): Promise<StickerDto> {
+    const userId = req.user.userId;
     return await this.stickersService.createPrivateSticker({
-      userKakaoId,
+      userId,
       file,
     });
   }
 
+  @ApiOperation({
+    summary: '재사용 가능한 private 스티커를 fetch한다.',
+    description:
+      '본인이 만든 재사용 가능한 스티커들을 fetch한다. toggle이 우선적으로 이루어져야함.',
+  })
+  @ApiOkResponse({ description: '조회 성공', type: [StickerDto] })
+  @UseGuards(AuthGuardV2)
+  @ApiCookieAuth()
+  @HttpCode(200)
+  @Get('stickers/private')
+  async fetchPrivateStickers(@Req() req: Request): Promise<StickerDto[]> {
+    const userId = req.user.userId;
+    return await this.stickersService.findUserStickers({ userId });
+  }
+
+  @ApiOperation({
+    summary: '스티커의 image_url 혹은 재사용 여부를 설정한다.',
+    description:
+      '본인이 만든 스티커를 patch한다. image_url 변경 시 기존의 이미지는 s3에서 제거된다.',
+  })
+  @Patch('stickers/:stickerId')
+  @UseGuards(AuthGuardV2)
+  @ApiCookieAuth()
+  @ApiOkResponse({ type: StickerDto })
+  @HttpCode(200)
+  async patchSticker(
+    @Req() req: Request,
+    @Param('stickerId') stickerId: number,
+    @Body() body: StickerPatchRequestDto,
+  ): Promise<StickerDto> {
+    const userId = req.user.userId;
+    return await this.stickersService.updateSticker({
+      userId,
+      stickerId,
+      ...body,
+    });
+  }
+
+  @ApiOperation({
+    summary: 'public 스티커를 fetch한다.',
+    description: '블꾸가 만든 스티커들을 fetch한다.',
+  })
+  @ApiOkResponse({ description: '조회 성공', type: [StickerDto] })
+  @Get('stickers')
+  @HttpCode(200)
+  async fetchPublicStickers(): Promise<StickerDto[]> {
+    return await this.stickersService.findPublicStickers();
+  }
+
+  @ApiTags('어드민 API')
   @ApiOperation({
     summary: '[어드민용] 공용 스티커를 업로드한다.',
     description:
@@ -68,64 +122,38 @@ export class StickersController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: '업로드 할 파일',
-    type: ImageUploadDto,
+    type: ImageUploadRequestDto,
   })
   @ApiCreatedResponse({
     description: '이미지 서버에 파일 업로드 완료',
-    type: Sticker,
+    type: StickerDto,
   })
-  @ApiUnauthorizedResponse({ description: '어드민이 아님' })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
-  @Post('public')
+  @Post('users/admin/stickers')
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
   async createPublicSticker(
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
-  ): Promise<Sticker> {
-    const userKakaoId = req.user.userId;
+  ): Promise<StickerDto> {
+    const userId = req.user.userId;
     return await this.stickersService.createPublicSticker({
-      userKakaoId,
+      userId,
       file,
     });
   }
-  @ApiOperation({
-    summary: '스티커 재사용 여부를 토글한다.',
-    description:
-      '본인이 만든 스티커의 재사용 여부를 토글한다. 보관함 저장 혹은 삭제 용도로 사용할 것',
-  })
-  @Post(':id')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiCookieAuth()
-  @HttpCode(200)
-  async toggleReusable(@Req() req: Request, @Param('id') id: number) {
-    const userKakaoId = req.user.userId;
-    return await this.stickersService.toggleReusable({ userKakaoId, id });
-  }
 
-  @ApiOperation({
-    summary: 'private 스티커를 fetch한다.',
-    description: '본인이 만든 재사용 가능한 스티커들을 fetch한다.',
-  })
-  @ApiOkResponse({ description: '조회 성공', type: [Sticker] })
-  @Get('private')
-  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: '스티커 삭제', description: '스티커를 삭제한다.' })
+  @UseGuards(AuthGuardV2)
   @ApiCookieAuth()
-  @HttpCode(200)
-  async fetchPrivateStickers(@Req() req: Request): Promise<Sticker[]> {
-    const userKakaoId = req.user.userId;
-    return await this.stickersService.fetchUserStickers({ userKakaoId });
-  }
-
-  @ApiOperation({
-    summary: 'public 스티커를 fetch한다.',
-    description: '블꾸가 만든 스티커들을 fetch한다.',
-  })
-  @ApiOkResponse({ description: '조회 성공', type: [Sticker] })
-  @Get('public')
-  @HttpCode(200)
-  async fetchPublicStickers(): Promise<Sticker[]> {
-    return await this.stickersService.fetchPublicStickers();
+  @ApiNoContentResponse({ description: '삭제 성공' })
+  @Delete('stickers/:stickerId')
+  async deleteSticker(
+    @Req() req: Request,
+    @Param('stickerId') stickerId: number,
+  ): Promise<void> {
+    const userId = req.user.userId;
+    return await this.stickersService.deleteSticker({ stickerId, userId });
   }
 }

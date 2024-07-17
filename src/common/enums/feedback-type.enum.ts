@@ -1,0 +1,6 @@
+export enum FeedbackType {
+  TOO_MANY_ERRORS = 'TOO_MANY_ERRORS', // 과도한 오류
+  REJOIN_AFTER_DEACTIVATION = 'REJOIN_AFTER_DEACTIVATION', // 탈퇴 후 재가입
+  OTHER_ISSUES = 'OTHER_ISSUES', // 기타 문제
+  GENERAL_FEEDBACK = 'GENERAL_FEEDBACK', // 일반 피드백
+}

@@ -1,108 +1,141 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Sticker } from './entities/sticker.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateStickerDto } from './dto/create-sticker.dto';
-import { AwsService } from 'src/utils/aws/aws.service';
-import { UtilsService } from 'src/utils/utils.service';
-import { ImageUploadResponseDto } from 'src/commons/dto/image-upload-response.dto';
-import { UsersService } from '../users/users.service';
+import { UsersValidateService } from '../users/services/users-validate-service';
+import {
+  IStickersServiceCreateSticker,
+  IStickersServiceDeleteSticker,
+  IStickersServiceFindUserStickers,
+  IStickersServiceId,
+  IStickersServiceUpdateSticker,
+} from './interfaces/stickers.service.interface';
+import { ImagesService } from 'src/modules/images/images.service';
+import { StickerDto } from './dtos/common/sticker.dto';
 
 @Injectable()
 export class StickersService {
   constructor(
-    private readonly awsService: AwsService,
-    private readonly utilsService: UtilsService,
     @InjectRepository(Sticker)
-    private readonly stickersRepository: Repository<Sticker>,
-    private readonly usersService: UsersService,
+    private readonly repo_stickers: Repository<Sticker>,
+    private readonly svc_usersValidate: UsersValidateService,
+    private readonly svc_images: ImagesService,
   ) {}
 
-  async findStickerById({ id }) {
-    return await this.stickersRepository.findOne({ where: { id } });
+  async findStickerById({
+    stickerId,
+  }: IStickersServiceId): Promise<StickerDto> {
+    return await this.repo_stickers.findOne({ where: { id: stickerId } });
   }
 
-  async existCheck({ id }) {
-    const data = await this.findStickerById({ id });
-    if (!data) throw new NotFoundException('스티커를 찾을 수 없습니다.');
-  }
-  async saveImage(file: Express.Multer.File): Promise<ImageUploadResponseDto> {
-    return await this.imageUpload(file);
-  }
-  async imageUpload(
-    file: Express.Multer.File,
-  ): Promise<ImageUploadResponseDto> {
-    const imageName = this.utilsService.getUUID();
-    const ext = file.originalname.split('.').pop();
+  async existCheck({ stickerId }: IStickersServiceId): Promise<StickerDto> {
+    try {
+      const data = await this.findStickerById({ stickerId });
+      if (!data) {
+        throw new NotFoundException('스티커를 찾을 수 없습니다.');
+      }
 
-    const image_url = await this.awsService.imageUploadToS3(
-      `${imageName}.${ext}`,
-      file,
-      ext,
-    );
-    return { image_url };
+      return data;
+    } catch (e) {
+      throw e;
+    }
   }
+
   async createPrivateSticker({
-    userKakaoId,
+    userId,
     file,
-  }: CreateStickerDto): Promise<Sticker> {
-    const { image_url } = await this.saveImage(file);
-    const insertData = await this.stickersRepository
+  }: IStickersServiceCreateSticker): Promise<StickerDto> {
+    const { imageUrl } = await this.svc_images.imageUpload({
+      file,
+      resize: 1600,
+      ext: 'png',
+    });
+    const insertData = await this.repo_stickers
       .createQueryBuilder()
       .insert()
-      .into(Sticker, ['userKakaoId', 'image_url', 'isDefault'])
-      .values({ userKakaoId, image_url, isDefault: false })
-      .orUpdate(['image_url', 'isDefault'], ['id'], {
-        skipUpdateIfNoValuesChanged: true,
-      })
+      .into(Sticker, ['user_id', 'image_url', 'is_default'])
+      .values({ userId, imageUrl, isDefault: false })
       .execute();
     const id = insertData.identifiers[0].id;
-    const data = await this.stickersRepository.findOne({ where: { id } });
+    const data = await this.repo_stickers.findOne({ where: { id } });
     return data;
   }
-
   async createPublicSticker({
-    userKakaoId,
+    userId,
     file,
-  }: CreateStickerDto): Promise<Sticker> {
-    await this.usersService.adminCheck({ kakaoId: userKakaoId });
-    const { image_url } = await this.saveImage(file);
-    const insertData = await this.stickersRepository
+  }: IStickersServiceCreateSticker): Promise<StickerDto> {
+    await this.svc_usersValidate.adminCheck({ userId });
+    const { imageUrl } = await this.svc_images.imageUpload({
+      file,
+      resize: 1600,
+      ext: 'png',
+    });
+    const insertData = await this.repo_stickers
       .createQueryBuilder()
       .insert()
-      .into(Sticker, ['userKakaoId', 'image_url', 'isDefault', 'isReusable'])
-      .values({ userKakaoId, image_url, isDefault: true, isReusable: true })
-      .orUpdate(['image_url', 'isDefault', 'isReusable'], ['id'], {
-        skipUpdateIfNoValuesChanged: true,
-      })
+      .into(Sticker, ['user_id', 'image_url', 'is_default', 'is_reusable'])
+      .values({ userId, imageUrl, isDefault: true, isReusable: true })
       .execute();
     const id = insertData.identifiers[0].id;
-    const data = await this.stickersRepository.findOne({ where: { id } });
+    const data = await this.repo_stickers.findOne({ where: { id } });
     return data;
   }
 
-  async toggleReusable({ userKakaoId, id }) {
-    const sticker = await this.stickersRepository.findOne({ where: { id } });
-    if (!sticker) throw new NotFoundException('스티커가 존재하지 않습니다.');
-    if (sticker.userKakaoId != userKakaoId)
-      throw new UnauthorizedException('스티커 제작자가 아닙니다.');
-    return await this.stickersRepository.update(id, {
-      isReusable: () => '!isReusable',
-    });
-  }
-  async fetchUserStickers({ userKakaoId }): Promise<Sticker[]> {
-    return await this.stickersRepository.find({
-      where: { userKakaoId, isReusable: true, isDefault: false },
+  async findUserStickers({
+    userId,
+  }: IStickersServiceFindUserStickers): Promise<StickerDto[]> {
+    return await this.repo_stickers.find({
+      where: { userId, isReusable: true, isDefault: false },
     });
   }
 
-  async fetchPublicStickers() {
-    return await this.stickersRepository.find({
+  async findPublicStickers(): Promise<StickerDto[]> {
+    return await this.repo_stickers.find({
       where: { isDefault: true },
     });
+  }
+
+  async updateSticker({
+    imageUrl,
+    isReusable,
+    userId,
+    stickerId,
+  }: IStickersServiceUpdateSticker): Promise<Sticker> {
+    try {
+      const sticker = await this.repo_stickers.findOne({
+        where: { id: stickerId, userId },
+      });
+      if (!sticker)
+        throw new NotFoundException(
+          '스티커가 존재하지 않거나 제작자 본인이 아닙니다.',
+        );
+      if (isReusable) sticker.isReusable = isReusable;
+      if (imageUrl) {
+        await this.svc_images.deleteImage({ url: sticker.imageUrl });
+        sticker.imageUrl = imageUrl;
+      }
+      const result = await this.repo_stickers.save(sticker);
+      return result;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async deleteSticker({
+    stickerId,
+    userId,
+  }: IStickersServiceDeleteSticker): Promise<void> {
+    const sticker = await this.repo_stickers.findOne({
+      where: { id: stickerId, userId },
+    });
+    if (!sticker)
+      throw new NotFoundException(
+        '스티커가 존재하지 않거나 제작자 본인이 아닙니다.',
+      );
+    await this.svc_images.deleteImage({
+      url: sticker.imageUrl,
+    });
+    await this.repo_stickers.remove(sticker);
+    return;
   }
 }
