@@ -10,7 +10,6 @@ import {
 } from '../interfaces/articles.service.interface';
 import { ArticleDetailForUpdateResponseDto } from '../dtos/response/article-detail-for-update-response.dto';
 import { ArticleDetailResponseDto } from '../dtos/response/article-detail-response.dto';
-import { ArticleDto } from '../dtos/common/article.dto';
 
 @Injectable()
 export class ArticlesReadService {

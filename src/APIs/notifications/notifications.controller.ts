@@ -41,8 +41,8 @@ export class NotificationsController {
   @Sse('subscribe')
   connectUser(@Req() req: Request, @Res() res: Response) {
     const targetUserId = req.user.userId;
-    res.setTimeout(60 * 10000); // 600초로 설정, 필요에 따라 변경 가능 nginx도 함께 변경할 것.
-
+    res.setTimeout(0); // 600초로 설정, 필요에 따라 변경 가능 nginx도 함께 변경할 것.
+    // res.setTimeout(15 * 1000);
     const sseStream = this.notificationsService.connectUser({
       targetUserId,
     });

@@ -57,6 +57,15 @@ export class Article extends IndexedCommonEntity {
   @IsNumber()
   userId: number;
 
+  @ApiProperty({
+    description: '현재 이미지 라벨링 정보',
+    type: Number,
+    nullable: true,
+  })
+  @Column({ name: 'currrent_image_id', nullable: true })
+  @IsNumber()
+  currrentImageId: number;
+
   @ApiProperty({ description: '제목(최대 100자)', type: String, default: '' })
   @Column({ length: 100, default: '' })
   @IsString()

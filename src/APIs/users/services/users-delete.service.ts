@@ -91,7 +91,7 @@ export class UsersDeleteService {
       for (const following of followersToDelete) {
         await queryRunner.manager.decrement(
           User,
-          { userId: following.fromUserId },
+          { id: following.fromUserId },
           'followingCount',
           1,
         );

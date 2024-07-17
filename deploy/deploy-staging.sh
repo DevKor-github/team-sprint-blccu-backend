@@ -2,6 +2,9 @@
 # 스크립트의 실제 위치를 기준으로 경로 설정
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PEM_PATH="$SCRIPT_DIR/../../../keys/blccu-dev-rsa.pem"
+ROOT_DIR=$(cd "$SCRIPT_DIR/.."; pwd)
+
+ENV_FILE="$ROOT_DIR/.env.staging"
 
 # PEM 파일 경로가 올바른지 확인
 if [[ ! -f "$PEM_PATH" ]]; then
@@ -34,6 +37,12 @@ docker buildx build --platform linux/amd64 -t $SERVICE_NAME . --load
 docker tag $SERVICE_NAME:$DOCKER_TAG $ECR_URL/$SERVICE_NAME:$DOCKER_TAG
 docker push $ECR_URL/$SERVICE_NAME:$DOCKER_TAG
 
+  # .env.staging 파일 전송
+echo -e "\n## .env.staging 파일 전송 to $HOST ##\n"
+ssh -i $PEM_PATH $SERVER "mkdir -p /home/ubuntu/upload"
+ssh -i $PEM_PATH $SERVER "chmod 700 /home/ubuntu/upload"
+scp -i "$PEM_PATH" "$ENV_FILE" $SERVER:/home/$ACCOUNT/upload/.env.staging
+
 # 현재 설정에서 활성 포트 찾기
 CURRENT_PORT=$(ssh -i "$PEM_PATH" -o StrictHostKeyChecking=no $SERVER "grep 'server localhost:' $NGINX_CONFIG | awk '{print \$2}' | cut -d ':' -f 2 | sed 's/;//'")
 echo -e "\nOld = $CURRENT_PORT\n"
@@ -57,7 +66,7 @@ OLD_SERVICE_NAME=$SERVICE_NAME-$CURRENT_PORT
 echo -e "\n## new docker pull & run ##\n"
 ssh -i $PEM_PATH $SERVER "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $ECR_URL"
 ssh -i $PEM_PATH $SERVER "docker pull $ECR_URL/$SERVICE_NAME:$DOCKER_TAG"
-ssh -i $PEM_PATH $SERVER "docker run  --env-file .env.staging -d --memory="512m" --cpus="0.5" -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul $ECR_URL/$SERVICE_NAME"
+ssh -i $PEM_PATH $SERVER "docker run  --env-file /home/$ACCOUNT/upload/.env.staging -d --memory="512m" --cpus="0.5" -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul $ECR_URL/$SERVICE_NAME"
 # memory랑 cpu 사용량 조절
 
 # 헬스체크 수행
