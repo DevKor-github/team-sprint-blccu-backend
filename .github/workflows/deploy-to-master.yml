@@ -35,9 +35,15 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Configure AWS credentials
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region $AWS_REGION
+
       - name: Log in to ECR
         run: |
-          aws ecr get-login-password --region ap-northeast-2 --profile $AWS_PROFILE | docker login --username AWS --password-stdin $ECR_URL
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URL
 
       - name: Build and push Docker image
         run: |
@@ -56,8 +62,6 @@ jobs:
           IFS=',' read -r -a HOST_ARRAY <<< "$HOSTS"
           for HOST in "${HOST_ARRAY[@]}"; do
             SERVER=$ACCOUNT@$HOST
-
-            scp -i deploy_key.pem "$GITHUB_WORKSPACE/.env.prod" $SERVER:/home/$ACCOUNT/upload/.env.prod
 
             CURRENT_PORT=$(ssh -i deploy_key.pem -o StrictHostKeyChecking=no $SERVER "grep 'server localhost:' $NGINX_CONFIG | awk '{print \$2}' | cut -d ':' -f 2 | sed 's/;//'")
 
