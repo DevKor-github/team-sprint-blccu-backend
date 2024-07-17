@@ -16,8 +16,8 @@ jobs:
       ECR_URL: ${{ secrets.AWS_PRODUCTION_ECR_URL }}
       HOSTS: ${{ secrets.AWS_PRODUCTUON_HOSTS }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ACCESS_KEY: ${ secrets.AWS_PRODUCTION_ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: ${ secrets.AWS_PRODUCTION_SECRET_ACCESS_KEY }}
+      AWS_ACCESS_KEY: ${{ secrets.AWS_PRODUCTION_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_PRODUCTION_SECRET_ACCESS_KEY }}
       AWS_PROFILE: production
       ACCOUNT: 'ubuntu'
       DOCKER_TAG: 'latest'
