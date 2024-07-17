@@ -16,8 +16,8 @@ jobs:
       ECR_URL: ${{ secrets.AWS_PRODUCTION_ECR_URL }}
       HOSTS: ${{ secrets.AWS_PRODUCTUON_HOSTS }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ACCESS_KEY: $$ { secrets:AWS_PRODUCTION_ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: $${ secrets.AWS_PRODUCTION_SECRET_ACCESS_KEY }}
+      AWS_ACCESS_KEY: ${ secrets.AWS_PRODUCTION_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${ secrets.AWS_PRODUCTION_SECRET_ACCESS_KEY }}
       AWS_PROFILE: production
       ACCOUNT: 'ubuntu'
       DOCKER_TAG: 'latest'
@@ -41,6 +41,12 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Create PEM file
+        run: echo "${{ secrets.BLCCU_PRODUCTION_RSA_PEM }}" > deploy_key.pem
+
+      - name: Set PEM file permissions
+        run: chmod 400 deploy_key.pem
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -57,12 +63,6 @@ jobs:
           docker buildx build --platform linux/amd64 -t $SERVICE_NAME . --load
           docker tag $SERVICE_NAME:$DOCKER_TAG $ECR_URL/$SERVICE_NAME:$DOCKER_TAG
           docker push $ECR_URL/$SERVICE_NAME:$DOCKER_TAG
-
-      - name: Create PEM file
-        run: echo "${{ secrets.BLCCU_PRODUCTION_RSA_PEM }}" > deploy_key.pem
-
-      - name: Set PEM file permissions
-        run: chmod 400 deploy_key.pem
 
       - name: Deploy to servers
         run: |
