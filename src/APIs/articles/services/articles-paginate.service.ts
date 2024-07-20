@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ArticlesValidateService } from './articles-validate.service';
 import { ArticlesPaginateRepository } from '../repositories/articles-paginate.repository';
 import { ArticleOrderOption } from 'src/common/enums/article-order-option';
@@ -111,6 +111,9 @@ export class ArticlesPaginateService {
   }: IArticlesServiceFetchFriendsArticlesCursor): Promise<
     CustomCursorPageDto<ArticleDto>
   > {
+    if (!userId) {
+      throw new BadRequestException('비로그인 상태입니다.');
+    }
     let dateFilter: Date;
     if (cursorOption.dateCreated)
       dateFilter = getDate(cursorOption.dateCreated);

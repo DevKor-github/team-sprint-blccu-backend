@@ -98,12 +98,16 @@ jobs:
 
             for i in {1..20}; do
               HEALTH_CHECK=$(ssh -i deploy_key.pem $SERVER "curl -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health")
+              echo "http://localhost:$NEW_PORT/health"
+              echo "HTTP Status Code: $HEALTH_CHECK"
               if [ "$HEALTH_CHECK" -eq 200 ]; then
+                echo -e "\n 헬스체크 성공 on $HOST \n"
                 break
               fi
+              echo -e "\n 헬스체크 시도 $i/20 실패. 5초 후 재시도 on $HOST... \n"
               sleep 5
             done
-
+            
             if [ "$HEALTH_CHECK" -ne 200 ]; then
               ssh -i deploy_key.pem $SERVER "docker stop $NEW_SERVICE_NAME && docker rm $NEW_SERVICE_NAME"
               exit 1
