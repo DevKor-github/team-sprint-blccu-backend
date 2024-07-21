@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  checkout_and_build:
+  build_and_push:
     runs-on: ubuntu-latest
 
     steps:
@@ -36,12 +36,6 @@ jobs:
           name: deploy-key
           path: deploy_key.pem
 
-  configure_aws:
-    runs-on: ubuntu-latest
-
-    needs: checkout_and_build
-
-    steps:
       - name: Install AWS CLI
         uses: unfor19/install-aws-cli-action@v1
         with:
@@ -55,15 +49,6 @@ jobs:
 
       - name: Test AWS Credentials
         run: aws sts get-caller-identity
-
-  docker_build_and_push:
-    runs-on: ubuntu-latest
-
-    needs: [checkout_and_build, configure_aws]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
       - name: Restore PEM file
         uses: actions/download-artifact@v2
@@ -84,11 +69,11 @@ jobs:
   deploy_to_servers:
     runs-on: ubuntu-latest
 
-    needs: [docker_build_and_push]
+    needs: build_and_push
 
     env:
       ECR_URL: ${{ secrets.AWS_PRODUCTION_ECR_URL }}
-      HOSTS: ${{ secrets.AWS_PRODUCTUON_HOSTS }}
+      HOSTS: ${{ secrets.AWS_PRODUCTION_HOSTS }}
       AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_PRODUCTION_ACCESS_KEY }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_PRODUCTION_SECRET_ACCESS_KEY }}
@@ -133,7 +118,9 @@ jobs:
 
             for i in {1..20}; do
               echo "Attempting health check on $HOST (attempt $i)"
-              HEALTH_CHECK=$(ssh -i deploy_key.pem $SERVER "curl -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health")
+              ssh -i deploy_key.pem $SERVER "curl -v -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health"
+              echo "여기까지 실행 된다"
+              HEALTH_CHECK=$(ssh -i deploy_key.pem $SERVER "curl -v -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health")
               echo "http://localhost:$NEW_PORT/health"
               echo "HTTP Status Code: $HEALTH_CHECK"
               if [ "$HEALTH_CHECK" -eq 200 ]; then
