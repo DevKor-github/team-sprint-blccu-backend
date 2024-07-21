@@ -5,6 +5,17 @@ on:
     branches:
       - master
 
+    env:
+      ECR_URL: ${{ secrets.AWS_PRODUCTION_ECR_URL }}
+      HOSTS: ${{ secrets.AWS_PRODUCTION_HOSTS }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_PRODUCTION_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_PRODUCTION_SECRET_ACCESS_KEY }}
+      AWS_PROFILE: production
+      ACCOUNT: 'ubuntu'
+      DOCKER_TAG: 'latest'
+      SERVICE_NAME: 'blccu'
+
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
