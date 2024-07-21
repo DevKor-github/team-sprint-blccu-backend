@@ -50,12 +50,6 @@ jobs:
       - name: Test AWS Credentials
         run: aws sts get-caller-identity
 
-      - name: Restore PEM file
-        uses: actions/download-artifact@v2
-        with:
-          name: deploy-key
-          path: deploy_key.pem
-
       - name: Log in to ECR
         run: |
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_PRODUCTION_ECR_URL }}
