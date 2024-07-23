@@ -5,6 +5,10 @@ on:
     branches:
       - master
 
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+
     env:
       ECR_URL: ${{ secrets.AWS_PRODUCTION_ECR_URL }}
       HOSTS: ${{ secrets.AWS_PRODUCTION_HOSTS }}
@@ -15,10 +19,6 @@ on:
       ACCOUNT: 'ubuntu'
       DOCKER_TAG: 'latest'
       SERVICE_NAME: 'blccu'
-
-jobs:
-  build_and_push:
-    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
