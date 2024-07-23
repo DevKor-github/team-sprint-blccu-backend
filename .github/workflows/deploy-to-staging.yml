@@ -1,22 +1,33 @@
-name: Deploy to Staging
+name: Deploy to Production
 
 on:
   push:
     branches:
-      - staging
+      - master
 
 jobs:
-  deploy:
+  build_and_push:
     runs-on: ubuntu-latest
+
+    env:
+      ECR_URL: ${{ secrets.AWS_STAGING_ECR_URL }}
+      HOSTS: ${{ secrets.AWS_STAGING_HOSTS }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_STAGING_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }}
+      AWS_PROFILE: production
+      ACCOUNT: 'ubuntu'
+      DOCKER_TAG: 'latest'
+      SERVICE_NAME: 'blccu'
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '21' # 필요한 Node.js 버전으로 설정
+          node-version: '21.7.2'
 
       - name: Install dependencies
         run: npm install
@@ -24,57 +35,120 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Create PEM file
+        run: echo "${{ secrets.BLCCU_STAGING_RSA_PEM }}" > deploy_key.pem
+
+      - name: Set PEM file permissions
+        run: chmod 400 deploy_key.pem
+
+      - name: Install AWS CLI
+        uses: unfor19/install-aws-cli-action@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_STAGING_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          version: 2
 
-      - name: Login to ECR
-        run: aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_STAGING_ECR_URL }}
-
-      - name: Build Docker image
-        run: docker buildx build --platform linux/amd64 -t blccu-ecr . --load
-
-      - name: Tag Docker image
-        run: docker tag blccu-ecr:latest ${{ secrets.AWS_STAGING_ECR_URL }}:staging-latest
-
-      - name: Push Docker image to ECR
-        run: docker push ${{ secrets.AWS_STAGING_ECR_URL }}:staging-latest
-
-      - name: Create PEM file from secret
-        run: echo "${{ secrets.BLCCU_STAGING_RSA_PEM }}" > blccu-staging-rsa.pem
-
-      - name: Deploy to server
+      - name: Configure AWS CLI
         run: |
-          chmod 400 blccu-staging-rsa.pem
-          ssh -o StrictHostKeyChecking=no -i blccu-staging-rsa.pem ubuntu@${{ secrets.BLCCU_STAGING_HOST }} << 'EOF'
-            set -e
-            NEW_PORT=3001
-            CURRENT_PORT=$(grep 'server localhost:' /etc/nginx/nginx.conf | awk '{print $2}' | cut -d ':' -f 2 | sed 's/;//')
-            if [ "$CURRENT_PORT" = "3001" ]; then
-              NEW_PORT=3000
-            fi
-            docker pull ${{ secrets.AWS_STAGING_ECR_URL }}:staging-latest
-            docker run --env-file .env.staging -d --memory="512m" --cpus="0.5" -p $NEW_PORT:3000 --name blccu-ecr-$NEW_PORT -e TZ=Asia/Seoul ${{ secrets.AWS_STAGING_ECR_URL }}:staging-latest
-            for i in {1..20}; do
-              HEALTH_CHECK=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health)
-              if [ "$HEALTH_CHECK" -eq 200 ]; then
-                break
-              fi
-              sleep 5
-            done
-            if [ "$HEALTH_CHECK" -ne 200 ]; then
-              docker stop blccu-ecr-$NEW_PORT && docker rm blccu-ecr-$NEW_PORT
+          aws configure set aws_access_key_id ${{ env.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ${{ env.AWS_DEFAULT_REGION }}
+
+      - name: Test AWS Credentials
+        run: aws sts get-caller-identity
+
+      - name: Log in to ECR
+        run: |
+          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
+
+      - name: Build and push Docker image
+        run: |
+          echo "Service Name: ${{ env.SERVICE_NAME }}"
+          echo "Docker Tag: ${{ env.DOCKER_TAG }}"
+          echo "ECR URL: ${{ env.ECR_URL }}"
+          docker buildx build --platform linux/amd64 -t ${{ env.SERVICE_NAME }} . --load
+          docker tag ${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }} ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}
+          docker push ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}
+
+  deploy_to_servers:
+    runs-on: ubuntu-latest
+
+    needs: build_and_push
+
+    env:
+      ECR_URL: ${{ secrets.AWS_STAGING_ECR_URL }}
+      HOSTS: ${{ secrets.AWS_STAGING_HOSTS }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_STAGING_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }}
+      AWS_PROFILE: production
+      ACCOUNT: 'ubuntu'
+      DOCKER_TAG: 'latest'
+      SERVICE_NAME: 'blccu'
+      BLUE_PORT: '3000'
+      GREEN_PORT: '3001'
+      NGINX_CONFIG: '/etc/nginx/nginx.conf'
+
+    steps:
+      - name: Create PEM file
+        run: echo "${{ secrets.BLCCU_STAGING_RSA_PEM }}" > deploy_key.pem
+
+      - name: Set PEM file permissions
+        run: chmod 400 deploy_key.pem
+
+      - name: Deploy to servers
+        run: |
+          IFS=',' read -r -a HOST_ARRAY <<< "$HOSTS"
+          if [ ${#HOST_ARRAY[@]} -eq 0 ]; then
+            HOST_ARRAY=("$HOSTS")
+          fi
+          for HOST in "${HOST_ARRAY[@]}"; do
+            SERVER=$ACCOUNT@$HOST
+
+            CURRENT_PORT=$(ssh -i deploy_key.pem -o StrictHostKeyChecking=no $SERVER "grep 'server localhost:' ${{ env.NGINX_CONFIG }} | awk '{print \$2}' | cut -d ':' -f 2 | sed 's/;//'")
+
+            if [ "$CURRENT_PORT" = "${{ env.BLUE_PORT }}" ]; then
+              NEW_PORT=${{ env.GREEN_PORT }}
+            elif [ "$CURRENT_PORT" = "${{ env.GREEN_PORT }}" ]; then
+              NEW_PORT=${{ env.BLUE_PORT }}
+            else
+              echo "서버의 blue green 포트 확인 실패 on $HOST"
               exit 1
             fi
-            sudo sed -i "s/server localhost:$CURRENT_PORT;/server localhost:$NEW_PORT;/g" /etc/nginx/nginx.conf
-            sudo systemctl restart nginx
-            docker stop blccu-ecr-$CURRENT_PORT && docker rm blccu-ecr-$CURRENT_PORT
-            docker images --format "{{.ID}} {{.Repository}}:{{.Tag}}" | grep -v ':staging-latest' | awk '{print $1}' | xargs -r docker rmi
-            yes | sudo docker system prune -a
-          EOF
 
-      - name: Remove PEM file
-        run: rm blccu-staging-rsa.pem
+            NEW_SERVICE_NAME=${{ env.SERVICE_NAME }}-$NEW_PORT
+            OLD_SERVICE_NAME=${{ env.SERVICE_NAME }}-$CURRENT_PORT
+
+            ssh -i deploy_key.pem $SERVER "aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}"
+            ssh -i deploy_key.pem $SERVER "docker pull ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}"
+            ssh -i deploy_key.pem $SERVER "docker run --env-file /home/${{ env.ACCOUNT }}/upload/.env.prod -d -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}"
+
+            for i in {1..20}; do
+              HEALTH_CHECK=$(ssh -i deploy_key.pem $SERVER "curl -v -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health || true")
+              echo "http://localhost:$NEW_PORT/health"
+              echo "HTTP Status Code: $HEALTH_CHECK"
+              if [ "$HEALTH_CHECK" -eq 200 ]; then
+                echo -e "\n 헬스체크 성공 on $HOST \n"
+                break
+              fi
+              echo -e "\n 헬스체크 시도 $i/20 실패. 5초 후 재시도 on $HOST... \n"
+              sleep 5
+            done
+
+            if [ "$HEALTH_CHECK" -ne 200 ]; then
+              ssh -i deploy_key.pem $SERVER "docker stop $NEW_SERVICE_NAME && docker rm $NEW_SERVICE_NAME"
+              exit 1
+            fi
+
+            ssh -i deploy_key.pem $SERVER "sudo sed -i 's/server localhost:$CURRENT_PORT;/server localhost:$NEW_PORT;/g' ${{ env.NGINX_CONFIG }}"
+            ssh -i deploy_key.pem $SERVER "sudo systemctl restart nginx"
+
+            ssh -i deploy_key.pem $SERVER "sudo docker stop $OLD_SERVICE_NAME"
+            ssh -i deploy_key.pem $SERVER "sudo docker rm $OLD_SERVICE_NAME"
+            ssh -i deploy_key.pem $SERVER "docker images --format \"{{.ID}} {{.Repository}}:{{.Tag}}\" | grep -v ':latest' | awk '{print \$1}' | xargs -r docker rmi"
+            ssh -i deploy_key.pem $SERVER "sudo docker system prune -a -f"
+
+            echo "배포 완료 on $HOST. $NEW_SERVICE_NAME"
+          done
+
+      - name: Cleanup PEM file
+        run: rm deploy_key.pem
+        if: always()
