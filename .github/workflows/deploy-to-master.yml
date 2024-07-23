@@ -100,6 +100,9 @@ jobs:
           name: deploy-key
           path: deploy_key.pem
 
+      - name: Set PEM file permissions
+        run: chmod 400 deploy_key.pem
+
       - name: Deploy to servers
         run: |
           IFS=',' read -r -a HOST_ARRAY <<< "$HOSTS"
@@ -122,7 +125,7 @@ jobs:
 
             ssh -i deploy_key.pem $SERVER "aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}"
             ssh -i deploy_key.pem $SERVER "docker pull ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}"
-            ssh -i deploy_key.pem $SERVER "docker run --env-file /home/${{ env.ACCOUNT }}/upload/.env.prod -d -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}"
+            ssh -i deploy_key.pem $SERVER "docker run --env-file /home/${{ env.ACCOUNT }}/upload/.env.prod -d -p $NEW_PORT:3000 --name $   -e TZ=Asia/Seoul ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}"
 
             for i in {1..20}; do
               echo "Attempting health check on $HOST (attempt $i)"
