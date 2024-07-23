@@ -116,11 +116,11 @@ jobs:
 
             ssh -i deploy_key.pem $SERVER "aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}"
             ssh -i deploy_key.pem $SERVER "docker pull ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}"
-            ssh -i deploy_key.pem $SERVER "docker run --env-file /home/${{ env.ACCOUNT }}/upload/.env.prod -d -p $NEW_PORT:3000 --name $   -e TZ=Asia/Seoul ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}"
+            ssh -i deploy_key.pem $SERVER "docker run --env-file /home/${{ env.ACCOUNT }}/upload/.env.prod -d -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}"
 
             for i in {1..20}; do
               echo "Attempting health check on $HOST (attempt $i)"
-              echo "curl 그냥 하기 to http://localhost:$NEW_PORT/health""
+              echo "curl 그냥 하기 to http://localhost:$NEW_PORT/health"
               ssh -i deploy_key.pem $SERVER "curl http://localhost:$NEW_PORT/health"         
               echo "그냥하기 성공"
               ssh -i deploy_key.pem $SERVER "curl -v -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health"
