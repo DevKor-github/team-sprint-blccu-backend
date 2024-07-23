@@ -18,7 +18,7 @@ jobs:
       AWS_PROFILE: staging
       ACCOUNT: 'ubuntu'
       DOCKER_TAG: 'latest'
-      SERVICE_NAME: 'blccu'
+      SERVICE_NAME: 'blccu-ecr'
 
     steps:
       - name: Checkout code
