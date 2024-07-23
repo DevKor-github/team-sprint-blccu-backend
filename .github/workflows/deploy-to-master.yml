@@ -71,7 +71,7 @@ jobs:
           echo "Docker Tag: ${{ env.DOCKER_TAG }}"
           echo "ECR URL: ${{ env.ECR_URL }}"
           docker buildx build --platform linux/amd64 -t ${{ env.SERVICE_NAME }} . --load
-          docker tag ${{ env.SERVICE_NAME }}:{{ env.DOCKER_TAG }} ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}
+          docker tag ${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }} ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}
           docker push ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}
 
   deploy_to_servers:
