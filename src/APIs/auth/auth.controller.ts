@@ -44,20 +44,24 @@ export class AuthController {
 
     // 클라이언트 도메인 설정
     const clientDomain = process.env.CLIENT_DOMAIN;
+    const oneDay = 24 * 60 * 60 * 1000; // 하루(밀리초)
+    const accessExpiryDate = new Date(Date.now() + oneDay);
+    const refreshExpiryDate = new Date(Date.now() + oneDay * 30);
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       domain: clientDomain,
       sameSite: 'none',
       secure: true,
+      expires: accessExpiryDate,
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       domain: clientDomain,
       sameSite: 'none',
       secure: true,
+      expires: refreshExpiryDate,
     });
-    res.cookie('isLoggedIn', true, { httpOnly: false, domain: clientDomain });
 
     return res.redirect(process.env.CLIENT_URL);
     // return res.send();
@@ -83,12 +87,15 @@ export class AuthController {
         req.cookies.refreshToken,
       );
       const clientDomain = process.env.CLIENT_DOMAIN;
+      const oneDay = 24 * 60 * 60 * 1000; // 하루(밀리초)
+      const accessExpiryDate = new Date(Date.now() + oneDay);
 
       res.cookie('accessToken', newAccessToken, {
         httpOnly: true,
         domain: clientDomain,
         sameSite: 'none',
         secure: true,
+        expires: accessExpiryDate,
       });
       return res.send();
     } catch (e) {
@@ -106,7 +113,6 @@ export class AuthController {
         sameSite: 'none',
         secure: true,
       });
-      res.clearCookie('isLoggedIn', { httpOnly: false, domain: clientDomain });
 
       throw new UnauthorizedException(e.message);
     }
