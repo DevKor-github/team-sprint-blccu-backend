@@ -119,12 +119,6 @@ jobs:
             ssh -i deploy_key.pem $SERVER "docker run --env-file /home/${{ env.ACCOUNT }}/upload/.env.prod -d -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}"
 
             for i in {1..20}; do
-              echo "Attempting health check on $HOST (attempt $i)"
-              echo "curl 그냥 하기 to http://localhost:$NEW_PORT/health"
-              ssh -i deploy_key.pem $SERVER "curl http://localhost:$NEW_PORT/health || true"
-              echo "그냥하기 성공"
-              ssh -i deploy_key.pem $SERVER "curl -v -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health || true"
-              echo "여기까지 실행 된다"
               HEALTH_CHECK=$(ssh -i deploy_key.pem $SERVER "curl -v -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health || true")
               echo "http://localhost:$NEW_PORT/health"
               echo "HTTP Status Code: $HEALTH_CHECK"
@@ -147,7 +141,7 @@ jobs:
             ssh -i deploy_key.pem $SERVER "sudo docker stop $OLD_SERVICE_NAME"
             ssh -i deploy_key.pem $SERVER "sudo docker rm $OLD_SERVICE_NAME"
             ssh -i deploy_key.pem $SERVER "docker images --format \"{{.ID}} {{.Repository}}:{{.Tag}}\" | grep -v ':latest' | awk '{print \$1}' | xargs -r docker rmi"
-            ssh -i deploy_key.pem $SERVER "y | sudo docker system prune -a"
+            ssh -i deploy_key.pem $SERVER "sudo docker system prune -a -f"
 
             echo "배포 완료 on $HOST. $NEW_SERVICE_NAME"
           done
