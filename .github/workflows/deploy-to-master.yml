@@ -120,6 +120,9 @@ jobs:
 
             for i in {1..20}; do
               echo "Attempting health check on $HOST (attempt $i)"
+              echo "curl 그냥 하기 to http://localhost:$NEW_PORT/health""
+              ssh -i deploy_key.pem $SERVER "curl http://localhost:$NEW_PORT/health"         
+              echo "그냥하기 성공"
               ssh -i deploy_key.pem $SERVER "curl -v -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health"
               echo "여기까지 실행 된다"
               HEALTH_CHECK=$(ssh -i deploy_key.pem $SERVER "curl -v -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health")
