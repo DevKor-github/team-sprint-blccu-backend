@@ -41,12 +41,6 @@ jobs:
       - name: Set PEM file permissions
         run: chmod 400 deploy_key.pem
 
-      - name: Save artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: deploy-key
-          path: deploy_key.pem
-
       - name: Install AWS CLI
         uses: unfor19/install-aws-cli-action@v1
         with:
@@ -94,11 +88,8 @@ jobs:
       NGINX_CONFIG: '/etc/nginx/nginx.conf'
 
     steps:
-      - name: Restore PEM file
-        uses: actions/download-artifact@v2
-        with:
-          name: deploy-key
-          path: deploy_key.pem
+      - name: Create PEM file
+        run: echo "${{ secrets.BLCCU_PRODUCTION_RSA_PEM }}" > deploy_key.pem
 
       - name: Set PEM file permissions
         run: chmod 400 deploy_key.pem
