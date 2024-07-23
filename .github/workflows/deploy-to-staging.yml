@@ -1,9 +1,9 @@
-name: Deploy to Production
+name: Deploy to Staging
 
 on:
   push:
     branches:
-      - master
+      - staging
 
 jobs:
   build_and_push:
@@ -15,10 +15,10 @@ jobs:
       AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_STAGING_ACCESS_KEY }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }}
-      AWS_PROFILE: production
+      AWS_PROFILE: staging
       ACCOUNT: 'ubuntu'
       DOCKER_TAG: 'latest'
-      SERVICE_NAME: 'blccu'
+      SERVICE_NAME: 'blccu-ecr'
 
     steps:
       - name: Checkout code
@@ -79,10 +79,10 @@ jobs:
       AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_STAGING_ACCESS_KEY }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }}
-      AWS_PROFILE: production
+      AWS_PROFILE: staging
       ACCOUNT: 'ubuntu'
       DOCKER_TAG: 'latest'
-      SERVICE_NAME: 'blccu'
+      SERVICE_NAME: 'blccu-ecr'
       BLUE_PORT: '3000'
       GREEN_PORT: '3001'
       NGINX_CONFIG: '/etc/nginx/nginx.conf'
@@ -119,7 +119,7 @@ jobs:
 
             ssh -i deploy_key.pem $SERVER "aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}"
             ssh -i deploy_key.pem $SERVER "docker pull ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}"
-            ssh -i deploy_key.pem $SERVER "docker run --env-file /home/${{ env.ACCOUNT }}/upload/.env.prod -d -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}"
+            ssh -i deploy_key.pem $SERVER "docker run --env-file /home/${{ env.ACCOUNT }}/upload/.env.staging -d -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul ${{ env.ECR_URL }}/${{ env.SERVICE_NAME }}:${{ env.DOCKER_TAG }}"
 
             for i in {1..20}; do
               HEALTH_CHECK=$(ssh -i deploy_key.pem $SERVER "curl -v -s -o /dev/null -w '%{http_code}' http://localhost:$NEW_PORT/health || true")
