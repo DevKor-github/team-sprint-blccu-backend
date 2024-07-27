@@ -114,6 +114,12 @@
     "name": "AGREEMENT_NOT_FOUND",
     "message": "동의 내역을 찾을 수 없습니다."
   },
+  "ANNOUNCEMENT_NOT_FOUND": {
+    "errorCode": 4042,
+    "statusCode": 404,
+    "name": "ANNOUNCEMENT_NOT_FOUND",
+    "message": "공지사항을 찾을 수 없습니다."
+  },
   "INVALID_PAGE_QUERY": {
     "errorCode": 4060,
     "statusCode": 406,

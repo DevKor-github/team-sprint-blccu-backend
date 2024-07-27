@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
   Param,
   Patch,
   Post,
@@ -11,36 +10,27 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AnnouncementsService } from './announcements.service';
-import {
-  ApiCookieAuth,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { Request } from 'express';
 import { AnnouncementDto } from './dtos/common/announcement.dto';
 import { AnnouncementPatchRequestDto } from './dtos/request/announcement-patch-request.dto';
 import { AnnouncementCreateRequestDto } from './dtos/request/announcement-create-request.dto';
 import { ApiResponseFromMetadata } from '@/common/decorators/api-response-from-metadata.decorator';
+import { AnnouncementsDocs } from './docs/announcements-docs.decorator';
 
+@AnnouncementsDocs
 @ApiTags('공지 API')
 @Controller()
 export class AnnouncementsController {
   constructor(private readonly svc_annoucements: AnnouncementsService) {}
 
-  @ApiTags('어드민 API')
-  @ApiOperation({ summary: '[어드민용] 공지사항 작성' })
-  @ApiCookieAuth()
   @UseGuards(AuthGuardV2)
-  @ApiCreatedResponse({ type: AnnouncementDto })
   @Post('users/admin/anmts')
-  @HttpCode(201)
   @ApiResponseFromMetadata([
     { service: AnnouncementsService, methodName: 'createAnnoucement' },
   ])
-  async createAnmt(
+  async createAnnouncement(
     @Req() req: Request,
     @Body() body: AnnouncementCreateRequestDto,
   ): Promise<AnnouncementDto> {
@@ -51,20 +41,14 @@ export class AnnouncementsController {
     });
   }
 
-  @ApiOperation({ summary: '공지사항 조회' })
-  @ApiOkResponse({ type: [AnnouncementDto] })
   @Get('anmts')
-  async fetchAnmts(): Promise<AnnouncementDto[]> {
+  async getAnnouncements(): Promise<AnnouncementDto[]> {
     return await this.svc_annoucements.getAnnouncements();
   }
 
-  @ApiTags('어드민 API')
-  @ApiOperation({ summary: '[어드민용] 공지사항 수정' })
-  @ApiCookieAuth()
-  @ApiOkResponse({ type: AnnouncementDto })
   @UseGuards(AuthGuardV2)
   @Patch('users/admin/anmts/:announcementId')
-  async patchAnmt(
+  async patchAnnouncement(
     @Req() req: Request,
     @Body() body: AnnouncementPatchRequestDto,
     @Param('announcementId') announcementId: number,
@@ -77,16 +61,9 @@ export class AnnouncementsController {
     });
   }
 
-  @ApiTags('어드민 API')
-  @ApiOperation({
-    summary: '[어드민용] 공지사항 삭제',
-    description: 'id에 해당하는 공지사항 삭제, 삭제된 공지사항을 반환',
-  })
-  @ApiCookieAuth()
-  @ApiOkResponse({ type: AnnouncementDto })
   @UseGuards(AuthGuardV2)
   @Delete('users/admin/anmts/:announcementId')
-  async removeAnmt(
+  async removeAnnouncement(
     @Req() req: Request,
     @Param('announcementId') announcementId: number,
   ): Promise<AnnouncementDto> {
