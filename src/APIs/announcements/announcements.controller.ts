@@ -23,11 +23,12 @@ import { Request } from 'express';
 import { AnnouncementDto } from './dtos/common/announcement.dto';
 import { AnnouncementPatchRequestDto } from './dtos/request/announcement-patch-request.dto';
 import { AnnouncementCreateRequestDto } from './dtos/request/announcement-create-request.dto';
+import { ApiResponseFromMetadata } from '@/common/decorators/api-response-from-metadata.decorator';
 
 @ApiTags('공지 API')
 @Controller()
 export class AnnouncementsController {
-  constructor(private readonly announcementsService: AnnouncementsService) {}
+  constructor(private readonly svc_annoucements: AnnouncementsService) {}
 
   @ApiTags('어드민 API')
   @ApiOperation({ summary: '[어드민용] 공지사항 작성' })
@@ -36,12 +37,15 @@ export class AnnouncementsController {
   @ApiCreatedResponse({ type: AnnouncementDto })
   @Post('users/admin/anmts')
   @HttpCode(201)
+  @ApiResponseFromMetadata([
+    { service: AnnouncementsService, methodName: 'createAnnoucement' },
+  ])
   async createAnmt(
     @Req() req: Request,
     @Body() body: AnnouncementCreateRequestDto,
   ): Promise<AnnouncementDto> {
     const userId = req.user.userId;
-    return await this.announcementsService.createAnnoucement({
+    return await this.svc_annoucements.createAnnoucement({
       ...body,
       userId,
     });
@@ -51,7 +55,7 @@ export class AnnouncementsController {
   @ApiOkResponse({ type: [AnnouncementDto] })
   @Get('anmts')
   async fetchAnmts(): Promise<AnnouncementDto[]> {
-    return await this.announcementsService.getAnnouncements();
+    return await this.svc_annoucements.getAnnouncements();
   }
 
   @ApiTags('어드민 API')
@@ -66,7 +70,7 @@ export class AnnouncementsController {
     @Param('announcementId') announcementId: number,
   ): Promise<AnnouncementDto> {
     const userId = req.user.userId;
-    return await this.announcementsService.patchAnnouncement({
+    return await this.svc_annoucements.patchAnnouncement({
       ...body,
       announcementId,
       userId,
@@ -87,7 +91,7 @@ export class AnnouncementsController {
     @Param('announcementId') announcementId: number,
   ): Promise<AnnouncementDto> {
     const userId = req.user.userId;
-    return await this.announcementsService.removeAnnouncement({
+    return await this.svc_annoucements.removeAnnouncement({
       userId,
       announcementId,
     });

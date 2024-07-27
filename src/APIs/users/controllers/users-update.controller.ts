@@ -26,6 +26,7 @@ import { Request } from 'express';
 import { ImageUploadRequestDto } from 'src/modules/images/dtos/image-upload-request.dto';
 import { ImageUploadResponseDto } from 'src/modules/images/dtos/image-upload-response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiResponseFromMetadata } from 'src/common/decorators/api-response-from-metadata.decorator';
 
 @ApiTags('유저 API')
 @Controller('users')
@@ -41,6 +42,9 @@ export class UsersUpdateController {
   @Patch('me')
   @HttpCode(200)
   @UseGuards(AuthGuardV2)
+  @ApiResponseFromMetadata([
+    { service: UsersUpdateService, methodName: 'updateUser' },
+  ])
   async patchUser(
     @Req() req: Request,
     @Body() body: UserPatchRequestDto,
@@ -78,6 +82,7 @@ export class UsersUpdateController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<ImageUploadResponseDto> {
     const userId = req.user.userId;
+
     return await this.svc_usersUpdate.updateProfileImage({
       userId,
       file,

@@ -1,0 +1,125 @@
+{
+  "EMAIL_VALIDATION_EXPIRED": {
+    "errorCode": 4000,
+    "statusCode": 400,
+    "name": "EMAIL_VALIDATION_EXPIRED",
+    "message": "이메일 인증이 만료되었습니다. 다시 인증해주세요."
+  },
+  "EMAIL_NOT_VALIDATED": {
+    "errorCode": 4001,
+    "statusCode": 400,
+    "name": "EMAIL_NOT_VALIDATED",
+    "message": "인증되지 않은 이메일입니다."
+  },
+  "EMAIL_ALREADY_USED": {
+    "errorCode": 4002,
+    "statusCode": 400,
+    "name": "EMAIL_ALREADY_USED",
+    "message": "이미 사용중인 이메일입니다."
+  },
+  "EMAIL_NOT_IN_KOREA_DOMAIN": {
+    "errorCode": 4003,
+    "statusCode": 400,
+    "name": "EMAIL_NOT_IN_KOREA_DOMAIN",
+    "message": "korea.ac.kr 이메일이 아닙니다."
+  },
+  "PASSWORD_INVALID_FORMAT": {
+    "errorCode": 4004,
+    "statusCode": 400,
+    "name": "PASSWORD_INVALID_FORMAT",
+    "message": "비밀번호는 6~16자의 영문 소문자와 숫자로만 입력해주세요."
+  },
+  "CODE_NOT_CORRECT": {
+    "errorCode": 4005,
+    "statusCode": 400,
+    "name": "CODE_NOT_CORRECT",
+    "message": "인증 코드가 일치하지 않습니다."
+  },
+  "CODE_EXPIRED": {
+    "errorCode": 4006,
+    "statusCode": 400,
+    "name": "CODE_EXPIRED",
+    "message": "인증 코드가 만료되었습니다. 다시 인증을 시도해주세요."
+  },
+  "CODE_NOT_VALIDATED": {
+    "errorCode": 4007,
+    "statusCode": 400,
+    "name": "CODE_NOT_VALIDATED",
+    "message": "인증되지 않은 코드입니다."
+  },
+  "CODE_VALIDATION_EXPIRED": {
+    "errorCode": 4008,
+    "statusCode": 400,
+    "name": "CODE_VALIDATION_EXPIRED",
+    "message": "인증 코드가 만료되었습니다. 다시 인증을 시도해주세요."
+  },
+
+  "LOGIN_FAILED": {
+    "errorCode": 4010,
+    "statusCode": 401,
+    "name": "LOGIN_FAILED",
+    "message": "이메일 또는 비밀번호가 일치하지 않습니다."
+  },
+  "TODO_REFRESH": {
+    "errorCode": 4011,
+    "statusCode": 401,
+    "name": "TODO_REFRESH",
+    "message": "할."
+  },
+  "INVALID_ACCESS_TOKEN": {
+    "errorCode": 4012,
+    "statusCode": 401,
+    "name": "INVALID_ACCESS_TOKEN",
+    "message": "유효하지 않은 토큰입니다."
+  },
+  "ACCESS_TOKEN_EXPIRED": {
+    "errorCode": 4013,
+    "statusCode": 401,
+    "name": "TOKEN_EXPIRED",
+    "message": "ACCESS TOKEN 만료. 리프레시를 시도해주세요"
+  },
+  "USER_NOT_FOUND": {
+    "errorCode": 4040,
+    "statusCode": 404,
+    "name": "USER_NOT_FOUND",
+    "message": "사용자를 찾을 수 없습니다."
+  },
+
+  "INVALID_PAGE_QUERY": {
+    "errorCode": 4060,
+    "statusCode": 406,
+    "name": "INVALID_PAGE_QUERY",
+    "message": "page 또는 pageSize 값이 잘못되었습니다. 자연수값이어야 합니다."
+  },
+
+  "TODO_INVALID": {
+    "errorCode": 4061,
+    "statusCode": 406,
+    "name": "TODO_INVALID",
+    "message": "할."
+  },
+  "TOO_MANY_REQUESTS": {
+    "errorCode": 4290,
+    "statusCode": 429,
+    "name": "TOO_MANY_REQUESTS",
+    "message": "잠시 후 다시 시도해주세요."
+  },
+  "INTERNAL_SERVER_ERROR": {
+    "errorCode": 5000,
+    "statusCode": 500,
+    "name": "INTERNAL_SERVER_ERROR",
+    "message": "Internal Server Error"
+  },
+  "EMAIL_SEND_FAILED": {
+    "errorCode": 5100,
+    "statusCode": 510,
+    "name": "EMAIL_SEND_FAILED",
+    "message": "이메일 전송에 실패했습니다. 잠시 후에 다시 시도해주세요."
+  },
+  "NOT_AN_ADMIN": {
+    "errorCode": 4030,
+    "statusCode": 403,
+    "name": "NOT_AN_ADMIN",
+    "message": "어드민이 아닙니다."
+  }
+}

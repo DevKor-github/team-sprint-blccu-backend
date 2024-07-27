@@ -9,6 +9,7 @@ import {
 } from './interfaces/announcements.service.interface';
 import { UsersValidateService } from '../users/services/users-validate-service';
 import { AnnouncementDto } from './dtos/common/announcement.dto';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
 
 @Injectable()
 export class AnnouncementsService {
@@ -18,6 +19,9 @@ export class AnnouncementsService {
     private readonly svc_usersValidate: UsersValidateService,
   ) {}
 
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'adminCheck' },
+  ])
   async createAnnoucement({
     userId,
     title,
