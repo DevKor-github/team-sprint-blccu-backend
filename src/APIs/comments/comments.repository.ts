@@ -8,7 +8,7 @@ import {
 } from './interfaces/comments.repository.interface';
 import { CommentsGetResponseDto } from './dtos/response/comments-get-response.dto';
 import { USER_PRIMARY_RESPONSE_DTO_KEYS } from '../users/dtos/response/user-primary-response.dto';
-import { transformKeysToArgsFormat } from 'src/utils/classUtils';
+import { transformKeysToArgsFormat } from 'src/utils/class.utils';
 
 @Injectable()
 export class CommentsRepository extends Repository<Comment> {

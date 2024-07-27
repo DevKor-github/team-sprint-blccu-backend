@@ -7,7 +7,7 @@ import { Notification } from 'src/APIs/notifications/entities/notification.entit
 import { Follow } from 'src/APIs/follows/entities/follow.entity';
 import { User } from '../entities/user.entity';
 import { Agreement } from 'src/APIs/agreements/entities/agreement.entity';
-import { getUUID } from 'src/utils/uuidUtils';
+import { getUUID } from '@/utils/uuid.utils';
 import { Injectable } from '@nestjs/common';
 import { IUsersServiceDelete } from '../interfaces/users.service.interface';
 

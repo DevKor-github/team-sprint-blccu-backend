@@ -4,7 +4,7 @@ import {
   IImagesServiceUploadImage,
 } from './interfaces/images.service.interface';
 import { ImageUploadResponseDto } from './dtos/image-upload-response.dto';
-import { getUUID } from 'src/utils/uuidUtils';
+import { getUUID } from '@/utils/uuid.utils';
 import { AwsService } from '../aws/aws.service';
 
 @Injectable()

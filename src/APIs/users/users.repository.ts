@@ -3,7 +3,7 @@ import { User } from './entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Follow } from '../follows/entities/follow.entity';
 import { plainToClass } from 'class-transformer';
-import { convertToCamelCase } from 'src/utils/classUtils';
+import { convertToCamelCase } from 'src/utils/class.utils';
 import { UserFollowingResponseDto } from './dtos/response/user-following-response.dto';
 import { USER_PRIMARY_RESPONSE_DTO_KEYS } from './dtos/response/user-primary-response.dto';
 

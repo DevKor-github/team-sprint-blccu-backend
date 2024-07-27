@@ -14,7 +14,7 @@ import {
   IArticlesServiceFetchUserArticlesCursor,
 } from '../interfaces/articles.service.interface';
 import { ArticleDto } from '../dtos/common/article.dto';
-import { getDate } from 'src/utils/dateUtils';
+import { getDate } from '@/utils/date.utils';
 
 @Injectable()
 export class ArticlesPaginateService {

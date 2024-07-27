@@ -1,5 +1,5 @@
 import { OmitType } from '@nestjs/swagger';
-import { getUserFields } from 'src/utils/classUtils';
+import { getUserFields } from 'src/utils/class.utils';
 import { User } from '../../entities/user.entity';
 
 // exclude refreshtoken!!
