@@ -13,10 +13,12 @@ export function ExceptionMetadata(exceptionInfoArray: ExceptionData[]) {
     // 메서드 이름과 클래스 이름을 예외 데이터에 추가
     const methodName = propertyKey;
     const className = target.constructor.name;
+    const stack = `${className}.${methodName}`;
     const newExceptionInfoArray = exceptionInfoArray.map((exceptionInfo) => ({
       ...exceptionInfo,
       methodName,
       className,
+      stack: [...(exceptionInfo.stack || []), stack],
     }));
 
     const newMetadata = Array.isArray(existingMetadata)

@@ -40,6 +40,16 @@ export function ApiResponseFromMetadata(
     }
   };
 }
+function formatStack(stack, level = 0) {
+  return stack
+    .map((call, index) => {
+      level += 1;
+      const indent = '&nbsp;'.repeat(level);
+      const prefix = index === 0 ? ' ' : '- Calls:';
+      return `${indent}${prefix} ${call}`;
+    })
+    .join('<br>');
+}
 
 function mergeExceptionDataByStatus(
   exceptionDataArray: ExceptionData[],
@@ -47,16 +57,18 @@ function mergeExceptionDataByStatus(
   const mergedData: { [status: number]: ExceptionData } = {};
 
   exceptionDataArray.forEach((data) => {
+    const formattedStack = formatStack(data.stack);
+
+    const messageTemplate = `**${data.name}(${data.errorCode})**: ${data.message}<br><small>${formattedStack}</small>`;
     if (!mergedData[data.statusCode]) {
       mergedData[data.statusCode] = {
         statusCode: data.statusCode,
-        message: `${data.name}(${data.errorCode}): ${data.message}(Class: ${data.className}, Method: ${data.methodName})`,
+        message: messageTemplate,
         name: data.name,
         errorCode: data.errorCode,
       };
     } else {
-      mergedData[data.statusCode].message +=
-        `<br>${data.name}(${data.errorCode}): ${data.message}(Class: ${data.className}, Method: ${data.methodName})`;
+      mergedData[data.statusCode].message += `<br>${messageTemplate}`;
     }
   });
 

@@ -138,13 +138,18 @@
     "name": "ARTICLE_BACKGROUND_NOT_FOUND",
     "message": "게시글 배경을 찾을 수 없습니다."
   },
+  "STICKER_NOT_FOUND": {
+    "errorCode": 4046,
+    "statusCode": 404,
+    "name": "STICKER_NOT_FOUND",
+    "message": "스티커를 찾을 수 없습니다."
+  },
   "INVALID_PAGE_QUERY": {
     "errorCode": 4060,
     "statusCode": 406,
     "name": "INVALID_PAGE_QUERY",
     "message": "page 또는 pageSize 값이 잘못되었습니다. 자연수값이어야 합니다."
   },
-
   "TODO_INVALID": {
     "errorCode": 4061,
     "statusCode": 406,

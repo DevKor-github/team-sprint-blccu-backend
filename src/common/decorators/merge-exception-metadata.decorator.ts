@@ -16,11 +16,20 @@ export function MergeExceptionMetadata(
         EXCEPTION_METADATA_KEY,
         method,
       );
-
+      const stack = `${target.constructor.name}.${propertyKey}`;
       if (Array.isArray(existingExceptionMetadata)) {
-        mergedMetadata = [...mergedMetadata, ...existingExceptionMetadata];
+        mergedMetadata = [
+          ...mergedMetadata,
+          ...existingExceptionMetadata.map((metadata) => ({
+            ...metadata,
+            stack: [stack, ...(metadata.stack || [])],
+          })),
+        ];
       } else if (existingExceptionMetadata) {
-        mergedMetadata.push(existingExceptionMetadata);
+        mergedMetadata.push({
+          ...existingExceptionMetadata,
+          stack: [stack, ...(existingExceptionMetadata.stack || [])],
+        });
       }
     });
 
