@@ -5,6 +5,7 @@ import { StickerBlocksService } from 'src/APIs/stickerBlocks/stickerBlocks.servi
 import { IArticlesServiceArticleUserIdPair } from '../interfaces/articles.service.interface';
 import { ArticlesReadRepository } from '../repositories/articles-read.repository';
 import { ImagesService } from 'src/modules/images/images.service';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
 
 @Injectable()
 export class ArticlesDeleteService {
@@ -17,6 +18,10 @@ export class ArticlesDeleteService {
     private readonly repo_articlesDelete: ArticlesDeleteRepository,
   ) {}
 
+  @MergeExceptionMetadata([
+    { service: ImagesService, methodName: 'deleteImage' },
+    { service: StickerBlocksService, methodName: 'deleteStickerBlocks' },
+  ])
   async softDelete({ userId, articleId }: IArticlesServiceArticleUserIdPair) {
     const data = await this.repo_articlesRead.findOne({
       where: { user: { id: userId }, id: articleId },
@@ -32,6 +37,10 @@ export class ArticlesDeleteService {
     });
   }
 
+  @MergeExceptionMetadata([
+    { service: ImagesService, methodName: 'deleteImage' },
+    { service: StickerBlocksService, methodName: 'deleteStickerBlocks' },
+  ])
   async hardDelete({ userId, articleId }: IArticlesServiceArticleUserIdPair) {
     const data = await this.repo_articlesRead.findOne({
       where: { userId, id: articleId },

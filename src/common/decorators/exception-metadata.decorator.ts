@@ -10,9 +10,18 @@ export function ExceptionMetadata(exceptionInfoArray: ExceptionData[]) {
     const existingMetadata =
       reflector.get(EXCEPTION_METADATA_KEY, target[propertyKey]) || [];
 
+    // 메서드 이름과 클래스 이름을 예외 데이터에 추가
+    const methodName = propertyKey;
+    const className = target.constructor.name;
+    const newExceptionInfoArray = exceptionInfoArray.map((exceptionInfo) => ({
+      ...exceptionInfo,
+      methodName,
+      className,
+    }));
+
     const newMetadata = Array.isArray(existingMetadata)
-      ? [...existingMetadata, ...exceptionInfoArray]
-      : [existingMetadata, ...exceptionInfoArray];
+      ? [...existingMetadata, ...newExceptionInfoArray]
+      : [existingMetadata, ...newExceptionInfoArray];
 
     SetMetadata(EXCEPTION_METADATA_KEY, newMetadata)(
       target,

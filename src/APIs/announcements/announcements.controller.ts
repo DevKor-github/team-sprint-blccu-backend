@@ -16,7 +16,6 @@ import { Request } from 'express';
 import { AnnouncementDto } from './dtos/common/announcement.dto';
 import { AnnouncementPatchRequestDto } from './dtos/request/announcement-patch-request.dto';
 import { AnnouncementCreateRequestDto } from './dtos/request/announcement-create-request.dto';
-import { ApiResponseFromMetadata } from '@/common/decorators/api-response-from-metadata.decorator';
 import { AnnouncementsDocs } from './docs/announcements-docs.decorator';
 
 @AnnouncementsDocs
@@ -27,9 +26,6 @@ export class AnnouncementsController {
 
   @UseGuards(AuthGuardV2)
   @Post('users/admin/anmts')
-  @ApiResponseFromMetadata([
-    { service: AnnouncementsService, methodName: 'createAnnoucement' },
-  ])
   async createAnnouncement(
     @Req() req: Request,
     @Body() body: AnnouncementCreateRequestDto,

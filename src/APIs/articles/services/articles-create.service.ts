@@ -11,6 +11,7 @@ import { ArticlesReadRepository } from '../repositories/articles-read.repository
 import { ArticleCreateResponseDto } from '../dtos/response/article-create-response.dto';
 import { ImagesService } from 'src/modules/images/images.service';
 import { ImageUploadResponseDto } from 'src/modules/images/dtos/image-upload-response.dto';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
 
 @Injectable()
 export class ArticlesCreateService {
@@ -22,6 +23,10 @@ export class ArticlesCreateService {
     private readonly repo_articlesRead: ArticlesReadRepository,
   ) {}
 
+  @MergeExceptionMetadata([
+    { service: ArticlesValidateService, methodName: 'fkValidCheck' },
+    { service: StickerBlocksService, methodName: 'createStickerBlocks' },
+  ])
   async save(
     createArticleDto: IArticlesServiceCreate,
   ): Promise<ArticleCreateResponseDto> {
@@ -65,6 +70,10 @@ export class ArticlesCreateService {
     }
   }
 
+  @MergeExceptionMetadata([
+    { service: ArticlesValidateService, methodName: 'fkValidCheck' },
+    { service: StickerBlocksService, methodName: 'createStickerBlocks' },
+  ])
   async createDraft(
     dto_createDraft: IArticlesServiceCreateDraft,
   ): Promise<ArticleCreateResponseDto> {
@@ -109,6 +118,9 @@ export class ArticlesCreateService {
     }
   }
 
+  @MergeExceptionMetadata([
+    { service: ImagesService, methodName: 'imageUpload' },
+  ])
   async imageUpload(
     file: Express.Multer.File,
   ): Promise<ImageUploadResponseDto> {

@@ -50,13 +50,13 @@ function mergeExceptionDataByStatus(
     if (!mergedData[data.statusCode]) {
       mergedData[data.statusCode] = {
         statusCode: data.statusCode,
-        message: `${data.name}(${data.errorCode}): ${data.message}`,
+        message: `${data.name}(${data.errorCode}): ${data.message}(Class: ${data.className}, Method: ${data.methodName})`,
         name: data.name,
         errorCode: data.errorCode,
       };
     } else {
       mergedData[data.statusCode].message +=
-        `<br>${data.name}(${data.errorCode}): ${data.message}`;
+        `<br>${data.name}(${data.errorCode}): ${data.message}(Class: ${data.className}, Method: ${data.methodName})`;
     }
   });
 
