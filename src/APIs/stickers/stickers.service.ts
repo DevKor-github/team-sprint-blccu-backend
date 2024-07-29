@@ -108,6 +108,7 @@ export class StickersService {
 
   @MergeExceptionMetadata([
     { service: StickersService, methodName: 'existCheck' },
+    { service: ImagesService, methodName: 'deleteImage' },
   ])
   @ExceptionMetadata([EXCEPTIONS.NOT_THE_OWNER])
   async updateSticker({
@@ -133,6 +134,7 @@ export class StickersService {
 
   @MergeExceptionMetadata([
     { service: StickersService, methodName: 'existCheck' },
+    { service: ImagesService, methodName: 'deleteImage' },
   ])
   @ExceptionMetadata([EXCEPTIONS.NOT_THE_OWNER])
   async deleteSticker({
