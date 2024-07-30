@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, MessageEvent } from '@nestjs/common';
+import { Injectable, MessageEvent } from '@nestjs/common';
 import { NotificationsRepository } from './notifications.repository';
 import { Observable, Subject, filter, map } from 'rxjs';
 import { DateOption } from 'src/common/enums/date-option';
@@ -11,6 +11,8 @@ import {
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { NotificationsGetResponseDto } from './dtos/response/notifications-get-response.dto';
+import { BlccuException, EXCEPTIONS } from '@/common/blccu-exception';
+import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
 
 @Injectable()
 export class NotificationsService {
@@ -48,6 +50,7 @@ export class NotificationsService {
     return pipe;
   }
 
+  @ExceptionMetadata([EXCEPTIONS.NOTIFICATION_CREATION_FAILED])
   async emitAlarm({
     userId,
     targetUserId,
@@ -67,7 +70,7 @@ export class NotificationsService {
       await this.redisQueue.add(this.queueName, response);
       return response;
     } catch (e) {
-      throw new BadRequestException('대상을 찾을 수 없습니다.');
+      throw new BlccuException('NOTIFICATION_CREATION_FAILED');
     }
   }
 
@@ -100,6 +103,7 @@ export class NotificationsService {
     });
   }
 
+  @ExceptionMetadata([EXCEPTIONS.NOTIFICATION_NOT_FOUND])
   async readNotification({
     notificationId,
     targetUserId,
@@ -111,7 +115,7 @@ export class NotificationsService {
       },
     );
     if (updateResult.affected < 1) {
-      throw new BadRequestException('알림을 찾을 수 없거나 권한이 없습니다.');
+      throw new BlccuException('NOTIFICATION_NOT_FOUND');
     }
     return await this.notificationsRepository.fetchOne({
       notificationId,

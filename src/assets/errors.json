@@ -257,5 +257,11 @@
     "statusCode": 500,
     "name": "DATABASE_QUERY_FAILED",
     "message": "데이터베이스 쿼리 실행 중 오류가 발생했습니다."
+  },
+  "NOTIFICATION_CREATION_FAILED": {
+    "errorCode": 5006,
+    "statusCode": 500,
+    "name": "NOTIFICATION_CREATION_FAILED",
+    "message": "알림 생성에 실패했습니다."
   }
 }
