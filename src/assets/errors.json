@@ -5,17 +5,17 @@
     "name": "VALIDATION_ERROR",
     "message": "올바르지 않은 입력 값입니다."
   },
-  "EMAIL_NOT_VALIDATED": {
+  "INVALID_PARENT_COMMENT_REQUEST": {
     "errorCode": 4001,
     "statusCode": 400,
-    "name": "EMAIL_NOT_VALIDATED",
-    "message": "인증되지 않은 이메일입니다."
+    "name": "INVALID_PARENT_COMMENT",
+    "message": "부모 댓글에 대한 입력 값이 유효하지 않습니다. 부모 댓글이 존재하는 값인 지, 루트 댓글인 지 확인하십시오."
   },
-  "EMAIL_ALREADY_USED": {
+  "INVALID_ARTICLE_REQUEST": {
     "errorCode": 4002,
     "statusCode": 400,
-    "name": "EMAIL_ALREADY_USED",
-    "message": "이미 사용중인 이메일입니다."
+    "name": "INVALID_ARTICLE_REQUEST",
+    "message": "게시글 아이디가 부모 댓글이 작성된 게시글 아이디와 일치하지 않습니다."
   },
   "EMAIL_NOT_IN_KOREA_DOMAIN": {
     "errorCode": 4003,
@@ -102,6 +102,12 @@
     "name": "NOT_AUTHORIZED",
     "message": "이 작업을 수행할 권한이 없습니다."
   },
+  "FORBIDDEN_ACCESS": {
+    "errorCode": 4033,
+    "statusCode": 403,
+    "name": "FORBIDDEN_ACCESS",
+    "message": "허용되지 않은 접근입니다."
+  },
   "USER_NOT_FOUND": {
     "errorCode": 4040,
     "statusCode": 404,
@@ -155,6 +161,12 @@
     "statusCode": 404,
     "name": "FOLLOW_NOT_FOUND",
     "message": "팔로우 정보를 찾을 수 없습니다."
+  },
+  "COMMENT_NOT_FOUND": {
+    "errorCode": 4049,
+    "statusCode": 404,
+    "name": "COMMENT_NOT_FOUND",
+    "message": "댓글을 찾을 수 없습니다."
   },
   "INVALID_PAGE_QUERY": {
     "errorCode": 4060,
