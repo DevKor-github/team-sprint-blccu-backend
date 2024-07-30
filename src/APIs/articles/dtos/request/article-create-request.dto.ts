@@ -21,7 +21,6 @@ export class ArticleCreateRequestDto extends OmitType(ArticleDto, [
   @IsArray({ message: 'stickerBlocks는 배열이여야 합니다.' })
   @ValidateNested({ each: true })
   @Type(() => StickerBlocksCreateDto)
-  @IsOptional()
   stickerBlocks: StickerBlocksCreateDto[];
 
   @ApiProperty({
