@@ -10,6 +10,8 @@ import { Agreement } from 'src/APIs/agreements/entities/agreement.entity';
 import { getUUID } from '@/utils/uuid.utils';
 import { Injectable } from '@nestjs/common';
 import { IUsersServiceDelete } from '../interfaces/users.service.interface';
+import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
+import { EXCEPTIONS } from '@/common/blccu-exception';
 
 @Injectable()
 export class UsersDeleteService {
@@ -17,6 +19,14 @@ export class UsersDeleteService {
     private readonly repo_users: UsersRepository,
     private readonly db_dataSource: DataSource,
   ) {}
+
+  @ExceptionMetadata([
+    EXCEPTIONS.QUERY_FAILED_ERROR,
+    EXCEPTIONS.ENTITY_NOT_FOUND_ERROR,
+    EXCEPTIONS.TRANSACTION_ALREADY_STARTED_ERROR,
+    EXCEPTIONS.TRANSACTION_NOT_STARTED_ERROR,
+    EXCEPTIONS.PESSIMISTIC_LOCK_TRANSACTION_REQUIRED_ERROR,
+  ])
   async deleteUser({
     userId,
     type,
