@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { StickerCategory } from './entities/stickerCategory.entity';
 import { InjectRepository } from '@nestjs/typeorm';

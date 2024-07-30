@@ -1,9 +1,9 @@
 {
-  "EMAIL_VALIDATION_EXPIRED": {
+  "VALIDATION_ERROR": {
     "errorCode": 4000,
     "statusCode": 400,
-    "name": "EMAIL_VALIDATION_EXPIRED",
-    "message": "이메일 인증이 만료되었습니다. 다시 인증해주세요."
+    "name": "VALIDATION_ERROR",
+    "message": "올바르지 않은 입력 값입니다."
   },
   "EMAIL_NOT_VALIDATED": {
     "errorCode": 4001,
@@ -204,10 +204,10 @@
     "name": "IMAGE_RESIZE_ERROR",
     "message": "이미지 리사이징 중에 오류가 발생했습니다."
   },
-  "EMAIL_SEND_FAILED": {
-    "errorCode": 5100,
-    "statusCode": 510,
-    "name": "EMAIL_SEND_FAILED",
-    "message": "이메일 전송에 실패했습니다. 잠시 후에 다시 시도해주세요."
+  "DATABASE_QUERY_FAILED": {
+    "errorCode": 5005,
+    "statusCode": 500,
+    "name": "DATABASE_QUERY_FAILED",
+    "message": "데이터베이스 쿼리 실행 중 오류가 발생했습니다."
   }
 }
