@@ -53,7 +53,7 @@ export class ArticlesCreateService {
         .into(Article, Object.keys(article))
         .values(article)
         .execute();
-      const articleData = await this.repo_articlesRead.findOne({
+      const articleData = await queryRunner.manager.findOne(Article, {
         where: { id: queryResult.identifiers[0].id },
       });
       const stickerBlockData = await this.svc_stickerBlocks.createStickerBlocks(
