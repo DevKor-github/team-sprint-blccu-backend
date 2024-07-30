@@ -1,18 +1,11 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Req,
-  Res,
-  UnauthorizedException,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { AuthDocs } from './docs/auth-docs.decorator';
+import { BlccuException } from '@/common/blccu-exception';
 
 @ApiTags('인증 API')
 @Controller('auth')
@@ -85,7 +78,7 @@ export class AuthController {
         secure: true,
       });
 
-      throw new UnauthorizedException(e.message);
+      throw new BlccuException('INVALID_REFRESH_TOKEN');
     }
   }
 

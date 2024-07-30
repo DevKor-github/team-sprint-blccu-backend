@@ -150,6 +150,12 @@
     "name": "STICKER_CATEGORY_NOT_FOUND",
     "message": "스티커 카테고리를 찾을 수 없습니다."
   },
+  "FOLLOW_NOT_FOUND": {
+    "errorCode": 4048,
+    "statusCode": 404,
+    "name": "FOLLOW_NOT_FOUND",
+    "message": "팔로우 정보를 찾을 수 없습니다."
+  },
   "INVALID_PAGE_QUERY": {
     "errorCode": 4060,
     "statusCode": 406,
@@ -173,6 +179,18 @@
     "statusCode": 409,
     "name": "MAPPING_CONFLICT",
     "message": "이미 매핑 된 값입니다."
+  },
+  "ALREADY_EXISTS": {
+    "errorCode": 4092,
+    "statusCode": 409,
+    "name": "ALREADY_EXISTS",
+    "message": "이미 존재하는 값입니다."
+  },
+  "SELF_ACTION_NOT_ALLOWED": {
+    "errorCode": 4093,
+    "statusCode": 409,
+    "name": "SELF_ACTION_NOT_ALLOWED",
+    "message": "자기 자신에게는 이 작업을 수행할 수 없습니다."
   },
   "TOO_MANY_REQUESTS": {
     "errorCode": 4290,

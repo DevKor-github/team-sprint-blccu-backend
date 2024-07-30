@@ -2,43 +2,27 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
   Param,
   Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
-import {
-  ApiConflictResponse,
-  ApiCookieAuth,
-  ApiCreatedResponse,
-  ApiNoContentResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { FollowsService } from './follows.service';
 import { FollowDto } from './dtos/common/follow.dto';
 import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
+import { FollowsDocs } from './docs/follows-docs.decorator';
 
+@FollowsDocs
 @ApiTags('유저 API')
 @Controller('users')
 export class FollowsController {
   constructor(private readonly followsService: FollowsService) {}
 
-  @ApiOperation({
-    summary: '팔로우 추가하기',
-    description: '로그인된 유저가 userId를 팔로우한다.',
-  })
-  @ApiCookieAuth()
-  @ApiCreatedResponse({ description: '이웃 추가 성공', type: FollowDto })
-  @ApiConflictResponse({ description: '이미 팔로우한 상태이다.' })
   @UseGuards(AuthGuardV2)
   @Post(':userId/follow')
-  @HttpCode(201)
   async followUser(
     @Req() req: Request,
     @Param('userId') toUser: number,
@@ -50,16 +34,8 @@ export class FollowsController {
     });
   }
 
-  @ApiOperation({
-    summary: '팔로우 삭제하기',
-    description: '로그인된 유저가 userId를 언팔로우 한다.',
-  })
-  @ApiCookieAuth()
-  @ApiNoContentResponse({ description: '언팔로우 성공' })
-  @ApiNotFoundResponse({ description: '존재하지 않는 이웃 정보이다.' })
   @UseGuards(AuthGuardV2)
   @Delete(':userId/follow')
-  @HttpCode(204)
   unfollowUser(
     @Req() req: Request,
     @Param('userId') toUser: number,
@@ -71,48 +47,32 @@ export class FollowsController {
     });
   }
 
-  @ApiOperation({
-    summary: '팔로워 유무 조회',
-    description: '나와 팔로우되었는지 유무 체크를 한다.',
-  })
-  @ApiCookieAuth()
-  @ApiOkResponse({ type: Boolean })
   @UseGuards(AuthGuardV2)
-  @HttpCode(200)
   @Get('me/follower/:userId')
   async checkFollower(
     @Req() req: Request,
     @Param('userId') toUser: number,
   ): Promise<boolean> {
     const fromUser = req.user.userId;
-    return await this.followsService.existCheck({ fromUser, toUser });
+    return await this.followsService.existCheckWithoutValidation({
+      fromUser,
+      toUser,
+    });
   }
 
-  @ApiOperation({
-    summary: '팔로잉 유무 조회',
-    description: '나의 팔로잉인지 유무 체크를 한다.',
-  })
-  @ApiCookieAuth()
-  @ApiOkResponse({ type: Boolean })
   @UseGuards(AuthGuardV2)
-  @HttpCode(200)
   @Get('me/following/:userId')
   async checkFollowing(
     @Req() req: Request,
     @Param('userId') fromUser: number,
   ): Promise<boolean> {
     const toUser = req.user.userId;
-    return await this.followsService.existCheck({ fromUser, toUser });
+    return await this.followsService.existCheckWithoutValidation({
+      fromUser,
+      toUser,
+    });
   }
-  @ApiOperation({
-    summary: '팔로워 목록 조회',
-    description: 'userId의 팔로워 목록을 조회한다.',
-  })
-  @ApiOkResponse({
-    description: '팔로워 목록 조회 성공',
-    type: [UserFollowingResponseDto],
-  })
-  @HttpCode(200)
+
   @Get(':userId/followers')
   getFollowers(
     @Req() req: Request,
@@ -122,15 +82,6 @@ export class FollowsController {
     return this.followsService.findFollowers({ userId, loggedUser });
   }
 
-  @ApiOperation({
-    summary: '팔로잉 목록 조회',
-    description: 'userId의 팔로잉 목록을 조회한다.',
-  })
-  @ApiOkResponse({
-    description: '팔로잉 목록 조회 성공',
-    type: [UserFollowingResponseDto],
-  })
-  @HttpCode(200)
   @Get(':userId/followings')
   getFollows(
     @Req() req: Request,
