@@ -28,7 +28,7 @@ export class FeedbacksService {
   }
 
   @MergeExceptionMetadata([
-    { service: UsersValidateService, methodName: ' adminCheck' },
+    { service: UsersValidateService, methodName: 'adminCheck' },
   ])
   async fetchFeedbacks({
     userId,

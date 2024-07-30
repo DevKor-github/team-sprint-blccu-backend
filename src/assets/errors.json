@@ -168,6 +168,24 @@
     "name": "COMMENT_NOT_FOUND",
     "message": "댓글을 찾을 수 없습니다."
   },
+  "LIKE_NOT_FOUND": {
+    "errorCode": 40410,
+    "statusCode": 404,
+    "name": "LIKE_NOT_FOUND",
+    "message": "좋아요를 찾을 수 없습니다."
+  },
+  "REPORT_NOT_FOUND": {
+    "errorCode": 40411,
+    "statusCode": 404,
+    "name": "REPORT_NOT_FOUND",
+    "message": "신고 내역을 찾을 수 없습니다."
+  },
+  "NOTIFICATION_NOT_FOUND": {
+    "errorCode": 40412,
+    "statusCode": 404,
+    "name": "NOTIFICATION_NOT_FOUND",
+    "message": "알림을 찾을 수 없습니다."
+  },
   "INVALID_PAGE_QUERY": {
     "errorCode": 4060,
     "statusCode": 406,
