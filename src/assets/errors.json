@@ -144,6 +144,12 @@
     "name": "STICKER_NOT_FOUND",
     "message": "스티커를 찾을 수 없습니다."
   },
+  "STICKER_CATEGORY_NOT_FOUND": {
+    "errorCode": 4047,
+    "statusCode": 404,
+    "name": "STICKER_CATEGORY_NOT_FOUND",
+    "message": "스티커 카테고리를 찾을 수 없습니다."
+  },
   "INVALID_PAGE_QUERY": {
     "errorCode": 4060,
     "statusCode": 406,
@@ -155,6 +161,18 @@
     "statusCode": 406,
     "name": "TODO_INVALID",
     "message": "할."
+  },
+  "CATEGORY_CONFLICT": {
+    "errorCode": 4090,
+    "statusCode": 409,
+    "name": "CATEGORY_CONFLICT",
+    "message": "동명의 카테고리가 존재합니다."
+  },
+  "MAPPING_CONFLICT": {
+    "errorCode": 4091,
+    "statusCode": 409,
+    "name": "MAPPING_CONFLICT",
+    "message": "이미 매핑 된 값입니다."
   },
   "TOO_MANY_REQUESTS": {
     "errorCode": 4290,

@@ -62,9 +62,9 @@ export class Article extends IndexedCommonEntity {
     type: Number,
     nullable: true,
   })
-  @Column({ name: 'currrent_image_id', nullable: true })
+  @Column({ name: 'current_image_id', nullable: true })
   @IsNumber()
-  currrentImageId: number;
+  currentImageId: number;
 
   @ApiProperty({ description: '제목(최대 100자)', type: String, default: '' })
   @Column({ length: 100, default: '' })
