@@ -6,6 +6,7 @@ import { IArticlesServiceArticleUserIdPair } from '../interfaces/articles.servic
 import { ArticlesReadRepository } from '../repositories/articles-read.repository';
 import { ImagesService } from 'src/modules/images/images.service';
 import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
+import { IsUrl, isURL } from 'class-validator';
 
 @Injectable()
 export class ArticlesDeleteService {
@@ -45,11 +46,14 @@ export class ArticlesDeleteService {
     const data = await this.repo_articlesRead.findOne({
       where: { userId, id: articleId },
     });
-    if (data) {
+    if (isURL(data.imageUrl)) {
       await this.svc_images.deleteImage({ url: data.imageUrl });
-      await this.svc_images.deleteImage({ url: data.mainImageUrl });
-      await this.svc_stickerBlocks.deleteStickerBlocks({ userId, articleId });
     }
+    if (isURL(data.mainImageUrl)) {
+      await this.svc_images.deleteImage({ url: data.mainImageUrl });
+    }
+    await this.svc_stickerBlocks.deleteStickerBlocks({ userId, articleId });
+
     return await this.repo_articlesDelete.delete({
       user: { id: userId },
       id: articleId,
