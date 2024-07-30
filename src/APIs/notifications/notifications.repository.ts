@@ -7,7 +7,7 @@ import {
   INotificationsSeviceEmitNotification,
 } from './interfaces/notifications.service.interface';
 import { NotificationsGetResponseDto } from './dtos/response/notifications-get-response.dto';
-import { transformKeysToArgsFormat } from 'src/utils/classUtils';
+import { transformKeysToArgsFormat } from 'src/utils/class.utils';
 import { USER_PRIMARY_RESPONSE_DTO_KEYS } from '../users/dtos/response/user-primary-response.dto';
 
 @Injectable()

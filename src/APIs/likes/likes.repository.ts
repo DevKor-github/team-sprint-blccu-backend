@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { ILikesRepositoryIds } from './interfaces/likes.repository.interface';
 import { Like } from './entities/like.entity';
 import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
-import { convertToCamelCase } from 'src/utils/classUtils';
+import { convertToCamelCase } from 'src/utils/class.utils';
 import { plainToClass } from 'class-transformer';
 import { USER_PRIMARY_RESPONSE_DTO_KEYS } from '../users/dtos/response/user-primary-response.dto';
 

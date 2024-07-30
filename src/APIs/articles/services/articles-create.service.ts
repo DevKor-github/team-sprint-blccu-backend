@@ -11,6 +11,8 @@ import { ArticlesReadRepository } from '../repositories/articles-read.repository
 import { ArticleCreateResponseDto } from '../dtos/response/article-create-response.dto';
 import { ImagesService } from 'src/modules/images/images.service';
 import { ImageUploadResponseDto } from 'src/modules/images/dtos/image-upload-response.dto';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
+import { ArticleDto } from '../dtos/common/article.dto';
 
 @Injectable()
 export class ArticlesCreateService {
@@ -22,13 +24,17 @@ export class ArticlesCreateService {
     private readonly repo_articlesRead: ArticlesReadRepository,
   ) {}
 
+  @MergeExceptionMetadata([
+    { service: ArticlesValidateService, methodName: 'fkValidCheck' },
+    { service: StickerBlocksService, methodName: 'createStickerBlocks' },
+  ])
   async save(
     createArticleDto: IArticlesServiceCreate,
   ): Promise<ArticleCreateResponseDto> {
     const queryRunner = this.db_dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    const article = {};
+    const article: Partial<ArticleDto> = {};
     try {
       Object.keys(createArticleDto).map((el) => {
         const value = createArticleDto[el];
@@ -40,13 +46,13 @@ export class ArticlesCreateService {
         articles: article,
         passNonEssentail: !createArticleDto.isPublished,
       });
+
       const queryResult = await queryRunner.manager
         .createQueryBuilder()
         .insert()
         .into(Article, Object.keys(article))
         .values(article)
         .execute();
-      await queryRunner.commitTransaction();
       const articleData = await this.repo_articlesRead.findOne({
         where: { id: queryResult.identifiers[0].id },
       });
@@ -56,6 +62,8 @@ export class ArticlesCreateService {
           stickerBlocks: createArticleDto.stickerBlocks,
         },
       );
+      await queryRunner.commitTransaction();
+
       return { articleData, stickerBlockData };
     } catch (e) {
       await queryRunner.rollbackTransaction();
@@ -65,6 +73,10 @@ export class ArticlesCreateService {
     }
   }
 
+  @MergeExceptionMetadata([
+    { service: ArticlesValidateService, methodName: 'fkValidCheck' },
+    { service: StickerBlocksService, methodName: 'createStickerBlocks' },
+  ])
   async createDraft(
     dto_createDraft: IArticlesServiceCreateDraft,
   ): Promise<ArticleCreateResponseDto> {
@@ -72,7 +84,7 @@ export class ArticlesCreateService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const article = {};
+    const article: Partial<ArticleDto> = {};
     try {
       Object.keys(dto_createDraft).map((el) => {
         const value = dto_createDraft[el];
@@ -90,8 +102,8 @@ export class ArticlesCreateService {
         .into(Article, Object.keys(article))
         .values(article)
         .execute();
-      await queryRunner.commitTransaction();
-      const articleData = await this.repo_articlesRead.findOne({
+
+      const articleData = await queryRunner.manager.findOne(Article, {
         where: { id: queryResult.identifiers[0].id },
       });
       const stickerBlockData = await this.svc_stickerBlocks.createStickerBlocks(
@@ -100,6 +112,8 @@ export class ArticlesCreateService {
           stickerBlocks: dto_createDraft.stickerBlocks,
         },
       );
+      await queryRunner.commitTransaction();
+
       return { articleData, stickerBlockData };
     } catch (e) {
       await queryRunner.rollbackTransaction();
@@ -109,6 +123,9 @@ export class ArticlesCreateService {
     }
   }
 
+  @MergeExceptionMetadata([
+    { service: ImagesService, methodName: 'imageUpload' },
+  ])
   async imageUpload(
     file: Express.Multer.File,
   ): Promise<ImageUploadResponseDto> {

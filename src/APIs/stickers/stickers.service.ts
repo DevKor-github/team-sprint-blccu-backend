@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Sticker } from './entities/sticker.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,6 +12,9 @@ import {
 } from './interfaces/stickers.service.interface';
 import { ImagesService } from 'src/modules/images/images.service';
 import { StickerDto } from './dtos/common/sticker.dto';
+import { BlccuException, EXCEPTIONS } from '@/common/blccu-exception';
+import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
 
 @Injectable()
 export class StickersService {
@@ -28,19 +31,16 @@ export class StickersService {
     return await this.repo_stickers.findOne({ where: { id: stickerId } });
   }
 
+  @ExceptionMetadata([EXCEPTIONS.STICKER_NOT_FOUND])
   async existCheck({ stickerId }: IStickersServiceId): Promise<StickerDto> {
-    try {
-      const data = await this.findStickerById({ stickerId });
-      if (!data) {
-        throw new NotFoundException('스티커를 찾을 수 없습니다.');
-      }
-
-      return data;
-    } catch (e) {
-      throw e;
-    }
+    const data = await this.findStickerById({ stickerId });
+    if (!data) throw new BlccuException('STICKER_NOT_FOUND');
+    return data;
   }
 
+  @MergeExceptionMetadata([
+    { service: ImagesService, methodName: 'imageUpload' },
+  ])
   async createPrivateSticker({
     userId,
     file,
@@ -60,6 +60,10 @@ export class StickersService {
     const data = await this.repo_stickers.findOne({ where: { id } });
     return data;
   }
+
+  @MergeExceptionMetadata([
+    { service: ImagesService, methodName: 'imageUpload' },
+  ])
   async createPublicSticker({
     userId,
     file,
@@ -95,6 +99,11 @@ export class StickersService {
     });
   }
 
+  @MergeExceptionMetadata([
+    { service: StickersService, methodName: 'existCheck' },
+    { service: ImagesService, methodName: 'deleteImage' },
+  ])
+  @ExceptionMetadata([EXCEPTIONS.NOT_THE_OWNER])
   async updateSticker({
     imageUrl,
     isReusable,
@@ -102,13 +111,8 @@ export class StickersService {
     stickerId,
   }: IStickersServiceUpdateSticker): Promise<Sticker> {
     try {
-      const sticker = await this.repo_stickers.findOne({
-        where: { id: stickerId, userId },
-      });
-      if (!sticker)
-        throw new NotFoundException(
-          '스티커가 존재하지 않거나 제작자 본인이 아닙니다.',
-        );
+      const sticker = await this.existCheck({ stickerId });
+      if (sticker.userId != userId) throw new BlccuException('NOT_THE_OWNER');
       if (isReusable) sticker.isReusable = isReusable;
       if (imageUrl) {
         await this.svc_images.deleteImage({ url: sticker.imageUrl });
@@ -121,21 +125,21 @@ export class StickersService {
     }
   }
 
+  @MergeExceptionMetadata([
+    { service: StickersService, methodName: 'existCheck' },
+    { service: ImagesService, methodName: 'deleteImage' },
+  ])
+  @ExceptionMetadata([EXCEPTIONS.NOT_THE_OWNER])
   async deleteSticker({
     stickerId,
     userId,
   }: IStickersServiceDeleteSticker): Promise<void> {
-    const sticker = await this.repo_stickers.findOne({
-      where: { id: stickerId, userId },
-    });
-    if (!sticker)
-      throw new NotFoundException(
-        '스티커가 존재하지 않거나 제작자 본인이 아닙니다.',
-      );
+    const sticker = await this.existCheck({ stickerId });
+    if (sticker.userId != userId) throw new BlccuException('NOT_THE_OWNER');
     await this.svc_images.deleteImage({
       url: sticker.imageUrl,
     });
-    await this.repo_stickers.remove(sticker);
+    await this.repo_stickers.delete({ id: stickerId });
     return;
   }
 }

@@ -1,14 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Announcement } from './entities/announcement.entity';
 import { Repository } from 'typeorm';
 import {
-  IAnnouncementsSerciceCreateAnnouncement,
-  IAnnouncementsSercicePatchAnnouncement,
-  IAnnouncementsSerciceRemoveAnnouncement,
+  IAnnouncementsServiceCreateAnnouncement,
+  IAnnouncementsServiceId,
+  IAnnouncementsServicePatchAnnouncement,
+  IAnnouncementsServiceRemoveAnnouncement,
 } from './interfaces/announcements.service.interface';
 import { UsersValidateService } from '../users/services/users-validate-service';
 import { AnnouncementDto } from './dtos/common/announcement.dto';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
+import { BlccuException, EXCEPTIONS } from '@/common/blccu-exception';
+import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
 
 @Injectable()
 export class AnnouncementsService {
@@ -18,11 +22,14 @@ export class AnnouncementsService {
     private readonly svc_usersValidate: UsersValidateService,
   ) {}
 
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'adminCheck' },
+  ])
   async createAnnoucement({
     userId,
     title,
     content,
-  }: IAnnouncementsSerciceCreateAnnouncement): Promise<AnnouncementDto> {
+  }: IAnnouncementsServiceCreateAnnouncement): Promise<AnnouncementDto> {
     await this.svc_usersValidate.adminCheck({ userId });
     return await this.repo_announcements.save({ title, content });
   }
@@ -31,32 +38,45 @@ export class AnnouncementsService {
     return await this.repo_announcements.find();
   }
 
+  @ExceptionMetadata([EXCEPTIONS.ANNOUNCEMENT_NOT_FOUND])
+  async existCheck({
+    announcementId,
+  }: IAnnouncementsServiceId): Promise<AnnouncementDto> {
+    const data = await this.repo_announcements.findOne({
+      where: { id: announcementId },
+    });
+    if (!data) throw new BlccuException('ANNOUNCEMENT_NOT_FOUND');
+    return data;
+  }
+
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'adminCheck' },
+    { service: AnnouncementsService, methodName: 'existCheck' },
+  ])
   async patchAnnouncement({
     userId,
     announcementId,
     title,
     content,
-  }: IAnnouncementsSercicePatchAnnouncement): Promise<AnnouncementDto> {
+  }: IAnnouncementsServicePatchAnnouncement): Promise<AnnouncementDto> {
     await this.svc_usersValidate.adminCheck({ userId });
-    const anmt = await this.repo_announcements.findOne({
-      where: { id: announcementId },
-    });
-    if (!anmt) throw new NotFoundException('공지를 찾을 수 없습니다.');
+    const anmt = await this.existCheck({ announcementId });
     if (title) anmt.title = title;
     if (content) anmt.content = content;
     await this.repo_announcements.save(anmt);
     return await this.repo_announcements.findOne({ where: { id: anmt.id } });
   }
 
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'adminCheck' },
+    { service: AnnouncementsService, methodName: 'existCheck' },
+  ])
   async removeAnnouncement({
     userId,
     announcementId,
-  }: IAnnouncementsSerciceRemoveAnnouncement): Promise<AnnouncementDto> {
+  }: IAnnouncementsServiceRemoveAnnouncement): Promise<AnnouncementDto> {
     await this.svc_usersValidate.adminCheck({ userId });
-    const anmt = await this.repo_announcements.findOne({
-      where: { id: announcementId },
-    });
-    if (!anmt) throw new NotFoundException('공지를 찾을 수 없습니다.');
+    const anmt = await this.existCheck({ announcementId });
     return await this.repo_announcements.softRemove(anmt);
   }
 }

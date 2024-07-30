@@ -11,6 +11,7 @@ import {
 } from './interfaces/stickerBlocks.service.interface';
 import { StickerBlockDto } from './dtos/common/stickerBlock.dto';
 import { StickerBlocksWithStickerResponseDto } from './dtos/response/stickerBlocks-with-sticker-response.dto';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
 
 @Injectable()
 export class StickerBlocksService {
@@ -20,27 +21,29 @@ export class StickerBlocksService {
     private readonly repo_stickerBlocks: Repository<StickerBlock>,
   ) {}
 
+  @MergeExceptionMetadata([
+    { service: StickersService, methodName: 'existCheck' },
+  ])
   async createStickerBlock({
     stickerId,
     articleId,
     ...rest
   }: IStickerBlocksServiceCreateStickerBlock): Promise<StickerBlockDto> {
-    try {
-      // await this.svc_stickers.existCheck({
-      //   stickerId: stickerId,
-      // });
+    await this.svc_stickers.existCheck({
+      stickerId: stickerId,
+    });
 
-      const data = await this.repo_stickerBlocks.save({
-        ...rest,
-        articleId,
-        stickerId,
-      });
-      return data;
-    } catch (e) {
-      throw e;
-    }
+    const data = await this.repo_stickerBlocks.save({
+      ...rest,
+      articleId,
+      stickerId,
+    });
+    return data;
   }
 
+  @MergeExceptionMetadata([
+    { service: StickersService, methodName: 'existCheck' },
+  ])
   async createStickerBlocks({
     stickerBlocks,
     articleId,
@@ -49,11 +52,11 @@ export class StickerBlocksService {
       ...stickerBlock,
       articleId,
     }));
-    stickerBlocksToInsert.forEach(async (stickerBlock) => {
+    for (const stickerBlock of stickerBlocksToInsert) {
       await this.svc_stickers.existCheck({
         stickerId: stickerBlock.stickerId,
       });
-    });
+    }
     return await this.repo_stickerBlocks.save(stickerBlocksToInsert);
   }
 
@@ -68,6 +71,9 @@ export class StickerBlocksService {
     });
   }
 
+  @MergeExceptionMetadata([
+    { service: StickersService, methodName: 'deleteSticker' },
+  ])
   async deleteStickerBlocks({
     userId,
     articleId,

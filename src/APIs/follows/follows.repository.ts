@@ -3,7 +3,7 @@ import { Follow } from './entities/follow.entity';
 import { Injectable } from '@nestjs/common';
 import { IFollowsRepositoryFindList } from './interfaces/follows.repository.interface';
 import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
-import { convertToCamelCase } from 'src/utils/classUtils';
+import { convertToCamelCase } from 'src/utils/class.utils';
 import { plainToClass } from 'class-transformer';
 import { USER_PRIMARY_RESPONSE_DTO_KEYS } from '../users/dtos/response/user-primary-response.dto';
 

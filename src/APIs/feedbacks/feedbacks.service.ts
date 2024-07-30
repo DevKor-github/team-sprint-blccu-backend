@@ -6,6 +6,7 @@ import {
 } from './interfaces/feedbacks.service.interface';
 import { FeedbackDto } from './dtos/common/feedback.dto';
 import { UsersValidateService } from '../users/services/users-validate-service';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
 
 @Injectable()
 export class FeedbacksService {
@@ -26,6 +27,9 @@ export class FeedbacksService {
     });
   }
 
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'adminCheck' },
+  ])
   async fetchFeedbacks({
     userId,
   }: IFeedbacksServiceUserId): Promise<FeedbackDto[]> {

@@ -11,7 +11,7 @@ import {
 } from '../interfaces/articles.repository.interface';
 import { Follow } from 'src/APIs/follows/entities/follow.entity';
 import { Injectable } from '@nestjs/common';
-import { transformKeysToArgsFormat } from 'src/utils/classUtils';
+import { transformKeysToArgsFormat } from 'src/utils/class.utils';
 import { USER_PRIMARY_RESPONSE_DTO_KEYS } from 'src/APIs/users/dtos/response/user-primary-response.dto';
 
 @Injectable()

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getUUID } from 'src/utils/uuidUtils';
+import { getUUID } from '@/utils/uuid.utils';
 import { IUsersServiceCreate } from '../interfaces/users.service.interface';
 import { UsersRepository } from '../users.repository';
 

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UpdateResult } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { UsersRepository } from '../users.repository';
@@ -7,6 +7,9 @@ import { UserDto } from '../dtos/common/user.dto';
 import { ImageUploadResponseDto } from 'src/modules/images/dtos/image-upload-response.dto';
 import { IUsersServiceImageUpload } from '../interfaces/users.service.interface';
 import { ImagesService } from 'src/modules/images/images.service';
+import { MergeExceptionMetadata } from 'src/common/decorators/merge-exception-metadata.decorator';
+import { BlccuException, EXCEPTIONS } from '@/common/blccu-exception';
+import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
 
 @Injectable()
 export class UsersUpdateService {
@@ -16,18 +19,25 @@ export class UsersUpdateService {
     private readonly svc_images: ImagesService,
   ) {}
 
-  async activateUser({ userId }): Promise<UpdateResult> {
-    return await this.repo_users.update({ id: userId }, { dateDeleted: null });
-  }
-
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'existCheck' },
+  ])
   async setCurrentRefreshToken({ userId, currentRefreshToken }): Promise<User> {
-    const user = await this.repo_users.findOne({ where: { id: userId } });
+    const user = await this.svc_usersValidate.existCheck({ userId });
     return await this.repo_users.save({
       ...user,
       currentRefreshToken,
     });
   }
 
+  async activateUser({ userId }): Promise<UpdateResult> {
+    return await this.repo_users.update({ id: userId }, { dateDeleted: null });
+  }
+
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'existCheck' },
+  ])
+  @ExceptionMetadata([EXCEPTIONS.UNIQUE_CONSTRAINT_VIOLATION])
   async updateUser({
     userId,
     handle,
@@ -46,12 +56,15 @@ export class UsersUpdateService {
       const data = await this.repo_users.save(user);
       return data;
     } catch (e) {
-      throw new ConflictException(
-        'username || handle 값이 Unique하지 않습니다.',
-      );
+      throw new BlccuException('UNIQUE_CONSTRAINT_VIOLATION');
     }
   }
 
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'existCheck' },
+    { service: ImagesService, methodName: 'imageUpload' },
+    { service: ImagesService, methodName: 'deleteImage' },
+  ])
   async updateProfileImage({
     userId,
     file,
@@ -70,6 +83,11 @@ export class UsersUpdateService {
     return { imageUrl };
   }
 
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'existCheck' },
+    { service: ImagesService, methodName: 'imageUpload' },
+    { service: ImagesService, methodName: 'deleteImage' },
+  ])
   async updateBackgroundImage({
     userId,
     file,

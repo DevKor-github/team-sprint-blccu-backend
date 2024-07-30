@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { StickerCategory } from './entities/stickerCategory.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -19,6 +15,9 @@ import { UsersValidateService } from '../users/services/users-validate-service';
 import { StickerCategoryDto } from './dtos/common/stickerCategory.dto';
 import { StickerCategoryMapperDto } from './dtos/common/stickerCategoryMapper.dto';
 import { StickersCategoryFetchStickersResponseDto } from './dtos/response/stickerCategories-fetch-stickers-response.dto';
+import { BlccuException, EXCEPTIONS } from '@/common/blccu-exception';
+import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
 
 @Injectable()
 export class StickerCategoriesService {
@@ -44,19 +43,24 @@ export class StickerCategoriesService {
       where: { id: stickerCategoryId },
     });
   }
+
+  @ExceptionMetadata([EXCEPTIONS.CATEGORY_CONFLICT])
   async existCheckByName({
     name,
   }: IStickerCategoriesServiceName): Promise<void> {
     const data = await this.findCategoryByName({ name });
-    if (data) throw new ConflictException('동명의 카테고리가 존재합니다.');
+    if (data) throw new BlccuException('CATEGORY_CONFLICT');
   }
+
+  @ExceptionMetadata([EXCEPTIONS.STICKER_CATEGORY_NOT_FOUND])
   async existCheckById({
     stickerCategoryId,
   }: IStickerCategoriesServiceId): Promise<void> {
     const data = await this.findCategoryById({ stickerCategoryId });
-    if (!data) throw new NotFoundException('스티커 카테고리가 없습니다.');
+    if (!data) throw new BlccuException('STICKER_CATEGORY_NOT_FOUND');
   }
 
+  @ExceptionMetadata([EXCEPTIONS.MAPPING_CONFLICT])
   async existCheckMapper({
     stickerId,
     stickerCategoryId,
@@ -64,12 +68,16 @@ export class StickerCategoriesService {
     const data = await this.repo_stickerCategoryMappers.findOne({
       where: { stickerId, stickerCategoryId },
     });
-    if (data) throw new ConflictException('이미 매핑 된 카테고리입니다.');
+    if (data) throw new BlccuException('MAPPING_CONFLICT');
   }
   async fetchCategories(): Promise<StickerCategoryDto[]> {
     return await this.repo_stickerCategories.find();
   }
 
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'adminCheck' },
+    { service: StickerCategoriesService, methodName: 'existCheckByName' },
+  ])
   async createCategory({
     userId,
     name,
@@ -79,6 +87,12 @@ export class StickerCategoriesService {
     return await this.repo_stickerCategories.save({ name });
   }
 
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'adminCheck' },
+    { service: StickersService, methodName: 'existCheck' },
+    { service: StickerCategoriesService, methodName: 'existCheckMapper' },
+    { service: StickerCategoriesService, methodName: 'existCheckById' },
+  ])
   async mapCategory({
     userId,
     maps,
@@ -99,6 +113,9 @@ export class StickerCategoriesService {
     return await this.repo_stickerCategoryMappers.save(maps);
   }
 
+  @MergeExceptionMetadata([
+    { service: StickerCategoriesService, methodName: 'existCheckById' },
+  ])
   async fetchStickersByCategoryId({
     stickerCategoryId,
   }: IStickerCategoriesServiceId): Promise<

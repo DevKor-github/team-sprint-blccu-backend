@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { ArticlesValidateService } from './articles-validate.service';
 import { ArticlesReadRepository } from '../repositories/articles-read.repository';
@@ -10,6 +10,9 @@ import {
 } from '../interfaces/articles.service.interface';
 import { ArticleDetailForUpdateResponseDto } from '../dtos/response/article-detail-for-update-response.dto';
 import { ArticleDetailResponseDto } from '../dtos/response/article-detail-response.dto';
+import { BlccuException, EXCEPTIONS } from '@/common/blccu-exception';
+import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
 
 @Injectable()
 export class ArticlesReadService {
@@ -21,10 +24,20 @@ export class ArticlesReadService {
     private readonly repo_articlesRead: ArticlesReadRepository,
   ) {}
 
+  @MergeExceptionMetadata([
+    { service: ArticlesValidateService, methodName: 'existCheck' },
+  ])
   async findArticlesById({ articleId }: IArticlesServiceArticleId) {
-    return await this.repo_articlesRead.findOne({ where: { id: articleId } });
+    return await this.svc_articlesValidate.existCheck({
+      articleId,
+    });
   }
 
+  @MergeExceptionMetadata([
+    { service: ArticlesValidateService, methodName: 'fkValidCheck' },
+    { service: StickerBlocksService, methodName: 'findStickerBlocks' },
+  ])
+  @ExceptionMetadata([EXCEPTIONS.NOT_THE_OWNER])
   async readArticleUpdateDetail({
     articleId,
     userId,
@@ -34,8 +47,7 @@ export class ArticlesReadService {
       articles: data,
       passNonEssentail: true,
     });
-    if (data.userId !== userId)
-      throw new UnauthorizedException('본인이 아닙니다.');
+    if (data.userId !== userId) throw new BlccuException('NOT_THE_OWNER');
     const article = await this.repo_articlesRead.readUpdateDetail({
       articleId,
     });
@@ -49,6 +61,11 @@ export class ArticlesReadService {
     return await this.repo_articlesRead.readTemp({ userId });
   }
 
+  @MergeExceptionMetadata([
+    { service: ArticlesValidateService, methodName: 'fkValidCheck' },
+    { service: ArticlesValidateService, methodName: 'existCheck' },
+    { service: FollowsService, methodName: 'getScope' },
+  ])
   async readArticleDetail({
     userId,
     articleId,
@@ -67,7 +84,6 @@ export class ArticlesReadService {
       articleId,
       scope,
     });
-    console.log(data, article);
     return article;
   }
 }

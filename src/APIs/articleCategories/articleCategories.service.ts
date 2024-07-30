@@ -1,13 +1,11 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { FollowsService } from '../follows/follows.service';
 import { ArticleCategoriesRepository } from './articleCategories.repository';
 import { ArticleCategoryDto } from './dtos/common/articleCategory.dto';
 import { ArticleCategoriesResponseDto } from './dtos/response/articleCategories-response.dto';
+import { BlccuException, EXCEPTIONS } from '@/common/blccu-exception';
+import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
 
 @Injectable()
 export class ArticleCategoriesService {
@@ -15,6 +13,7 @@ export class ArticleCategoriesService {
     private readonly svc_follows: FollowsService,
     private readonly repo_articleCategories: ArticleCategoriesRepository,
   ) {}
+
   async findArticleCategoryByName({
     userId,
     name,
@@ -24,10 +23,11 @@ export class ArticleCategoriesService {
     });
   }
 
+  @ExceptionMetadata([EXCEPTIONS.CATEGORY_CONFLICT])
   async createArticleCategory({ userId, name }): Promise<ArticleCategoryDto> {
     const articleData = await this.findArticleCategoryByName({ userId, name });
     if (articleData) {
-      throw new BadRequestException('이미 동명의 카테고리가 존재합니다.');
+      throw new BlccuException('CATEGORY_CONFLICT');
     }
     const result = await this.repo_articleCategories.save({
       userId,
@@ -36,15 +36,24 @@ export class ArticleCategoriesService {
     return result;
   }
 
+  @MergeExceptionMetadata([
+    {
+      service: ArticleCategoriesService,
+      methodName: 'findArticleCategoryByName',
+    },
+  ])
+  @ExceptionMetadata([
+    EXCEPTIONS.ARTICLE_CATEGORY_NOT_FOUND,
+    EXCEPTIONS.NOT_THE_OWNER,
+  ])
   async patchArticleCategory({
     userId,
     articleCategoryId,
     name,
   }): Promise<ArticleCategoryDto> {
     const data = await this.findArticleCategoryById({ articleCategoryId });
-    if (!data) throw new NotFoundException('카테고리를 찾을 수 없습니다.');
-    if (data.userId != userId)
-      throw new ForbiddenException('카테고리를 수정할 권한이 없습니다.');
+    if (!data) throw new BlccuException('ARTICLE_CATEGORY_NOT_FOUND');
+    if (data.userId != userId) throw new BlccuException('NOT_THE_OWNER');
     data.name = name;
     return await this.repo_articleCategories.save(data);
   }
@@ -57,6 +66,7 @@ export class ArticleCategoriesService {
     });
   }
 
+  @MergeExceptionMetadata([{ service: FollowsService, methodName: 'getScope' }])
   async fetchAll({
     userId,
     targetUserId,
@@ -71,9 +81,16 @@ export class ArticleCategoriesService {
     });
   }
 
-  deleteArticleCategory({ userId, articleCategoryId }) {
-    return this.repo_articleCategories.delete({
-      id: articleCategoryId,
+  @ExceptionMetadata([
+    EXCEPTIONS.ARTICLE_CATEGORY_NOT_FOUND,
+    EXCEPTIONS.NOT_THE_OWNER,
+  ])
+  async deleteArticleCategory({ userId, articleCategoryId }) {
+    const data = await this.findArticleCategoryById({ articleCategoryId });
+    if (!data) throw new BlccuException('ARTICLE_CATEGORY_NOT_FOUND');
+    if (data.userId != userId) throw new BlccuException('NOT_THE_OWNER');
+    return await this.repo_articleCategories.delete({
+      id: data.id,
       user: { id: userId },
     });
   }

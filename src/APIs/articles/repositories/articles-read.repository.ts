@@ -2,7 +2,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Article } from '../entities/article.entity';
 import { Injectable } from '@nestjs/common';
 import { ArticleDetailResponseDto } from '../dtos/response/article-detail-response.dto';
-import { transformKeysToArgsFormat } from 'src/utils/classUtils';
+import { transformKeysToArgsFormat } from 'src/utils/class.utils';
 import { USER_PRIMARY_RESPONSE_DTO_KEYS } from 'src/APIs/users/dtos/response/user-primary-response.dto';
 
 @Injectable()

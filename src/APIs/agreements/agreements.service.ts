@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AgreementsRepository } from './agreements.repository';
 import {
   IAgreementsServiceCreate,
@@ -15,6 +11,9 @@ import path from 'path';
 import fs from 'fs';
 import { UsersValidateService } from '../users/services/users-validate-service';
 import { AgreementDto } from './dtos/common/agreement.dto';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
+import { BlccuException, EXCEPTIONS } from '@/common/blccu-exception';
+import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
 
 @Injectable()
 export class AgreementsService {
@@ -23,6 +22,9 @@ export class AgreementsService {
     private readonly svc_usersValidate: UsersValidateService,
   ) {}
 
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'adminCheck' },
+  ])
   async adminCheck({ userId }: IAgreementsServiceUserId): Promise<void> {
     await this.svc_usersValidate.adminCheck({ userId });
   }
@@ -53,6 +55,15 @@ export class AgreementsService {
     return await this.repo_agreements.findOne({ where: { id: agreementId } });
   }
 
+  @ExceptionMetadata([EXCEPTIONS.AGREEMENT_NOT_FOUND])
+  async existCheck({
+    agreementId,
+  }: IAgreementsServiceId): Promise<AgreementDto> {
+    const data = await this.findAgreement({ agreementId });
+    if (!data) throw new BlccuException('AGREEMENT_NOT_FOUND');
+    return data;
+  }
+
   async findAgreements({
     userId,
   }: IAgreementsServiceUserId): Promise<AgreementDto[]> {
@@ -61,14 +72,17 @@ export class AgreementsService {
     });
   }
 
+  @MergeExceptionMetadata([
+    { service: AgreementsService, methodName: 'existCheck' },
+  ])
+  @ExceptionMetadata([EXCEPTIONS.NOT_THE_OWNER])
   async patchAgreement({
     userId,
     agreementId,
     isAgreed,
   }: IAgreementsServicePatchAgreement): Promise<AgreementDto> {
-    const data = await this.findAgreement({ agreementId });
-    if (!data) throw new NotFoundException('데이터를 찾을 수 없습니다.');
-    if (data.userId != userId) throw new ForbiddenException('권한이 없습니다.');
+    const data = await this.existCheck({ agreementId });
+    if (data.userId != userId) throw new BlccuException('NOT_THE_OWNER');
     // if(data.agreementType != AgreementType.MARKETING_CONSENT)
     data.isAgreed = isAgreed;
     return await this.repo_agreements.save(data);

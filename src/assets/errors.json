@@ -1,0 +1,321 @@
+{
+  "VALIDATION_ERROR": {
+    "errorCode": 4000,
+    "statusCode": 400,
+    "name": "VALIDATION_ERROR",
+    "message": "올바르지 않은 입력 값입니다."
+  },
+  "INVALID_PARENT_COMMENT_REQUEST": {
+    "errorCode": 4001,
+    "statusCode": 400,
+    "name": "INVALID_PARENT_COMMENT",
+    "message": "부모 댓글에 대한 입력 값이 유효하지 않습니다. 부모 댓글이 존재하는 값인 지, 루트 댓글인 지 확인하십시오."
+  },
+  "INVALID_ARTICLE_REQUEST": {
+    "errorCode": 4002,
+    "statusCode": 400,
+    "name": "INVALID_ARTICLE_REQUEST",
+    "message": "게시글 아이디가 부모 댓글이 작성된 게시글 아이디와 일치하지 않습니다."
+  },
+  "EMAIL_NOT_IN_KOREA_DOMAIN": {
+    "errorCode": 4003,
+    "statusCode": 400,
+    "name": "EMAIL_NOT_IN_KOREA_DOMAIN",
+    "message": "korea.ac.kr 이메일이 아닙니다."
+  },
+  "PASSWORD_INVALID_FORMAT": {
+    "errorCode": 4004,
+    "statusCode": 400,
+    "name": "PASSWORD_INVALID_FORMAT",
+    "message": "비밀번호는 6~16자의 영문 소문자와 숫자로만 입력해주세요."
+  },
+  "CODE_NOT_CORRECT": {
+    "errorCode": 4005,
+    "statusCode": 400,
+    "name": "CODE_NOT_CORRECT",
+    "message": "인증 코드가 일치하지 않습니다."
+  },
+  "CODE_EXPIRED": {
+    "errorCode": 4006,
+    "statusCode": 400,
+    "name": "CODE_EXPIRED",
+    "message": "인증 코드가 만료되었습니다. 다시 인증을 시도해주세요."
+  },
+  "CODE_NOT_VALIDATED": {
+    "errorCode": 4007,
+    "statusCode": 400,
+    "name": "CODE_NOT_VALIDATED",
+    "message": "인증되지 않은 코드입니다."
+  },
+  "CODE_VALIDATION_EXPIRED": {
+    "errorCode": 4008,
+    "statusCode": 400,
+    "name": "CODE_VALIDATION_EXPIRED",
+    "message": "인증 코드가 만료되었습니다. 다시 인증을 시도해주세요."
+  },
+
+  "LOGIN_FAILED": {
+    "errorCode": 4010,
+    "statusCode": 401,
+    "name": "LOGIN_FAILED",
+    "message": "이메일 또는 비밀번호가 일치하지 않습니다."
+  },
+  "NOT_LOGGED_IN": {
+    "errorCode": 4010,
+    "statusCode": 401,
+    "name": "NOT_LOGGED_IN",
+    "message": "비로그인 상태입니다."
+  },
+  "INVALID_ACCESS_TOKEN": {
+    "errorCode": 4012,
+    "statusCode": 401,
+    "name": "INVALID_ACCESS_TOKEN",
+    "message": "유효하지 않은 엑세스 토큰입니다."
+  },
+  "INVALID_REFRESH_TOKEN": {
+    "errorCode": 4013,
+    "statusCode": 401,
+    "name": "INVALID_REFRESH_TOKEN",
+    "message": "유효하지 않은 리프레쉬 토큰입니다."
+  },
+  "ACCESS_TOKEN_EXPIRED": {
+    "errorCode": 4014,
+    "statusCode": 401,
+    "name": "TOKEN_EXPIRED",
+    "message": "ACCESS TOKEN 만료. 리프레시를 시도해주세요"
+  },
+  "NOT_AN_ADMIN": {
+    "errorCode": 4030,
+    "statusCode": 403,
+    "name": "NOT_AN_ADMIN",
+    "message": "어드민이 아닙니다."
+  },
+  "NOT_THE_OWNER": {
+    "errorCode": 4031,
+    "statusCode": 403,
+    "name": "NOT_THE_OWNER",
+    "message": "본인이 아니므로 이 작업을 수행할 수 없습니다."
+  },
+  "NOT_AUTHORIZED": {
+    "errorCode": 4032,
+    "statusCode": 403,
+    "name": "NOT_AUTHORIZED",
+    "message": "이 작업을 수행할 권한이 없습니다."
+  },
+  "FORBIDDEN_ACCESS": {
+    "errorCode": 4033,
+    "statusCode": 403,
+    "name": "FORBIDDEN_ACCESS",
+    "message": "허용되지 않은 접근입니다."
+  },
+  "USER_NOT_FOUND": {
+    "errorCode": 4040,
+    "statusCode": 404,
+    "name": "USER_NOT_FOUND",
+    "message": "사용자를 찾을 수 없습니다."
+  },
+  "AGREEMENT_NOT_FOUND": {
+    "errorCode": 4041,
+    "statusCode": 404,
+    "name": "AGREEMENT_NOT_FOUND",
+    "message": "동의 내역을 찾을 수 없습니다."
+  },
+  "ANNOUNCEMENT_NOT_FOUND": {
+    "errorCode": 4042,
+    "statusCode": 404,
+    "name": "ANNOUNCEMENT_NOT_FOUND",
+    "message": "공지사항을 찾을 수 없습니다."
+  },
+  "ARTICLE_NOT_FOUND": {
+    "errorCode": 4043,
+    "statusCode": 404,
+    "name": "ARTICLE_NOT_FOUND",
+    "message": "게시글을 찾을 수 없습니다."
+  },
+  "ARTICLE_CATEGORY_NOT_FOUND": {
+    "errorCode": 4044,
+    "statusCode": 404,
+    "name": "ARTICLE_CATEGORY_NOT_FOUND",
+    "message": "게시글 카테고리를 찾을 수 없습니다."
+  },
+  "ARTICLE_BACKGROUND_NOT_FOUND": {
+    "errorCode": 4045,
+    "statusCode": 404,
+    "name": "ARTICLE_BACKGROUND_NOT_FOUND",
+    "message": "게시글 배경을 찾을 수 없습니다."
+  },
+  "STICKER_NOT_FOUND": {
+    "errorCode": 4046,
+    "statusCode": 404,
+    "name": "STICKER_NOT_FOUND",
+    "message": "스티커를 찾을 수 없습니다."
+  },
+  "STICKER_CATEGORY_NOT_FOUND": {
+    "errorCode": 4047,
+    "statusCode": 404,
+    "name": "STICKER_CATEGORY_NOT_FOUND",
+    "message": "스티커 카테고리를 찾을 수 없습니다."
+  },
+  "FOLLOW_NOT_FOUND": {
+    "errorCode": 4048,
+    "statusCode": 404,
+    "name": "FOLLOW_NOT_FOUND",
+    "message": "팔로우 정보를 찾을 수 없습니다."
+  },
+  "COMMENT_NOT_FOUND": {
+    "errorCode": 4049,
+    "statusCode": 404,
+    "name": "COMMENT_NOT_FOUND",
+    "message": "댓글을 찾을 수 없습니다."
+  },
+  "LIKE_NOT_FOUND": {
+    "errorCode": 40410,
+    "statusCode": 404,
+    "name": "LIKE_NOT_FOUND",
+    "message": "좋아요를 찾을 수 없습니다."
+  },
+  "REPORT_NOT_FOUND": {
+    "errorCode": 40411,
+    "statusCode": 404,
+    "name": "REPORT_NOT_FOUND",
+    "message": "신고 내역을 찾을 수 없습니다."
+  },
+  "ENTITY_NOT_FOUND_ERROR": {
+    "errorCode": 40412,
+    "statusCode": 404,
+    "name": "ENTITY_NOT_FOUND_ERROR",
+    "message": "요청한 엔티티를 찾을 수 없습니다."
+  },
+  "NOTIFICATION_NOT_FOUND": {
+    "errorCode": 40412,
+    "statusCode": 404,
+    "name": "NOTIFICATION_NOT_FOUND",
+    "message": "알림을 찾을 수 없습니다."
+  },
+  "INVALID_PAGE_QUERY": {
+    "errorCode": 4060,
+    "statusCode": 406,
+    "name": "INVALID_PAGE_QUERY",
+    "message": "page 또는 pageSize 값이 잘못되었습니다. 자연수값이어야 합니다."
+  },
+  "TODO_INVALID": {
+    "errorCode": 4061,
+    "statusCode": 406,
+    "name": "TODO_INVALID",
+    "message": "할."
+  },
+  "CATEGORY_CONFLICT": {
+    "errorCode": 4090,
+    "statusCode": 409,
+    "name": "CATEGORY_CONFLICT",
+    "message": "동명의 카테고리가 존재합니다."
+  },
+  "MAPPING_CONFLICT": {
+    "errorCode": 4091,
+    "statusCode": 409,
+    "name": "MAPPING_CONFLICT",
+    "message": "이미 매핑 된 값입니다."
+  },
+  "ALREADY_EXISTS": {
+    "errorCode": 4092,
+    "statusCode": 409,
+    "name": "ALREADY_EXISTS",
+    "message": "이미 존재하는 값입니다."
+  },
+  "SELF_ACTION_NOT_ALLOWED": {
+    "errorCode": 4093,
+    "statusCode": 409,
+    "name": "SELF_ACTION_NOT_ALLOWED",
+    "message": "자기 자신에게는 이 작업을 수행할 수 없습니다."
+  },
+  "UNIQUE_CONSTRAINT_VIOLATION": {
+    "errorCode": 4094,
+    "statusCode": 409,
+    "name": "UNIQUE_CONSTRAINT_VIOLATION",
+    "message": "해당 필드 값이 유니크해야 합니다."
+  },
+  "TOO_MANY_REQUESTS": {
+    "errorCode": 4290,
+    "statusCode": 429,
+    "name": "TOO_MANY_REQUESTS",
+    "message": "잠시 후 다시 시도해주세요."
+  },
+  "INTERNAL_SERVER_ERROR": {
+    "errorCode": 5000,
+    "statusCode": 500,
+    "name": "INTERNAL_SERVER_ERROR",
+    "message": "Internal Server Error"
+  },
+  "IMAGE_UPLOAD_TO_S3_ERROR": {
+    "errorCode": 5003,
+    "statusCode": 500,
+    "name": "IMAGE_UPLOAD_TO_S3_ERROR",
+    "message": "이미지를 S3로 업로드하는 중에 오류가 발생했습니다."
+  },
+  "IMAGE_DELETE_FROM_S3_ERROR": {
+    "errorCode": 5002,
+    "statusCode": 500,
+    "name": "IMAGE_DELETE_FROM_S3_ERROR",
+    "message": "S3에서 객체를 삭제하는 중에 오류가 발생했습니다."
+  },
+  "IMAGE_RESIZE_ERROR": {
+    "errorCode": 5004,
+    "statusCode": 500,
+    "name": "IMAGE_RESIZE_ERROR",
+    "message": "이미지 리사이징 중에 오류가 발생했습니다."
+  },
+  "NOTIFICATION_CREATION_FAILED": {
+    "errorCode": 5005,
+    "statusCode": 500,
+    "name": "NOTIFICATION_CREATION_FAILED",
+    "message": "알림 생성에 실패했습니다."
+  },
+  "QUERY_FAILED_ERROR": {
+    "errorCode": 5006,
+    "statusCode": 500,
+    "name": "QUERY_FAILED_ERROR",
+    "message": "데이터베이스 쿼리 실행 중 오류가 발생했습니다."
+  },
+  "CANNOT_CREATE_ENTITY_ID_MAP_ERROR": {
+    "errorCode": 5007,
+    "statusCode": 500,
+    "name": "CANNOT_CREATE_ENTITY_ID_MAP_ERROR",
+    "message": "엔티티 ID 맵을 생성할 수 없습니다."
+  },
+  "ENTITY_COLUMN_NOT_FOUND": {
+    "errorCode": 5008,
+    "statusCode": 500,
+    "name": "ENTITY_COLUMN_NOT_FOUND",
+    "message": "엔티티의 열을 찾을 수 없습니다."
+  },
+  "OPTIMISTIC_LOCK_CAN_NOT_BE_USED_ERROR": {
+    "errorCode": 5009,
+    "statusCode": 500,
+    "name": "OPTIMISTIC_LOCK_CAN_NOT_BE_USED_ERROR",
+    "message": "낙관적 잠금을 사용할 수 없습니다."
+  },
+  "PESSIMISTIC_LOCK_TRANSACTION_REQUIRED_ERROR": {
+    "errorCode": 50010,
+    "statusCode": 500,
+    "name": "PESSIMISTIC_LOCK_TRANSACTION_REQUIRED_ERROR",
+    "message": "비관적 잠금을 사용하려면 트랜잭션이 필요합니다."
+  },
+  "TRANSACTION_ALREADY_STARTED_ERROR": {
+    "errorCode": 50011,
+    "statusCode": 500,
+    "name": "TRANSACTION_ALREADY_STARTED_ERROR",
+    "message": "이미 트랜잭션이 시작되었습니다."
+  },
+  "TRANSACTION_NOT_STARTED_ERROR": {
+    "errorCode": 50012,
+    "statusCode": 500,
+    "name": "TRANSACTION_NOT_STARTED_ERROR",
+    "message": "트랜잭션이 시작되지 않았습니다."
+  },
+  "NO_NEED_TO_RELEASE_ENTITY_MANAGER_ERROR": {
+    "errorCode": 50013,
+    "statusCode": 500,
+    "name": "NO_NEED_TO_RELEASE_ENTITY_MANAGER_ERROR",
+    "message": "EntityManager를 해제할 필요가 없습니다."
+  }
+}
