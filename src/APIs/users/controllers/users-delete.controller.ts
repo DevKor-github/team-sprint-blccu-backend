@@ -1,36 +1,18 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiCookieAuth,
-  ApiNoContentResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Body, Controller, Delete, Req, Res, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { UsersDeleteService } from '../services/users-delete.service';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { Request, Response } from 'express';
 import { UserDeleteRequestDto } from '../dtos/request/user-delete-request.dto';
+import { UsersDeleteDocs } from '../docs/users-delete-docs.decorator';
 
+@UsersDeleteDocs
 @ApiTags('유저 API')
 @Controller('users')
 export class UsersDeleteController {
   constructor(private readonly svc_usersDelete: UsersDeleteService) {}
 
-  @ApiOperation({
-    summary: '회원 탈퇴(soft delete)',
-    description: '회원을 탈퇴하고 연동된 게시글과 댓글을 soft delete한다.',
-  })
-  @ApiCookieAuth()
   @UseGuards(AuthGuardV2)
-  @ApiNoContentResponse()
-  @HttpCode(204)
   @Delete('me')
   async deleteUser(
     @Req() req: Request,

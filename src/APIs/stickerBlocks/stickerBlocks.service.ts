@@ -52,11 +52,11 @@ export class StickerBlocksService {
       ...stickerBlock,
       articleId,
     }));
-    stickerBlocksToInsert.forEach(async (stickerBlock) => {
+    for (const stickerBlock of stickerBlocksToInsert) {
       await this.svc_stickers.existCheck({
         stickerId: stickerBlock.stickerId,
       });
-    });
+    }
     return await this.repo_stickerBlocks.save(stickerBlocksToInsert);
   }
 

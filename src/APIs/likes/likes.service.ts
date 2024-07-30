@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { LikesRepository } from './likes.repository';
 import { ILikesServiceIds } from './interfaces/likes.service.interface';
@@ -8,6 +8,9 @@ import { LikesGetResponseDto } from './dtos/response/likes-get-response.dto';
 import { Article } from '../articles/entities/article.entity';
 import { Like } from './entities/like.entity';
 import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
+import { BlccuException, EXCEPTIONS } from '@/common/blccu-exception';
+import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
 
 @Injectable()
 export class LikesService {
@@ -28,6 +31,10 @@ export class LikesService {
     return false;
   }
 
+  @MergeExceptionMetadata([
+    { service: NotificationsService, methodName: 'emitAlarm' },
+  ])
+  @ExceptionMetadata([EXCEPTIONS.ALREADY_EXISTS])
   async like({
     articleId,
     userId,
@@ -43,7 +50,7 @@ export class LikesService {
         where: { articleId, userId },
       });
       if (alreadyLiked) {
-        throw new ConflictException('이미 좋아요 한 게시글입니다.');
+        throw new BlccuException('ALREADY_EXISTS');
       } else {
         const likeData = await queryRunner.manager.save(Like, {
           userId,
@@ -71,6 +78,7 @@ export class LikesService {
     }
   }
 
+  @ExceptionMetadata([EXCEPTIONS.LIKE_NOT_FOUND])
   async cancleLike({ articleId, userId }: ILikesServiceIds): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -83,7 +91,7 @@ export class LikesService {
         where: { articleId, userId },
       });
       if (!alreadyLiked) {
-        throw new ConflictException('좋아요 내역을 찾을 수 없습니다.');
+        throw new BlccuException('LIKE_NOT_FOUND');
       } else {
         await queryRunner.manager.delete(Like, {
           id: alreadyLiked.id,

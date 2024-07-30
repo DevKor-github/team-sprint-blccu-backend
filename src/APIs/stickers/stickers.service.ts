@@ -33,16 +33,9 @@ export class StickersService {
 
   @ExceptionMetadata([EXCEPTIONS.STICKER_NOT_FOUND])
   async existCheck({ stickerId }: IStickersServiceId): Promise<StickerDto> {
-    try {
-      const data = await this.findStickerById({ stickerId });
-      if (!data) {
-        throw new BlccuException('STICKER_NOT_FOUND');
-      }
-
-      return data;
-    } catch (e) {
-      throw e;
-    }
+    const data = await this.findStickerById({ stickerId });
+    if (!data) throw new BlccuException('STICKER_NOT_FOUND');
+    return data;
   }
 
   @MergeExceptionMetadata([

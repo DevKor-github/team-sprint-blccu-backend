@@ -5,17 +5,17 @@
     "name": "VALIDATION_ERROR",
     "message": "올바르지 않은 입력 값입니다."
   },
-  "EMAIL_NOT_VALIDATED": {
+  "INVALID_PARENT_COMMENT_REQUEST": {
     "errorCode": 4001,
     "statusCode": 400,
-    "name": "EMAIL_NOT_VALIDATED",
-    "message": "인증되지 않은 이메일입니다."
+    "name": "INVALID_PARENT_COMMENT",
+    "message": "부모 댓글에 대한 입력 값이 유효하지 않습니다. 부모 댓글이 존재하는 값인 지, 루트 댓글인 지 확인하십시오."
   },
-  "EMAIL_ALREADY_USED": {
+  "INVALID_ARTICLE_REQUEST": {
     "errorCode": 4002,
     "statusCode": 400,
-    "name": "EMAIL_ALREADY_USED",
-    "message": "이미 사용중인 이메일입니다."
+    "name": "INVALID_ARTICLE_REQUEST",
+    "message": "게시글 아이디가 부모 댓글이 작성된 게시글 아이디와 일치하지 않습니다."
   },
   "EMAIL_NOT_IN_KOREA_DOMAIN": {
     "errorCode": 4003,
@@ -102,6 +102,12 @@
     "name": "NOT_AUTHORIZED",
     "message": "이 작업을 수행할 권한이 없습니다."
   },
+  "FORBIDDEN_ACCESS": {
+    "errorCode": 4033,
+    "statusCode": 403,
+    "name": "FORBIDDEN_ACCESS",
+    "message": "허용되지 않은 접근입니다."
+  },
   "USER_NOT_FOUND": {
     "errorCode": 4040,
     "statusCode": 404,
@@ -156,6 +162,36 @@
     "name": "FOLLOW_NOT_FOUND",
     "message": "팔로우 정보를 찾을 수 없습니다."
   },
+  "COMMENT_NOT_FOUND": {
+    "errorCode": 4049,
+    "statusCode": 404,
+    "name": "COMMENT_NOT_FOUND",
+    "message": "댓글을 찾을 수 없습니다."
+  },
+  "LIKE_NOT_FOUND": {
+    "errorCode": 40410,
+    "statusCode": 404,
+    "name": "LIKE_NOT_FOUND",
+    "message": "좋아요를 찾을 수 없습니다."
+  },
+  "REPORT_NOT_FOUND": {
+    "errorCode": 40411,
+    "statusCode": 404,
+    "name": "REPORT_NOT_FOUND",
+    "message": "신고 내역을 찾을 수 없습니다."
+  },
+  "ENTITY_NOT_FOUND_ERROR": {
+    "errorCode": 40412,
+    "statusCode": 404,
+    "name": "ENTITY_NOT_FOUND_ERROR",
+    "message": "요청한 엔티티를 찾을 수 없습니다."
+  },
+  "NOTIFICATION_NOT_FOUND": {
+    "errorCode": 40412,
+    "statusCode": 404,
+    "name": "NOTIFICATION_NOT_FOUND",
+    "message": "알림을 찾을 수 없습니다."
+  },
   "INVALID_PAGE_QUERY": {
     "errorCode": 4060,
     "statusCode": 406,
@@ -192,6 +228,12 @@
     "name": "SELF_ACTION_NOT_ALLOWED",
     "message": "자기 자신에게는 이 작업을 수행할 수 없습니다."
   },
+  "UNIQUE_CONSTRAINT_VIOLATION": {
+    "errorCode": 4094,
+    "statusCode": 409,
+    "name": "UNIQUE_CONSTRAINT_VIOLATION",
+    "message": "해당 필드 값이 유니크해야 합니다."
+  },
   "TOO_MANY_REQUESTS": {
     "errorCode": 4290,
     "statusCode": 429,
@@ -222,10 +264,58 @@
     "name": "IMAGE_RESIZE_ERROR",
     "message": "이미지 리사이징 중에 오류가 발생했습니다."
   },
-  "DATABASE_QUERY_FAILED": {
+  "NOTIFICATION_CREATION_FAILED": {
     "errorCode": 5005,
     "statusCode": 500,
-    "name": "DATABASE_QUERY_FAILED",
+    "name": "NOTIFICATION_CREATION_FAILED",
+    "message": "알림 생성에 실패했습니다."
+  },
+  "QUERY_FAILED_ERROR": {
+    "errorCode": 5006,
+    "statusCode": 500,
+    "name": "QUERY_FAILED_ERROR",
     "message": "데이터베이스 쿼리 실행 중 오류가 발생했습니다."
+  },
+  "CANNOT_CREATE_ENTITY_ID_MAP_ERROR": {
+    "errorCode": 5007,
+    "statusCode": 500,
+    "name": "CANNOT_CREATE_ENTITY_ID_MAP_ERROR",
+    "message": "엔티티 ID 맵을 생성할 수 없습니다."
+  },
+  "ENTITY_COLUMN_NOT_FOUND": {
+    "errorCode": 5008,
+    "statusCode": 500,
+    "name": "ENTITY_COLUMN_NOT_FOUND",
+    "message": "엔티티의 열을 찾을 수 없습니다."
+  },
+  "OPTIMISTIC_LOCK_CAN_NOT_BE_USED_ERROR": {
+    "errorCode": 5009,
+    "statusCode": 500,
+    "name": "OPTIMISTIC_LOCK_CAN_NOT_BE_USED_ERROR",
+    "message": "낙관적 잠금을 사용할 수 없습니다."
+  },
+  "PESSIMISTIC_LOCK_TRANSACTION_REQUIRED_ERROR": {
+    "errorCode": 50010,
+    "statusCode": 500,
+    "name": "PESSIMISTIC_LOCK_TRANSACTION_REQUIRED_ERROR",
+    "message": "비관적 잠금을 사용하려면 트랜잭션이 필요합니다."
+  },
+  "TRANSACTION_ALREADY_STARTED_ERROR": {
+    "errorCode": 50011,
+    "statusCode": 500,
+    "name": "TRANSACTION_ALREADY_STARTED_ERROR",
+    "message": "이미 트랜잭션이 시작되었습니다."
+  },
+  "TRANSACTION_NOT_STARTED_ERROR": {
+    "errorCode": 50012,
+    "statusCode": 500,
+    "name": "TRANSACTION_NOT_STARTED_ERROR",
+    "message": "트랜잭션이 시작되지 않았습니다."
+  },
+  "NO_NEED_TO_RELEASE_ENTITY_MANAGER_ERROR": {
+    "errorCode": 50013,
+    "statusCode": 500,
+    "name": "NO_NEED_TO_RELEASE_ENTITY_MANAGER_ERROR",
+    "message": "EntityManager를 해제할 필요가 없습니다."
   }
 }

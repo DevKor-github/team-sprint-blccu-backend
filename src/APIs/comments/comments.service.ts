@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CommentsRepository } from './comments.repository';
 import { DataSource, EntityManager, UpdateResult } from 'typeorm';
 import {
@@ -22,6 +17,9 @@ import { CommentDto } from './dtos/common/comment.dto';
 import { CommentChildrenDto } from './dtos/common/comment-children.dto';
 import { Article } from '../articles/entities/article.entity';
 import { CommentsGetResponseDto } from './dtos/response/comments-get-response.dto';
+import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
+import { BlccuException, EXCEPTIONS } from '@/common/blccu-exception';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
 
 @Injectable()
 export class CommentsService {
@@ -31,41 +29,47 @@ export class CommentsService {
     private readonly db_dataSource: DataSource,
   ) {}
 
-  async postsIdValidCheck({
+  @ExceptionMetadata([
+    EXCEPTIONS.INVALID_ARTICLE_REQUEST,
+    EXCEPTIONS.INVALID_PARENT_COMMENT_REQUEST,
+  ])
+  async articleIdValidCheck({
     parentId,
     articleId,
   }: ICommentsServiceArticleIdValidCheck): Promise<void> {
     const parent = await this.existCheck({ commentId: parentId });
     if (parent.articleId != articleId)
-      throw new BadRequestException(
-        '게시글 아이디가 루트 댓글이 작성된 게시글 아이디와 일치하지 않습니다.',
-      );
+      throw new BlccuException('INVALID_ARTICLE_REQUEST');
     if (parent.parentId)
-      throw new BadRequestException('부모 댓글이 루트 댓글이 아닙니다.');
+      throw new BlccuException('INVALID_PARENT_COMMENT_REQUEST');
   }
 
+  @ExceptionMetadata([EXCEPTIONS.COMMENT_NOT_FOUND])
   async existCheck({ commentId }: ICommentsServiceId): Promise<CommentDto> {
     const comment = await this.repo_comments.findOne({
       where: { id: commentId },
     });
     if (!comment) {
-      throw new NotFoundException(
-        '댓글의 아이디를 찾을 수 없습니다. 존재하지 않거나 이미 삭제되었습니다.',
-      );
+      throw new BlccuException('COMMENT_NOT_FOUND');
     }
     return comment;
   }
 
+  @MergeExceptionMetadata([
+    { service: CommentsService, methodName: 'articleIdValidCheck' },
+    { service: NotificationsService, methodName: 'emitAlarm' },
+  ])
+  @ExceptionMetadata([EXCEPTIONS.FORBIDDEN_ACCESS])
   async createComment(
     createCommentDto: ICommentsServiceCreateComment,
   ): Promise<CommentChildrenDto> {
-    const post = await this.db_dataSource.manager.findOne(Article, {
+    const articleData = await this.db_dataSource.manager.findOne(Article, {
       where: { id: createCommentDto.articleId },
     });
-    if (post.allowComment === false)
-      throw new ForbiddenException('댓글이 허용되지 않은 게시물 입니다.');
+    if (articleData.allowComment === false)
+      throw new BlccuException('FORBIDDEN_ACCESS');
     if (createCommentDto.parentId)
-      await this.postsIdValidCheck({
+      await this.articleIdValidCheck({
         parentId: createCommentDto.parentId,
         articleId: createCommentDto.articleId,
       });
@@ -80,7 +84,6 @@ export class CommentsService {
     const commentData = await this.repo_comments.insertComment({
       createCommentDto,
     });
-    console.log(commentData);
     const commentId = commentData.identifiers[0].id;
 
     const { article, parent, ...result } =
@@ -107,6 +110,11 @@ export class CommentsService {
     return result;
   }
 
+  @ExceptionMetadata([
+    EXCEPTIONS.NOT_THE_OWNER,
+    EXCEPTIONS.INVALID_ARTICLE_REQUEST,
+    EXCEPTIONS.COMMENT_NOT_FOUND,
+  ])
   async patchComment({
     userId,
     articleId,
@@ -114,11 +122,10 @@ export class CommentsService {
     content,
   }: ICommentsServicePatchComment): Promise<CommentDto> {
     const commentData = await this.existCheck({ commentId });
-    if (!commentData) throw new NotFoundException('댓글을 찾을 수 없습니다.');
+    if (!commentData) throw new BlccuException('COMMENT_NOT_FOUND');
     if (commentData.articleId != articleId)
-      throw new NotFoundException('루트 게시글의 아이디가 일치하지 않습니다.');
-    if (commentData.userId != userId)
-      throw new ForbiddenException('댓글을 수정할 권한이 없습니다.');
+      throw new BlccuException('INVALID_ARTICLE_REQUEST');
+    if (commentData.userId != userId) throw new BlccuException('NOT_THE_OWNER');
     commentData.content = content;
     return await this.repo_comments.save(commentData);
   }
@@ -139,6 +146,13 @@ export class CommentsService {
     });
   }
 
+  @ExceptionMetadata([
+    EXCEPTIONS.ARTICLE_NOT_FOUND,
+    EXCEPTIONS.COMMENT_NOT_FOUND,
+  ])
+  @MergeExceptionMetadata([
+    { service: CommentsService, methodName: 'existCheck' },
+  ])
   async delete({
     commentId,
     userId,
@@ -149,7 +163,7 @@ export class CommentsService {
       let childrenData = [];
       let deletedResult: UpdateResult;
       if (data.articleId !== articleId) {
-        throw new NotFoundException('게시글을 찾을 수 없습니다.');
+        throw new BlccuException('ARTICLE_NOT_FOUND');
       }
       if (data.parentId == null)
         childrenData = await manager.find(Comment, {
@@ -166,7 +180,7 @@ export class CommentsService {
           id: commentId,
         });
         if (deletedResult.affected < 1)
-          throw new NotFoundException('삭제할 댓글이 존재하지 않습니다');
+          throw new BlccuException('COMMENT_NOT_FOUND');
       }
     });
   }
