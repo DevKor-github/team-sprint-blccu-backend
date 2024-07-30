@@ -59,7 +59,7 @@ export class AwsService {
       return await this.s3Client.send(command);
     } catch (error) {
       this.logger.error('Error deleting object from S3', error.stack);
-      throw new BlccuException('IMAGE_DELETE_FROM_S3_ERROR');
+      // throw new BlccuException('IMAGE_DELETE_FROM_S3_ERROR');
     }
   }
 
