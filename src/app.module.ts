@@ -32,7 +32,6 @@ import { ArticlesModule } from './APIs/articles/articles.module';
 import { ArticleCategoriesModule } from './APIs/articleCategories/articleCategories.module';
 import { ArticleBackgroundsModule } from './APIs/articleBackgrounds/articleBackgrounds.module';
 import { ImagesModule } from './modules/images/images.module';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [

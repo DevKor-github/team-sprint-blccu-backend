@@ -34,6 +34,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       // 직접 발생시킨 예외의 경우
       if (exception instanceof BlccuHttpException) {
         errorCode = exception.errorCode;
+        name = exception.name;
       }
       // db 쿼리 에러의 경우
     } else if (exception instanceof QueryFailedError) {
