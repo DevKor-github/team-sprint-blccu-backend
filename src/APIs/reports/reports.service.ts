@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Report } from './entities/report.entity';
 import { DataSource, Repository } from 'typeorm';
@@ -12,6 +8,9 @@ import { Comment } from '../comments/entities/comment.entity';
 import { IReportsServiceCreateReport } from './interfaces/reports.service.interface';
 import { ReportDto } from './dtos/common/report.dto';
 import { UsersValidateService } from '../users/services/users-validate-service';
+import { BlccuException, EXCEPTIONS } from '@/common/blccu-exception';
+import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
 
 @Injectable()
 export class ReportsService {
@@ -22,6 +21,12 @@ export class ReportsService {
     private readonly db_dataSource: DataSource,
   ) {}
 
+  @ExceptionMetadata([
+    EXCEPTIONS.ARTICLE_NOT_FOUND,
+    EXCEPTIONS.ALREADY_EXISTS,
+    EXCEPTIONS.COMMENT_NOT_FOUND,
+    EXCEPTIONS.VALIDATION_ERROR,
+  ])
   async createReport(
     dto_createReport: IReportsServiceCreateReport,
   ): Promise<ReportDto> {
@@ -36,14 +41,12 @@ export class ReportsService {
           const articleData = await queryRunner.manager.findOne(Article, {
             where: { id: targetId },
           });
-          if (!articleData)
-            throw new BadRequestException('게시글이 존재하지 않습니다.');
+          if (!articleData) throw new BlccuException('ARTICLE_NOT_FOUND');
 
           const reportPost = await this.repo_reports.findOne({
             where: { userId, articleId: targetId },
           });
-          if (reportPost)
-            throw new ConflictException('이미 신고한 게시물입니다.');
+          if (reportPost) throw new BlccuException('ALREADY_EXISTS');
 
           await queryRunner.manager.update(Article, articleData.id, {
             reportCount: () => 'report_count +1',
@@ -62,15 +65,12 @@ export class ReportsService {
           const commentData = await queryRunner.manager.findOne(Comment, {
             where: { id: targetId },
           });
-          if (!commentData)
-            throw new BadRequestException('댓글이 존재하지 않습니다.');
+          if (!commentData) throw new BlccuException('COMMENT_NOT_FOUND');
 
           const reportComment = await this.repo_reports.findOne({
             where: { userId, commentId: targetId },
           });
-          if (reportComment)
-            throw new ConflictException('이미 신고한 게시물입니다.');
-
+          if (reportComment) throw new BlccuException('ALREADY_EXISTS');
           await queryRunner.manager.update(Comment, commentData.id, {
             reportCount: () => 'report_count +1',
           });
@@ -85,7 +85,7 @@ export class ReportsService {
           break;
 
         default:
-          throw new BadRequestException('잘못된 target입니다.');
+          throw new BlccuException('VALIDATION_ERROR');
       } // end of switch
       await queryRunner.commitTransaction();
       return data;
@@ -97,6 +97,9 @@ export class ReportsService {
     }
   }
 
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'adminCheck' },
+  ])
   async findReports({ userId }): Promise<ReportDto[]> {
     await this.svc_userValidate.adminCheck({ userId });
     const result = await this.repo_reports.find();
