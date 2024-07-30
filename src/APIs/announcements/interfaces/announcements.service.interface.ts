@@ -1,6 +1,6 @@
 import { Announcement } from '../entities/announcement.entity';
 
-export interface IAnnouncementsSerciceCreateAnnouncement
+export interface IAnnouncementsServiceCreateAnnouncement
   extends Omit<
     Announcement,
     'id' | 'dateCreated' | 'dateUpdated' | 'dateDeleted'
@@ -8,12 +8,15 @@ export interface IAnnouncementsSerciceCreateAnnouncement
   userId: number;
 }
 
-export interface IAnnouncementsSerciceRemoveAnnouncement {
+export interface IAnnouncementsServiceRemoveAnnouncement {
   userId: number;
   announcementId: number;
 }
+export interface IAnnouncementsServiceId {
+  announcementId: number;
+}
 
-export interface IAnnouncementsSercicePatchAnnouncement {
+export interface IAnnouncementsServicePatchAnnouncement {
   userId: number;
   announcementId: number;
   title?: string;

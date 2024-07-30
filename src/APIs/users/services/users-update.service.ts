@@ -7,6 +7,7 @@ import { UserDto } from '../dtos/common/user.dto';
 import { ImageUploadResponseDto } from 'src/modules/images/dtos/image-upload-response.dto';
 import { IUsersServiceImageUpload } from '../interfaces/users.service.interface';
 import { ImagesService } from 'src/modules/images/images.service';
+import { MergeExceptionMetadata } from 'src/common/decorators/merge-exception-metadata.decorator';
 
 @Injectable()
 export class UsersUpdateService {
@@ -16,18 +17,24 @@ export class UsersUpdateService {
     private readonly svc_images: ImagesService,
   ) {}
 
-  async activateUser({ userId }): Promise<UpdateResult> {
-    return await this.repo_users.update({ id: userId }, { dateDeleted: null });
-  }
-
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'existCheck' },
+  ])
   async setCurrentRefreshToken({ userId, currentRefreshToken }): Promise<User> {
-    const user = await this.repo_users.findOne({ where: { id: userId } });
+    const user = await this.svc_usersValidate.existCheck({ userId });
     return await this.repo_users.save({
       ...user,
       currentRefreshToken,
     });
   }
 
+  async activateUser({ userId }): Promise<UpdateResult> {
+    return await this.repo_users.update({ id: userId }, { dateDeleted: null });
+  }
+
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'existCheck' },
+  ])
   async updateUser({
     userId,
     handle,

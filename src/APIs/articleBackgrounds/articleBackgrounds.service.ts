@@ -6,6 +6,7 @@ import { ImagesService } from 'src/modules/images/images.service';
 import { ArticleBackgroundDto } from './dtos/common/articleBackground.dto';
 import { ImageUploadResponseDto } from 'src/modules/images/dtos/image-upload-response.dto';
 import { UsersValidateService } from '../users/services/users-validate-service';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
 
 @Injectable()
 export class ArticleBackgroundsService {
@@ -16,6 +17,10 @@ export class ArticleBackgroundsService {
     private readonly repo_articleBackgrounds: Repository<ArticleBackground>,
   ) {}
 
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'adminCheck' },
+    { service: ImagesService, methodName: 'imageUpload' },
+  ])
   async createArticleBackground(
     userId: number,
     file: Express.Multer.File,
@@ -34,6 +39,10 @@ export class ArticleBackgroundsService {
     return await this.repo_articleBackgrounds.find();
   }
 
+  @MergeExceptionMetadata([
+    { service: UsersValidateService, methodName: 'adminCheck' },
+    { service: ImagesService, methodName: 'deleteImage' },
+  ])
   async deleteArticleBackground({ articleBackgroundId, userId }) {
     await this.svc_usersValidate.adminCheck({ userId });
 

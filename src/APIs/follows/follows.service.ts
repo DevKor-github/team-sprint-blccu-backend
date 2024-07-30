@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { OpenScope } from 'src/common/enums/open-scope.enum';
 import { FollowsRepository } from './follows.repository';
@@ -11,6 +11,9 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { NotType } from 'src/common/enums/not-type.enum';
 import { UserFollowingResponseDto } from '../users/dtos/response/user-following-response.dto';
 import { FollowDto } from './dtos/common/follow.dto';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
+import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
+import { BlccuException, EXCEPTIONS } from '@/common/blccu-exception';
 
 @Injectable()
 export class FollowsService {
@@ -56,7 +59,7 @@ export class FollowsService {
     return [OpenScope.PUBLIC];
   }
 
-  async existCheck({
+  async existCheckWithoutValidation({
     fromUser,
     toUser,
   }: IFollowsServiceUsers): Promise<boolean> {
@@ -73,6 +76,14 @@ export class FollowsService {
     return true;
   }
 
+  @MergeExceptionMetadata([
+    { service: FollowsService, methodName: 'existCheckWithoutValidation' },
+    { service: NotificationsService, methodName: 'emitAlarm' },
+  ])
+  @ExceptionMetadata([
+    EXCEPTIONS.ALREADY_EXISTS,
+    EXCEPTIONS.SELF_ACTION_NOT_ALLOWED,
+  ])
   async followUser({
     fromUser,
     toUser,
@@ -88,12 +99,15 @@ export class FollowsService {
         where: { id: fromUser },
       });
 
-      const isExist = await this.existCheck({ fromUser, toUser });
+      const isExist = await this.existCheckWithoutValidation({
+        fromUser,
+        toUser,
+      });
       if (isExist) {
-        throw new ConflictException('already exists');
+        throw new BlccuException('ALREADY_EXISTS');
       }
       if (this.isSame({ fromUser, toUser })) {
-        throw new ConflictException('you cannot follow yourself!');
+        throw new BlccuException('SELF_ACTION_NOT_ALLOWED');
       }
       const follow = await this.repo_follows.save({
         fromUser: { id: fromUser },
@@ -107,7 +121,6 @@ export class FollowsService {
       });
 
       await queryRunner.commitTransaction();
-      console.log('commited');
       await this.svc_notifications.emitAlarm({
         userId: fromUser,
         targetUserId: toUser,
@@ -123,6 +136,13 @@ export class FollowsService {
     }
   }
 
+  @MergeExceptionMetadata([
+    { service: FollowsService, methodName: 'existCheckWithoutValidation' },
+  ])
+  @ExceptionMetadata([
+    EXCEPTIONS.ALREADY_EXISTS,
+    EXCEPTIONS.SELF_ACTION_NOT_ALLOWED,
+  ])
   async unfollowUser({
     fromUser,
     toUser,
@@ -138,14 +158,17 @@ export class FollowsService {
         where: { id: fromUser },
       });
 
-      const isExist = await this.existCheck({ fromUser, toUser });
+      const isExist = await this.existCheckWithoutValidation({
+        fromUser,
+        toUser,
+      });
 
       if (!isExist) {
-        throw new ConflictException('no data exists');
+        throw new BlccuException('FOLLOW_NOT_FOUND');
       }
 
       if (this.isSame({ fromUser, toUser })) {
-        throw new ConflictException('you cannot unfollow yourself!');
+        throw new BlccuException('SELF_ACTION_NOT_ALLOWED');
       }
 
       await queryRunner.manager.update(User, fromUserData.id, {

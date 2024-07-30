@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ArticlesValidateService } from './articles-validate.service';
 import { ArticlesPaginateRepository } from '../repositories/articles-paginate.repository';
 import { ArticleOrderOption } from 'src/common/enums/article-order-option';
@@ -14,7 +14,10 @@ import {
   IArticlesServiceFetchUserArticlesCursor,
 } from '../interfaces/articles.service.interface';
 import { ArticleDto } from '../dtos/common/article.dto';
-import { getDate } from 'src/utils/dateUtils';
+import { getDate } from '@/utils/date.utils';
+import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
+import { BlccuException, EXCEPTIONS } from '@/common/blccu-exception';
+import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
 
 @Injectable()
 export class ArticlesPaginateService {
@@ -46,6 +49,9 @@ export class ArticlesPaginateService {
     return customCursor;
   }
 
+  @MergeExceptionMetadata([
+    { service: ArticlesPaginateService, methodName: 'createCustomCursor' },
+  ])
   async createCursorResponse({
     cursorOption,
     articles,
@@ -80,6 +86,9 @@ export class ArticlesPaginateService {
     return new CustomCursorPageDto(responseData, customCursorPageMetaDto);
   }
 
+  @MergeExceptionMetadata([
+    { service: ArticlesPaginateService, methodName: 'createCursorResponse' },
+  ])
   async fetchArticlesCursor({
     cursorOption,
   }: IArticlesServiceFetchArticlesCursor): Promise<
@@ -105,6 +114,10 @@ export class ArticlesPaginateService {
     return result;
   }
 
+  @MergeExceptionMetadata([
+    { service: ArticlesPaginateService, methodName: 'createCursorResponse' },
+  ])
+  @ExceptionMetadata([EXCEPTIONS.NOT_LOGGED_IN])
   async fetchFriendsArticlesCursor({
     cursorOption,
     userId,
@@ -112,7 +125,7 @@ export class ArticlesPaginateService {
     CustomCursorPageDto<ArticleDto>
   > {
     if (!userId) {
-      throw new BadRequestException('비로그인 상태입니다.');
+      throw new BlccuException('NOT_LOGGED_IN');
     }
     let dateFilter: Date;
     if (cursorOption.dateCreated)
@@ -127,6 +140,10 @@ export class ArticlesPaginateService {
     return await this.createCursorResponse({ articles, cursorOption });
   }
 
+  @MergeExceptionMetadata([
+    { service: FollowsService, methodName: 'getScope' },
+    { service: ArticlesPaginateService, methodName: 'createCursorResponse' },
+  ])
   async fetchUserArticlesCursor({
     userId,
     targetUserId,

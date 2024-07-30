@@ -10,20 +10,16 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AgreementsService } from './agreements.service';
-import {
-  ApiCookieAuth,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { Request } from 'express';
 import { AgreementGetContractRequestDto } from './dtos/request/agreement-get-contract-request.dto';
 import { AgreementCreateRequestDto } from './dtos/request/agreement-create-request.dto';
 import { AgreementDto } from './dtos/common/agreement.dto';
 import { AgreementPatchRequestDto } from './dtos/request/agreement-patch-request.dto';
+import { AgreementsDocs } from './docs/agreements-docs.decorator';
 
+@AgreementsDocs
 @ApiTags('유저 API')
 @Controller('users')
 export class AgreementsController {
@@ -36,9 +32,6 @@ export class AgreementsController {
     return data;
   }
 
-  @ApiOperation({ summary: '온보딩 동의' })
-  @ApiCookieAuth()
-  @ApiCreatedResponse({ type: AgreementDto })
   @UseGuards(AuthGuardV2)
   @Post('me/agreement')
   async agree(
@@ -49,9 +42,6 @@ export class AgreementsController {
     return await this.svc_agreements.createAgreement({ ...body, userId });
   }
 
-  @ApiOperation({ summary: '로그인된 유저의 온보딩 동의 내용들을 fetch' })
-  @ApiCookieAuth()
-  @ApiOkResponse({ type: [AgreementDto] })
   @UseGuards(AuthGuardV2)
   @Get('me/agreements')
   async fetchAgreements(@Req() req: Request): Promise<AgreementDto[]> {
@@ -59,10 +49,6 @@ export class AgreementsController {
     return await this.svc_agreements.findAgreements({ userId });
   }
 
-  @ApiTags('어드민 API')
-  @ApiOperation({ summary: '[어드민용] 특정 유저의 온보딩 동의 내용을 조회' })
-  @ApiCookieAuth()
-  @ApiOkResponse({ type: [AgreementDto] })
   @UseGuards(AuthGuardV2)
   @Get('admin/:userId/agreements')
   async fetchAgreementAdmin(
@@ -76,9 +62,6 @@ export class AgreementsController {
     });
   }
 
-  @ApiOperation({ summary: '동의 여부를 수정' })
-  @ApiCookieAuth()
-  @ApiOkResponse({ type: AgreementDto })
   @UseGuards(AuthGuardV2)
   @Patch('me/agreement/:agreementId')
   async patchAgreement(
