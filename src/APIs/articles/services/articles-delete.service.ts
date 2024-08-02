@@ -6,7 +6,7 @@ import { IArticlesServiceArticleUserIdPair } from '../interfaces/articles.servic
 import { ArticlesReadRepository } from '../repositories/articles-read.repository';
 import { ImagesService } from 'src/modules/images/images.service';
 import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
-import { IsUrl, isURL } from 'class-validator';
+import { isURL } from 'class-validator';
 
 @Injectable()
 export class ArticlesDeleteService {

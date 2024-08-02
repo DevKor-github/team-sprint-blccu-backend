@@ -13,7 +13,7 @@ fi
 # PEM 파일 권한 확인 및 수정
 chmod 400 "$PEM_PATH"
 
-HOSTS=("13.209.215.21" "3.35.68.4")
+HOSTS=("13.209.215.21")
 ACCOUNT=ubuntu
 SERVICE_NAME=blccu
 DOCKER_TAG=latest
@@ -66,7 +66,7 @@ for HOST in "${HOSTS[@]}"; do
   echo -e "\n## new docker pull & run on $HOST ##\n"
   ssh -i $PEM_PATH $SERVER "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $ECR_URL"
   ssh -i $PEM_PATH $SERVER "docker pull $ECR_URL/$SERVICE_NAME:$DOCKER_TAG"
-  ssh -i $PEM_PATH $SERVER "docker run --env-file /home/$ACCOUNT/upload/.env.prod -d -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul $ECR_URL/$SERVICE_NAME"
+  ssh -i $PEM_PATH $SERVER "docker run --env-file /home/$ACCOUNT/upload/.env.prod -d -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul $ECR_URL/$SERVICE_NAME --network blccu_network"
 
   # 헬스체크 수행
   echo -e "\n## 헬스체크 수행 on $HOST ##\n"
