@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -17,6 +19,7 @@ import { StickerCategoryMapperDto } from './dtos/common/stickerCategoryMapper.dt
 import { StickerCategoryDto } from './dtos/common/stickerCategory.dto';
 import { StickersCategoryFetchStickersResponseDto } from './dtos/response/stickerCategories-fetch-stickers-response.dto';
 import { StickerCategoriesDocs } from './docs/stickerCategories-docs.decorator';
+import { StickerCategoryUpdateRequestDto } from './dtos/request/stickerCategory-update-request.dto';
 
 @StickerCategoriesDocs
 @ApiTags('스티커 API')
@@ -64,5 +67,50 @@ export class StickerCategoriesController {
       userId,
       ...mapCategoryDto,
     });
+  }
+
+  @UseGuards(AuthGuardV2)
+  @Patch('stickers/categories/:stickerCategoryId')
+  async patchCategory(
+    @Req() req: Request,
+    @Body() body: StickerCategoryUpdateRequestDto,
+    @Param('stickerCategoryId') stickerCategoryId: number,
+  ): Promise<StickerCategoryDto> {
+    const userId = req.user.userId;
+    return await this.stickerCategoriesService.updateStickerCategory({
+      ...body,
+      userId,
+      stickerCategoryId,
+    });
+  }
+
+  @UseGuards(AuthGuardV2)
+  @Delete('stickers/categories/:stickerCategoryId')
+  async deleteCategory(
+    @Req() req: Request,
+    @Param('stickerCategoryId') stickerCategoryId: number,
+  ): Promise<void> {
+    const userId = req.user.userId;
+    await this.stickerCategoriesService.deleteStickerCategory({
+      stickerCategoryId,
+      userId,
+    });
+    return;
+  }
+
+  @Delete('stickers/categories/:stickerCategoryId/:stickerId')
+  @UseGuards(AuthGuardV2)
+  async deleteCategoryMapping(
+    @Req() req: Request,
+    @Param('stickerCategoryId') stickerCategoryId: number,
+    @Param('stickerId') stickerId: number,
+  ): Promise<void> {
+    const userId = req.user.userId;
+    await this.stickerCategoriesService.deleteStickerCategoryMapper({
+      stickerCategoryId,
+      stickerId,
+      userId,
+    });
+    return;
   }
 }

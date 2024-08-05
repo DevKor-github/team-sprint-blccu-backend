@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { StickerCategory } from './entities/stickerCategory.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { StickerCategoryMapper } from './entities/stickerCategoryMapper.entity';
 import { StickersService } from '../stickers/stickers.service';
 import {
   IStickerCategoriesServiceCreateCategory,
+  IStickerCategoriesServiceDeleteCategory,
+  IStickerCategoriesServiceDeleteCategoryMapper,
   IStickerCategoriesServiceId,
   IStickerCategoriesServiceIds,
   IStickerCategoriesServiceMapCategory,
   IStickerCategoriesServiceName,
+  IStickerCategoriesServiceUpdate,
 } from './interfaces/stickerCategories.service.interface';
 import { UsersValidateService } from '../users/services/users-validate-service';
 import { StickerCategoryDto } from './dtos/common/stickerCategory.dto';
@@ -55,9 +58,10 @@ export class StickerCategoriesService {
   @ExceptionMetadata([EXCEPTIONS.STICKER_CATEGORY_NOT_FOUND])
   async existCheckById({
     stickerCategoryId,
-  }: IStickerCategoriesServiceId): Promise<void> {
+  }: IStickerCategoriesServiceId): Promise<StickerCategoryDto> {
     const data = await this.findCategoryById({ stickerCategoryId });
     if (!data) throw new BlccuException('STICKER_CATEGORY_NOT_FOUND');
+    return data;
   }
 
   @ExceptionMetadata([EXCEPTIONS.MAPPING_CONFLICT])
@@ -128,6 +132,51 @@ export class StickerCategoriesService {
         stickerCategory: { id: stickerCategoryId },
         sticker: { isDefault: true },
       },
+    });
+  }
+
+  @MergeExceptionMetadata([
+    { service: StickerCategoriesService, methodName: 'existCheckById' },
+    { service: UsersValidateService, methodName: 'adminCheck' },
+  ])
+  async updateStickerCategory({
+    stickerCategoryId,
+    name,
+    userId,
+  }: IStickerCategoriesServiceUpdate): Promise<StickerCategoryDto> {
+    await this.svc_usersValidate.adminCheck({ userId });
+    const stickerCategory = await this.existCheckById({ stickerCategoryId });
+    stickerCategory.name = name;
+    return await this.repo_stickerCategories.save(stickerCategory);
+  }
+
+  @MergeExceptionMetadata([
+    { service: StickerCategoriesService, methodName: 'existCheckById' },
+    { service: UsersValidateService, methodName: 'adminCheck' },
+  ])
+  async deleteStickerCategory({
+    stickerCategoryId,
+    userId,
+  }: IStickerCategoriesServiceDeleteCategory): Promise<DeleteResult> {
+    await this.svc_usersValidate.adminCheck({ userId });
+    await this.existCheckById({ stickerCategoryId });
+    return await this.repo_stickerCategories.delete({ id: stickerCategoryId });
+  }
+
+  @MergeExceptionMetadata([
+    { service: StickerCategoriesService, methodName: 'existCheckMapper' },
+    { service: UsersValidateService, methodName: 'adminCheck' },
+  ])
+  async deleteStickerCategoryMapper({
+    userId,
+    stickerCategoryId,
+    stickerId,
+  }: IStickerCategoriesServiceDeleteCategoryMapper): Promise<DeleteResult> {
+    await this.svc_usersValidate.adminCheck({ userId });
+    await this.existCheckMapper({ stickerCategoryId, stickerId });
+    return await this.repo_stickerCategoryMappers.delete({
+      stickerCategoryId,
+      stickerId,
     });
   }
 }
