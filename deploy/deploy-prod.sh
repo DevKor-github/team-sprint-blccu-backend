@@ -66,7 +66,7 @@ for HOST in "${HOSTS[@]}"; do
   echo -e "\n## new docker pull & run on $HOST ##\n"
   ssh -i $PEM_PATH $SERVER "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $ECR_URL"
   ssh -i $PEM_PATH $SERVER "docker pull $ECR_URL/$SERVICE_NAME:$DOCKER_TAG"
-  ssh -i $PEM_PATH $SERVER "docker run --env-file /home/$ACCOUNT/upload/.env.prod -d -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul $ECR_URL/$SERVICE_NAME --network blccu_network"
+  ssh -i $PEM_PATH $SERVER "docker run --env-file /home/$ACCOUNT/upload/.env.prod -d -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul --network blccu_network $ECR_URL/$SERVICE_NAME"
 
   # 헬스체크 수행
   echo -e "\n## 헬스체크 수행 on $HOST ##\n"
