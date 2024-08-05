@@ -45,7 +45,7 @@ export class AwsService {
       throw new BlccuException('IMAGE_UPLOAD_TO_S3_ERROR');
     }
   }
-  @ExceptionMetadata([EXCEPTIONS.IMAGE_DELETE_FROM_S3_ERROR])
+  // @ExceptionMetadata([EXCEPTIONS.IMAGE_DELETE_FROM_S3_ERROR])
   async deleteImageFromS3({ url }) {
     try {
       const fileNameRegex = /\/([^\/]+)\.[^.]+$/;

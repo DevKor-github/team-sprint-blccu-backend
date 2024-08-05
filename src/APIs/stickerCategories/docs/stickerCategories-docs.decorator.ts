@@ -4,7 +4,12 @@ import { StickerCategoriesController } from '../stickerCategories.controller';
 import { ApiResponseFromMetadata } from '@/common/decorators/api-response-from-metadata.decorator';
 import { StickerCategoriesService } from '../stickerCategories.service';
 import { StickerCategoryDto } from '../dtos/common/stickerCategory.dto';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { StickersCategoryFetchStickersResponseDto } from '../dtos/response/stickerCategories-fetch-stickers-response.dto';
 import { ApiAuthResponse } from '@/common/decorators/api-auth-response.dto';
 import { StickerCategoryMapperDto } from '../dtos/common/stickerCategoryMapper.dto';
@@ -61,6 +66,51 @@ const StickerCategoriesDocsMap: Record<
       {
         service: StickerCategoriesService,
         methodName: 'mapCategory',
+      },
+    ]),
+  ],
+  patchCategory: [
+    ApiTags('어드민 API'),
+    ApiOperation({
+      summary: '[어드민용] 스티커 카테고리 이름 변경',
+      description: '[어드민 전용] 스티커 카테고리의 이름을 변경한다.',
+    }),
+    ApiAuthResponse(),
+    ApiOkResponse({ type: StickerCategoryDto }),
+    ApiResponseFromMetadata([
+      {
+        service: StickerCategoriesService,
+        methodName: 'updateStickerCategory',
+      },
+    ]),
+  ],
+  deleteCategory: [
+    ApiTags('어드민 API'),
+    ApiOperation({
+      summary: '[어드민용] 스티커 카테고리 삭제',
+      description: '[어드민 전용] 스티커 카테고리를 삭제한다',
+    }),
+    ApiAuthResponse(),
+    ApiNoContentResponse(),
+    ApiResponseFromMetadata([
+      {
+        service: StickerCategoriesService,
+        methodName: 'deleteStickerCategory',
+      },
+    ]),
+  ],
+  deleteCategoryMapping: [
+    ApiTags('어드민 API'),
+    ApiOperation({
+      summary: '[어드민용] 스티커 카테고리 매핑 삭제',
+      description: '[어드민 전용] 스티커 카테고리 매핑 값을 삭제한다',
+    }),
+    ApiAuthResponse(),
+    ApiNoContentResponse(),
+    ApiResponseFromMetadata([
+      {
+        service: StickerCategoriesService,
+        methodName: 'deleteStickerCategoryMapper',
       },
     ]),
   ],

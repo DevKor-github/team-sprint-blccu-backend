@@ -23,7 +23,9 @@ export class UserDto extends OmitType(User, [
 export const USER_SELECT_OPTION: { [key: string]: boolean } =
   getUserFields().reduce(
     (options, field) => {
-      options[field] = true;
+      if (field !== 'currentRefreshToken') {
+        options[field] = true;
+      }
       return options;
     },
     {} as { [key: string]: boolean },

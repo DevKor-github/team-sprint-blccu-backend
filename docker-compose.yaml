@@ -1,23 +1,66 @@
-version: "3.7"
+networks:
+  t4y:
+    driver: bridge
+  blccu_network:
+    external: true
 
 services:
-  blccu-ecr:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PLATFORM: linux/amd64
+  redis:
+    image: redis:latest
     ports:
-      - 3000:3000
-    env_file:
-      - ./.env.prod
-  # my-database: 
-  #   image: "mysql:latest"     
-  #   restart: always
-  #   env_file:
-  #     - ./.env.prod
-  #   environment:
-  #     MYSQL_DATABASE: 'mydocker'
-  #     MYSQL_ROOT_PASSWORD: 'root'
-  #   ports:
-  #     - 3306:3306      
+      - '6379:6379'
+    restart: always
+    networks:
+      - blccu_network
+#   prometheus:
+#     image: prom/prometheus
+#     container_name: prometheus
+#     volumes:
+#       - ./prometheus/config:/etc/prometheus
+#       - prometheus-data:/prometheus
+#     ports:
+#       - 9090:9090
+#     command:
+#       - '--storage.tsdb.path=/prometheus'
+#       - '--config.file=/etc/prometheus/prometheus.yaml'
+#     restart: always
+#     networks:
+#       - t4y
+
+#   grafana:
+#     image: grafana/grafana
+#     container_name: grafana
+#     ports:
+#       - 9000:3000
+#     volumes:
+#       - grafana-data:/var/lib/grafana
+#       - ./grafana/provisioning/:/etc/grafana/provisioning/
+#     restart: always
+#     depends_on:
+#       - prometheus
+#     networks:
+#       - t4y
+
+# volumes:
+#   grafana-data:
+#   prometheus-data:
+# blccu-ecr:
+#   build:
+#     context: .
+#     dockerfile: Dockerfile
+#     args:
+#       PLATFORM: linux/amd64
+#   ports:
+#     - 3000:3000
+#   env_file:
+#     - ./.env.prod
+# my-database:
+#   image: "mysql:latest"
+#   restart: always
+#   env_file:
+#     - ./.env.prod
+#   environment:
+#     MYSQL_DATABASE: 'mydocker'
+#     MYSQL_ROOT_PASSWORD: 'root'
+#   ports:
+#     - 3306:3306
