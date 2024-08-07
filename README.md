@@ -257,7 +257,7 @@ erDiagram
 - **컨트롤러 메서드**: HTTP 요청 중점 네이밍
   - 생성: `create{Entity}`
   - 조회: `get{Entity}`, `get{Entities}`
-  - 업데이트: `patch{Entity}`, `put{Entity}`
+  - 업데이트: `patch{Entity}`, `put{Entity}`
   - 삭제: `delete{Entity}`
 - **서비스 메서드**: Entity 명시
   - 생성: `create{Entity}`
@@ -273,9 +273,30 @@ erDiagram
 
 ## 테스트 코드 네이밍 룰
 
-{메서드명}{기대결과}{테스트상태}
+```
+describe('{layer}',()=>{
 
-`isAdult_False_AgeLessThan18)`
+    describe('{method}',async ()=>{
+
+        it('should {result}{condition}',()=>{})
+    })
+})
+```
+
+`  AgreementsService
+    createAgreement
+      ✓ should return AgreementDto with valid input (6 ms)
+    existCheck
+      ✓ should throw exception when agreement does not exist (5 ms)
+      ✓ should return AgreementDto when agreement exists (2 ms)
+    findAgreement
+      ✓ should return AgreementDto with valid input (1 ms)
+    findAgreements
+      ✓ should return AgreementDtos with valid input (1 ms)
+    patchAgreement
+      ✓ should return AgreementDto with valid input (1 ms)
+      ✓ should throw exception for invalid agreementId (1 ms)
+      ✓ should throw exception for invalid userId (1 ms)`
 
 ## 접두사 정리
 

@@ -54,131 +54,139 @@ describe('AgreementsService', () => {
       ...TEST_DATE_FIELDS,
     };
   });
-
-  it('createAgreement_AgreementDto_ValidInput', async () => {
-    const createAgreementInput: IAgreementsServiceCreate = {
-      userId: 1,
-      agreementType: AgreementType.TERMS_OF_SERVICE,
-      isAgreed: true,
-    };
-    const createAgreementOutput: AgreementDto = {
-      id: 1,
-      ...createAgreementInput,
-      ...TEST_DATE_FIELDS,
-    };
-    repo_agreements.save.mockResolvedValue(createAgreementOutput);
-    const result = await svc_agreements.createAgreement(createAgreementInput);
-    expect(result).toEqual(createAgreementOutput);
-    expect(repo_agreements.save).toHaveBeenCalledWith(createAgreementInput);
-  });
-
-  it('existCheck_ThrowError_NotExist', async () => {
-    const existCheckInput: IAgreementsServiceId = { agreementId: 1 };
-    const findOneOutput: AgreementDto = null;
-    repo_agreements.findOne.mockResolvedValue(findOneOutput);
-    await expect(svc_agreements.existCheck(existCheckInput)).rejects.toThrow(
-      BlccuExceptionTest('AGREEMENT_NOT_FOUND'),
-    );
-    expect(repo_agreements.findOne).toHaveBeenCalledWith({
-      where: { id: existCheckInput.agreementId },
+  describe('createAgreement', () => {
+    it('should return AgreementDto with valid input', async () => {
+      const createAgreementInput: IAgreementsServiceCreate = {
+        userId: 1,
+        agreementType: AgreementType.TERMS_OF_SERVICE,
+        isAgreed: true,
+      };
+      const createAgreementOutput: AgreementDto = {
+        id: 1,
+        ...createAgreementInput,
+        ...TEST_DATE_FIELDS,
+      };
+      repo_agreements.save.mockResolvedValue(createAgreementOutput);
+      const result = await svc_agreements.createAgreement(createAgreementInput);
+      expect(result).toEqual(createAgreementOutput);
+      expect(repo_agreements.save).toHaveBeenCalledWith(createAgreementInput);
     });
   });
 
-  it('existCheck_AgreementDto_WhenExist', async () => {
-    const existCheckInput: IAgreementsServiceId = { agreementId: 1 };
-    repo_agreements.findOne.mockResolvedValue(dto_agreement);
-    await expect(svc_agreements.existCheck(existCheckInput)).resolves.toEqual(
-      dto_agreement,
-    );
-    expect(repo_agreements.findOne).toHaveBeenCalledWith({
-      where: { id: existCheckInput.agreementId },
+  describe('existCheck', () => {
+    it('should throw exception when agreement does not exist', async () => {
+      const existCheckInput: IAgreementsServiceId = { agreementId: 1 };
+      const findOneOutput: AgreementDto = null;
+      repo_agreements.findOne.mockResolvedValue(findOneOutput);
+      await expect(svc_agreements.existCheck(existCheckInput)).rejects.toThrow(
+        BlccuExceptionTest('AGREEMENT_NOT_FOUND'),
+      );
+      expect(repo_agreements.findOne).toHaveBeenCalledWith({
+        where: { id: existCheckInput.agreementId },
+      });
+    });
+
+    it('should return AgreementDto when agreement exists', async () => {
+      const existCheckInput: IAgreementsServiceId = { agreementId: 1 };
+      repo_agreements.findOne.mockResolvedValue(dto_agreement);
+      await expect(svc_agreements.existCheck(existCheckInput)).resolves.toEqual(
+        dto_agreement,
+      );
+      expect(repo_agreements.findOne).toHaveBeenCalledWith({
+        where: { id: existCheckInput.agreementId },
+      });
     });
   });
 
-  it('findAgreement_AgreementDto_ValidInput', async () => {
-    const findAgreementInput: IAgreementsServiceId = { agreementId: 1 };
-    repo_agreements.findOne.mockResolvedValue(dto_agreement);
-    await expect(
-      svc_agreements.findAgreement(findAgreementInput),
-    ).resolves.toEqual(dto_agreement);
-    expect(repo_agreements.findOne).toHaveBeenCalledWith({
-      where: { id: findAgreementInput.agreementId },
+  describe('findAgreement', () => {
+    it('should return AgreementDto with valid input', async () => {
+      const findAgreementInput: IAgreementsServiceId = { agreementId: 1 };
+      repo_agreements.findOne.mockResolvedValue(dto_agreement);
+      await expect(
+        svc_agreements.findAgreement(findAgreementInput),
+      ).resolves.toEqual(dto_agreement);
+      expect(repo_agreements.findOne).toHaveBeenCalledWith({
+        where: { id: findAgreementInput.agreementId },
+      });
+    });
+  });
+  describe('findAgreements', () => {
+    it('should return AgreementDtos with valid input', async () => {
+      const findAgreementsInput: IAgreementsServiceUserId = { userId: 1 };
+      repo_agreements.find.mockResolvedValue([dto_agreement]);
+      await expect(
+        svc_agreements.findAgreements(findAgreementsInput),
+      ).resolves.toEqual([dto_agreement]);
+      expect(repo_agreements.find).toHaveBeenCalledWith({
+        where: { user: { id: findAgreementsInput.userId } },
+      });
     });
   });
 
-  it('findAgreements_AgreementDtos_ValidInput', async () => {
-    const findAgreementsInput: IAgreementsServiceUserId = { userId: 1 };
-    repo_agreements.find.mockResolvedValue([dto_agreement]);
-    await expect(
-      svc_agreements.findAgreements(findAgreementsInput),
-    ).resolves.toEqual([dto_agreement]);
-    expect(repo_agreements.find).toHaveBeenCalledWith({
-      where: { user: { id: findAgreementsInput.userId } },
+  describe('patchAgreement', () => {
+    it('should return AgreementDto with valid input', async () => {
+      const patchAgreementInput: IAgreementsServicePatchAgreement = {
+        userId: 1,
+        agreementId: 1,
+        isAgreed: true,
+      };
+      const saveOutput: AgreementDto = {
+        ...dto_agreement,
+        isAgreed: patchAgreementInput.isAgreed,
+      };
+      repo_agreements.findOne.mockResolvedValue(dto_agreement);
+      repo_agreements.save.mockResolvedValue(saveOutput);
+      expect(await svc_agreements.patchAgreement(patchAgreementInput)).toEqual(
+        saveOutput,
+      );
+      expect(repo_agreements.findOne).toHaveBeenCalledWith({
+        where: { id: patchAgreementInput.agreementId },
+      });
+      expect(repo_agreements.save).toHaveBeenCalledWith({
+        ...dto_agreement,
+        isAgreed: patchAgreementInput.isAgreed,
+      });
     });
-  });
 
-  it('patchAgreement_AgreementDto_ValidInput', async () => {
-    const patchAgreementInput: IAgreementsServicePatchAgreement = {
-      userId: 1,
-      agreementId: 1,
-      isAgreed: true,
-    };
-    const saveOutput: AgreementDto = {
-      ...dto_agreement,
-      isAgreed: patchAgreementInput.isAgreed,
-    };
-    repo_agreements.findOne.mockResolvedValue(dto_agreement);
-    repo_agreements.save.mockResolvedValue(saveOutput);
-    expect(await svc_agreements.patchAgreement(patchAgreementInput)).toEqual(
-      saveOutput,
-    );
-    expect(repo_agreements.findOne).toHaveBeenCalledWith({
-      where: { id: patchAgreementInput.agreementId },
+    it('should throw exception for invalid agreementId', async () => {
+      const patchAgreementInput: IAgreementsServicePatchAgreement = {
+        userId: 1,
+        agreementId: 1,
+        isAgreed: true,
+      };
+      const findOneOutput: AgreementDto = null;
+      const saveOutput: AgreementDto = {
+        ...findOneOutput,
+        isAgreed: patchAgreementInput.isAgreed,
+      };
+      repo_agreements.findOne.mockResolvedValue(findOneOutput);
+      repo_agreements.save.mockResolvedValue(saveOutput);
+      await expect(
+        svc_agreements.patchAgreement(patchAgreementInput),
+      ).rejects.toThrow(BlccuExceptionTest('AGREEMENT_NOT_FOUND'));
+      expect(repo_agreements.findOne).toHaveBeenCalledWith({
+        where: { id: patchAgreementInput.agreementId },
+      });
     });
-    expect(repo_agreements.save).toHaveBeenCalledWith({
-      ...dto_agreement,
-      isAgreed: patchAgreementInput.isAgreed,
-    });
-  });
 
-  it('patchAgreement_AgreementDto_InvalidAgreementId', async () => {
-    const patchAgreementInput: IAgreementsServicePatchAgreement = {
-      userId: 1,
-      agreementId: 1,
-      isAgreed: true,
-    };
-    const findOneOutput: AgreementDto = null;
-    const saveOutput: AgreementDto = {
-      ...findOneOutput,
-      isAgreed: patchAgreementInput.isAgreed,
-    };
-    repo_agreements.findOne.mockResolvedValue(findOneOutput);
-    repo_agreements.save.mockResolvedValue(saveOutput);
-    await expect(
-      svc_agreements.patchAgreement(patchAgreementInput),
-    ).rejects.toThrow(BlccuExceptionTest('AGREEMENT_NOT_FOUND'));
-    expect(repo_agreements.findOne).toHaveBeenCalledWith({
-      where: { id: patchAgreementInput.agreementId },
-    });
-  });
-
-  it('patchAgreement_AgreementDto_InvalidUserId', async () => {
-    const patchAgreementInput: IAgreementsServicePatchAgreement = {
-      userId: 2,
-      agreementId: 1,
-      isAgreed: true,
-    };
-    const saveOutput: AgreementDto = {
-      ...dto_agreement,
-      isAgreed: patchAgreementInput.isAgreed,
-    };
-    repo_agreements.findOne.mockResolvedValue(dto_agreement);
-    repo_agreements.save.mockResolvedValue(saveOutput);
-    await expect(
-      svc_agreements.patchAgreement(patchAgreementInput),
-    ).rejects.toThrow(BlccuExceptionTest('NOT_THE_OWNER'));
-    expect(repo_agreements.findOne).toHaveBeenCalledWith({
-      where: { id: patchAgreementInput.agreementId },
+    it('should throw exception for invalid userId', async () => {
+      const patchAgreementInput: IAgreementsServicePatchAgreement = {
+        userId: 2,
+        agreementId: 1,
+        isAgreed: true,
+      };
+      const saveOutput: AgreementDto = {
+        ...dto_agreement,
+        isAgreed: patchAgreementInput.isAgreed,
+      };
+      repo_agreements.findOne.mockResolvedValue(dto_agreement);
+      repo_agreements.save.mockResolvedValue(saveOutput);
+      await expect(
+        svc_agreements.patchAgreement(patchAgreementInput),
+      ).rejects.toThrow(BlccuExceptionTest('NOT_THE_OWNER'));
+      expect(repo_agreements.findOne).toHaveBeenCalledWith({
+        where: { id: patchAgreementInput.agreementId },
+      });
     });
   });
 });
