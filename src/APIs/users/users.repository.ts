@@ -28,7 +28,6 @@ export class UsersRepository extends Repository<User> {
       .where('user.dateDeleted IS NULL')
       .select([
         ...USER_PRIMARY_RESPONSE_DTO_KEYS.map((column) => {
-          console.log(column);
           return `user.${column} AS ${column}`;
         }),
         'CASE WHEN follow.to_user_id IS NOT NULL THEN true ELSE false END AS is_following',
@@ -51,7 +50,6 @@ export class UsersRepository extends Repository<User> {
       })
       .getRawMany();
 
-    console.log(users);
     return users.map((user) =>
       plainToClass(UserFollowingResponseDto, {
         ...convertToCamelCase(user),

@@ -17,22 +17,22 @@ import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decora
 @Injectable()
 export class NotificationsService {
   constructor(
-    @InjectQueue('audio') private redisQueue: Queue,
-    private readonly notificationsRepository: NotificationsRepository,
+    @InjectQueue('audio') private db_redisQueue: Queue,
+    private readonly repo_notifications: NotificationsRepository,
   ) {}
   private notis$: Subject<NotificationsGetResponseDto> = new Subject();
   private observer = this.notis$.asObservable();
   private readonly queueName = 'audio';
 
   onModuleInit() {
-    this.redisQueue.process(this.queueName, async (job) => {
+    this.db_redisQueue.process(this.queueName, async (job) => {
       const data = job.data;
       this.notis$.next(data);
     });
   }
 
   onModuleDestroy() {
-    this.redisQueue.close();
+    this.db_redisQueue.close();
   }
 
   connectUser({
@@ -57,17 +57,17 @@ export class NotificationsService {
     type,
   }: INotificationsSeviceEmitNotification): Promise<NotificationsGetResponseDto> {
     try {
-      const data = await this.notificationsRepository.save({
+      const data = await this.repo_notifications.save({
         userId,
         targetUserId,
         type,
       });
-      const response = await this.notificationsRepository.fetchOne({
+      const response = await this.repo_notifications.fetchOne({
         notificationId: data.id,
         targetUserId,
       });
       // Redis 큐에 이벤트를 전송
-      await this.redisQueue.add(this.queueName, response);
+      await this.db_redisQueue.add(this.queueName, response);
       return response;
     } catch (e) {
       throw new BlccuException('NOTIFICATION_CREATION_FAILED');
@@ -96,7 +96,7 @@ export class NotificationsService {
       default:
         currentDate = null;
     }
-    return await this.notificationsRepository.fetchAll({
+    return await this.repo_notifications.fetchAll({
       isChecked,
       userId,
       dateCreated: currentDate,
@@ -108,7 +108,7 @@ export class NotificationsService {
     notificationId,
     targetUserId,
   }: INotificationsServiceRead): Promise<NotificationsGetResponseDto> {
-    const updateResult = await this.notificationsRepository.update(
+    const updateResult = await this.repo_notifications.update(
       { id: notificationId, targetUserId },
       {
         isChecked: true,
@@ -117,7 +117,7 @@ export class NotificationsService {
     if (updateResult.affected < 1) {
       throw new BlccuException('NOTIFICATION_NOT_FOUND');
     }
-    return await this.notificationsRepository.fetchOne({
+    return await this.repo_notifications.fetchOne({
       notificationId,
       targetUserId,
     });
