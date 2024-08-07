@@ -27,3 +27,7 @@ export class BlccuHttpException extends HttpException {
 export function BlccuException(name: ExceptionNames) {
   throw new BlccuHttpException(name);
 }
+
+export function BlccuExceptionTest(name: ExceptionNames): string {
+  return new BlccuHttpException(name).message;
+}

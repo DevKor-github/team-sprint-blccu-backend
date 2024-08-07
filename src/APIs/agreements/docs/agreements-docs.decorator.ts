@@ -15,12 +15,6 @@ import { ApiAuthResponse } from '@/common/decorators/api-auth-response.dto';
 type AgreementsEndpoints = MethodNames<AgreementsController>;
 
 const AgreementsDocsMap: Record<AgreementsEndpoints, MethodDecorator[]> = {
-  getContract: [
-    ApiOperation({ summary: 'contract fetch' }),
-    ApiResponseFromMetadata([
-      { service: AgreementsService, methodName: 'findContract' },
-    ]),
-  ],
   agree: [
     ApiOperation({ summary: '온보딩 동의' }),
     ApiAuthResponse(),
