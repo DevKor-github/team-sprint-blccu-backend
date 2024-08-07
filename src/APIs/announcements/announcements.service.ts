@@ -13,12 +13,12 @@ import { AnnouncementDto } from './dtos/common/announcement.dto';
 import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
 import { BlccuException, EXCEPTIONS } from '@/common/blccu-exception';
 import { ExceptionMetadata } from '@/common/decorators/exception-metadata.decorator';
+import { AnnouncementsRepository } from './announcements.repository';
 
 @Injectable()
 export class AnnouncementsService {
   constructor(
-    @InjectRepository(Announcement)
-    private readonly repo_announcements: Repository<Announcement>,
+    private readonly repo_announcements: AnnouncementsRepository,
     private readonly svc_usersValidate: UsersValidateService,
   ) {}
 

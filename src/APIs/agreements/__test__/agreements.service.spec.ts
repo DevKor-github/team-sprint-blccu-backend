@@ -54,6 +54,7 @@ describe('AgreementsService', () => {
       ...TEST_DATE_FIELDS,
     };
   });
+
   describe('createAgreement', () => {
     it('should return AgreementDto with valid input', async () => {
       const createAgreementInput: IAgreementsServiceCreate = {
