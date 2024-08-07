@@ -4,23 +4,25 @@ import { AgreementsRepository } from '../agreements.repository';
 import { UsersValidateService } from '@/APIs/users/services/users-validate-service';
 import { AgreementType } from '@/common/enums/agreement-type.enum';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { MockRepository, MockRepositoryFactory } from '@/utils/test.utils';
+import {
+  MockRepository,
+  MockRepositoryFactory,
+  TEST_DATE_FIELDS,
+} from '@/utils/test.utils';
 import {
   IAgreementsServiceCreate,
   IAgreementsServiceId,
+  IAgreementsServicePatchAgreement,
+  IAgreementsServiceUserId,
 } from '../interfaces/agreements.service.interface';
 import { UsersRepository } from '@/APIs/users/users.repository';
 import { AgreementDto } from '../dtos/common/agreement.dto';
-import {
-  BlccuException,
-  BlccuExceptionTest,
-  BlccuHttpException,
-} from '@/common/blccu-exception';
+import { BlccuExceptionTest } from '@/common/blccu-exception';
 
 describe('AgreementsService', () => {
   let svc_agreements: AgreementsService;
   let repo_agreements: MockRepository<AgreementsRepository>;
-  let svc_usersValidate: UsersValidateService;
+  let dto_agreement: AgreementDto;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -44,7 +46,13 @@ describe('AgreementsService', () => {
     repo_agreements = module.get<MockRepository<AgreementsRepository>>(
       getRepositoryToken(AgreementsRepository),
     );
-    svc_usersValidate = module.get<UsersValidateService>(UsersValidateService);
+    dto_agreement = {
+      id: 1,
+      userId: 1,
+      agreementType: AgreementType.TERMS_OF_SERVICE,
+      isAgreed: true,
+      ...TEST_DATE_FIELDS,
+    };
   });
 
   it('createAgreement_AgreementDto_ValidInput', async () => {
@@ -56,9 +64,7 @@ describe('AgreementsService', () => {
     const createAgreementOutput: AgreementDto = {
       id: 1,
       ...createAgreementInput,
-      dateCreated: expect.any(Date),
-      dateUpdated: expect.any(Date),
-      dateDeleted: expect.any(Date),
+      ...TEST_DATE_FIELDS,
     };
     repo_agreements.save.mockResolvedValue(createAgreementOutput);
     const result = await svc_agreements.createAgreement(createAgreementInput);
@@ -73,84 +79,106 @@ describe('AgreementsService', () => {
     await expect(svc_agreements.existCheck(existCheckInput)).rejects.toThrow(
       BlccuExceptionTest('AGREEMENT_NOT_FOUND'),
     );
+    expect(repo_agreements.findOne).toHaveBeenCalledWith({
+      where: { id: existCheckInput.agreementId },
+    });
+  });
+
+  it('existCheck_AgreementDto_WhenExist', async () => {
+    const existCheckInput: IAgreementsServiceId = { agreementId: 1 };
+    repo_agreements.findOne.mockResolvedValue(dto_agreement);
+    await expect(svc_agreements.existCheck(existCheckInput)).resolves.toEqual(
+      dto_agreement,
+    );
+    expect(repo_agreements.findOne).toHaveBeenCalledWith({
+      where: { id: existCheckInput.agreementId },
+    });
+  });
+
+  it('findAgreement_AgreementDto_ValidInput', async () => {
+    const findAgreementInput: IAgreementsServiceId = { agreementId: 1 };
+    repo_agreements.findOne.mockResolvedValue(dto_agreement);
+    await expect(
+      svc_agreements.findAgreement(findAgreementInput),
+    ).resolves.toEqual(dto_agreement);
+    expect(repo_agreements.findOne).toHaveBeenCalledWith({
+      where: { id: findAgreementInput.agreementId },
+    });
+  });
+
+  it('findAgreements_AgreementDtos_ValidInput', async () => {
+    const findAgreementsInput: IAgreementsServiceUserId = { userId: 1 };
+    repo_agreements.find.mockResolvedValue([dto_agreement]);
+    await expect(
+      svc_agreements.findAgreements(findAgreementsInput),
+    ).resolves.toEqual([dto_agreement]);
+    expect(repo_agreements.find).toHaveBeenCalledWith({
+      where: { user: { id: findAgreementsInput.userId } },
+    });
+  });
+
+  it('patchAgreement_AgreementDto_ValidInput', async () => {
+    const patchAgreementInput: IAgreementsServicePatchAgreement = {
+      userId: 1,
+      agreementId: 1,
+      isAgreed: true,
+    };
+    const saveOutput: AgreementDto = {
+      ...dto_agreement,
+      isAgreed: patchAgreementInput.isAgreed,
+    };
+    repo_agreements.findOne.mockResolvedValue(dto_agreement);
+    repo_agreements.save.mockResolvedValue(saveOutput);
+    expect(await svc_agreements.patchAgreement(patchAgreementInput)).toEqual(
+      saveOutput,
+    );
+    expect(repo_agreements.findOne).toHaveBeenCalledWith({
+      where: { id: patchAgreementInput.agreementId },
+    });
+    expect(repo_agreements.save).toHaveBeenCalledWith({
+      ...dto_agreement,
+      isAgreed: patchAgreementInput.isAgreed,
+    });
+  });
+
+  it('patchAgreement_AgreementDto_InvalidAgreementId', async () => {
+    const patchAgreementInput: IAgreementsServicePatchAgreement = {
+      userId: 1,
+      agreementId: 1,
+      isAgreed: true,
+    };
+    const findOneOutput: AgreementDto = null;
+    const saveOutput: AgreementDto = {
+      ...findOneOutput,
+      isAgreed: patchAgreementInput.isAgreed,
+    };
+    repo_agreements.findOne.mockResolvedValue(findOneOutput);
+    repo_agreements.save.mockResolvedValue(saveOutput);
+    await expect(
+      svc_agreements.patchAgreement(patchAgreementInput),
+    ).rejects.toThrow(BlccuExceptionTest('AGREEMENT_NOT_FOUND'));
+    expect(repo_agreements.findOne).toHaveBeenCalledWith({
+      where: { id: patchAgreementInput.agreementId },
+    });
+  });
+
+  it('patchAgreement_AgreementDto_InvalidUserId', async () => {
+    const patchAgreementInput: IAgreementsServicePatchAgreement = {
+      userId: 2,
+      agreementId: 1,
+      isAgreed: true,
+    };
+    const saveOutput: AgreementDto = {
+      ...dto_agreement,
+      isAgreed: patchAgreementInput.isAgreed,
+    };
+    repo_agreements.findOne.mockResolvedValue(dto_agreement);
+    repo_agreements.save.mockResolvedValue(saveOutput);
+    await expect(
+      svc_agreements.patchAgreement(patchAgreementInput),
+    ).rejects.toThrow(BlccuExceptionTest('NOT_THE_OWNER'));
+    expect(repo_agreements.findOne).toHaveBeenCalledWith({
+      where: { id: patchAgreementInput.agreementId },
+    });
   });
 });
-
-//   it('createAgreement_ShouldReturnAgreementDto_ValidInput', async () => {
-//     const result = await service.createAgreement({
-//       userId: 1,
-//       agreementType: AgreementType.TERMS_OF_SERVICE,
-//       isAgreed: true,
-//     });
-
-//     expect(result).toEqual(agreementDto);
-//     expect(repo.save).toHaveBeenCalledWith({
-//       agreementType: AgreementType.TERMS_OF_SERVICE,
-//       isAgreed: true,
-//       userId: 1,
-//     });
-//   });
-
-//   it('findContract_ShouldReturnContractHtml_ValidAgreementType', async () => {
-//     const agreementType = AgreementType.TERMS_OF_SERVICE;
-//     const mockData = '<html>Contract Terms</html>';
-
-//     jest.spyOn(fs.promises, 'readFile').mockResolvedValue(mockData);
-
-//     const result = await service.findContract({ agreementType });
-
-//     expect(result).toBe(mockData);
-//   });
-
-//   it('findAgreement_ShouldReturnAgreementDto_ValidAgreementId', async () => {
-//     const result = await service.findAgreement({ agreementId: 1 });
-
-//     expect(result).toEqual(agreementDto);
-//     expect(repo.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
-//   });
-
-//   it('existCheck_ShouldThrowBlccuException_AgreementNotFound', async () => {
-//     jest.spyOn(service, 'findAgreement').mockResolvedValue(null);
-
-//     await expect(service.existCheck({ agreementId: 1 })).rejects.toThrow(
-//       new BlccuException('AGREEMENT_NOT_FOUND'),
-//     );
-//   });
-
-//   it('findAgreements_ShouldReturnAgreementDtoArray_ValidUserId', async () => {
-//     const result = await service.findAgreements({ userId: 1 });
-
-//     expect(result).toEqual([agreementDto]);
-//     expect(repo.find).toHaveBeenCalledWith({ where: { user: { id: 1 } } });
-//   });
-
-//   it('patchAgreement_ShouldThrowBlccuException_NotTheOwner', async () => {
-//     const otherUserAgreement: Agreement = { ...agreementEntity, userId: 2 };
-
-//     jest.spyOn(service, 'existCheck').mockResolvedValue(otherUserAgreement);
-
-//     await expect(
-//       service.patchAgreement({
-//         userId: 1,
-//         agreementId: 1,
-//         isAgreed: true,
-//       }),
-//     ).rejects.toThrow(new BlccuException('NOT_THE_OWNER'));
-//   });
-
-//   it('patchAgreement_ShouldReturnUpdatedAgreement_ValidInput', async () => {
-//     const updatedAgreement: Agreement = { ...agreementEntity, isAgreed: true };
-
-//     jest.spyOn(service, 'existCheck').mockResolvedValue(agreementEntity);
-//     jest.spyOn(repo, 'save').mockResolvedValue(updatedAgreement);
-
-//     const result = await service.patchAgreement({
-//       userId: 1,
-//       agreementId: 1,
-//       isAgreed: true,
-//     });
-
-//     expect(result).toEqual(plainToClass(AgreementDto, updatedAgreement));
-//     expect(repo.save).toHaveBeenCalledWith(updatedAgreement);
-//   });
-// });

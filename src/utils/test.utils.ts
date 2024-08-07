@@ -28,3 +28,9 @@ export class MockRepositoryFactory {
     return mockRepository;
   }
 }
+
+export const TEST_DATE_FIELDS = {
+  dateCreated: expect.any(Date),
+  dateUpdated: expect.any(Date),
+  dateDeleted: expect.any(Date),
+};

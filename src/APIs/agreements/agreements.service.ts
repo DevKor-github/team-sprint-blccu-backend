@@ -2,13 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { AgreementsRepository } from './agreements.repository';
 import {
   IAgreementsServiceCreate,
-  IAgreementsServiceFetchContract,
   IAgreementsServiceId,
   IAgreementsServicePatchAgreement,
   IAgreementsServiceUserId,
 } from './interfaces/agreements.service.interface';
-import path from 'path';
-import fs from 'fs';
 import { UsersValidateService } from '../users/services/users-validate-service';
 import { AgreementDto } from './dtos/common/agreement.dto';
 import { MergeExceptionMetadata } from '@/common/decorators/merge-exception-metadata.decorator';
@@ -41,12 +38,6 @@ export class AgreementsService {
     });
   }
 
-  async findAgreement({
-    agreementId,
-  }: IAgreementsServiceId): Promise<AgreementDto> {
-    return await this.repo_agreements.findOne({ where: { id: agreementId } });
-  }
-
   @ExceptionMetadata([EXCEPTIONS.AGREEMENT_NOT_FOUND])
   async existCheck({
     agreementId,
@@ -54,6 +45,12 @@ export class AgreementsService {
     const data = await this.findAgreement({ agreementId });
     if (!data) throw new BlccuException('AGREEMENT_NOT_FOUND');
     return data;
+  }
+
+  async findAgreement({
+    agreementId,
+  }: IAgreementsServiceId): Promise<AgreementDto> {
+    return await this.repo_agreements.findOne({ where: { id: agreementId } });
   }
 
   async findAgreements({
