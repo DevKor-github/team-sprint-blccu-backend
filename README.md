@@ -273,30 +273,26 @@ erDiagram
 
 ## 테스트 코드 네이밍 룰
 
+### jest 코드
+
+```typescript
+describe('{layer}', () => {
+  describe('{method}', async () => {
+    it('should {result}{condition}', () => {});
+  });
+});
 ```
-describe('{layer}',()=>{
 
-    describe('{method}',async ()=>{
+### 예시
 
-        it('should {result}{condition}',()=>{})
-    })
-})
-```
-
-`  AgreementsService
+```typescript
+AgreementsService
     createAgreement
       ✓ should return AgreementDto with valid input (6 ms)
     existCheck
       ✓ should throw exception when agreement does not exist (5 ms)
       ✓ should return AgreementDto when agreement exists (2 ms)
-    findAgreement
-      ✓ should return AgreementDto with valid input (1 ms)
-    findAgreements
-      ✓ should return AgreementDtos with valid input (1 ms)
-    patchAgreement
-      ✓ should return AgreementDto with valid input (1 ms)
-      ✓ should throw exception for invalid agreementId (1 ms)
-      ✓ should throw exception for invalid userId (1 ms)`
+```
 
 ## 접두사 정리
 

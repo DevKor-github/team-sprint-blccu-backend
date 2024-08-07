@@ -7,7 +7,4 @@ export class AgreementsRepository extends Repository<Agreement> {
   constructor(private db_dataSource: DataSource) {
     super(Agreement, db_dataSource.createEntityManager());
   }
-  getHello(): string {
-    return '1';
-  }
 }
