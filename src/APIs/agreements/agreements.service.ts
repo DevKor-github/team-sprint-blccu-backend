@@ -41,14 +41,6 @@ export class AgreementsService {
     });
   }
 
-  async findContract({ agreementType }: IAgreementsServiceFetchContract) {
-    const fileName = agreementType + '.html';
-    const rootPath = process.cwd();
-    const filePath = path.join(rootPath, 'src', 'assets', 'terms', fileName);
-    const data = await fs.promises.readFile(filePath, 'utf8');
-    return data;
-  }
-
   async findAgreement({
     agreementId,
   }: IAgreementsServiceId): Promise<AgreementDto> {

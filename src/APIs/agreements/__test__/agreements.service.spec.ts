@@ -2,29 +2,25 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AgreementsService } from '../agreements.service';
 import { AgreementsRepository } from '../agreements.repository';
 import { UsersValidateService } from '@/APIs/users/services/users-validate-service';
-import { AgreementDto } from '../dtos/common/agreement.dto';
-import { Agreement } from '../entities/agreement.entity';
-import { plainToClass } from 'class-transformer';
-import fs from 'fs';
 import { AgreementType } from '@/common/enums/agreement-type.enum';
-import { BlccuException } from '@/common/blccu-exception';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { MockRepository, MockRepositoryFactory } from '@/utils/test.utils';
+import {
+  IAgreementsServiceCreate,
+  IAgreementsServiceId,
+} from '../interfaces/agreements.service.interface';
+import { UsersRepository } from '@/APIs/users/users.repository';
+import { AgreementDto } from '../dtos/common/agreement.dto';
+import {
+  BlccuException,
+  BlccuExceptionTest,
+  BlccuHttpException,
+} from '@/common/blccu-exception';
 
 describe('AgreementsService', () => {
   let svc_agreements: AgreementsService;
   let repo_agreements: MockRepository<AgreementsRepository>;
   let svc_usersValidate: UsersValidateService;
-
-  const ent_agreement: Agreement = {
-    id: 1,
-    userId: 30000000,
-    agreementType: AgreementType.TERMS_OF_SERVICE,
-    isAgreed: true,
-    dateCreated: new Date(),
-    dateUpdated: new Date(),
-    dateDeleted: new Date(),
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,6 +30,12 @@ describe('AgreementsService', () => {
           provide: getRepositoryToken(AgreementsRepository),
           useValue:
             MockRepositoryFactory.getMockRepository(AgreementsRepository),
+        },
+
+        UsersValidateService,
+        {
+          provide: getRepositoryToken(UsersRepository),
+          useValue: MockRepositoryFactory.getMockRepository(UsersRepository),
         },
       ],
     }).compile();
@@ -45,7 +47,33 @@ describe('AgreementsService', () => {
     svc_usersValidate = module.get<UsersValidateService>(UsersValidateService);
   });
 
-  it('createAgreement_AgreementDto_ValidInput');
+  it('createAgreement_AgreementDto_ValidInput', async () => {
+    const createAgreementInput: IAgreementsServiceCreate = {
+      userId: 1,
+      agreementType: AgreementType.TERMS_OF_SERVICE,
+      isAgreed: true,
+    };
+    const createAgreementOutput: AgreementDto = {
+      id: 1,
+      ...createAgreementInput,
+      dateCreated: expect.any(Date),
+      dateUpdated: expect.any(Date),
+      dateDeleted: expect.any(Date),
+    };
+    repo_agreements.save.mockResolvedValue(createAgreementOutput);
+    const result = await svc_agreements.createAgreement(createAgreementInput);
+    expect(result).toEqual(createAgreementOutput);
+    expect(repo_agreements.save).toHaveBeenCalledWith(createAgreementInput);
+  });
+
+  it('existCheck_ThrowError_NotExist', async () => {
+    const existCheckInput: IAgreementsServiceId = { agreementId: 1 };
+    const findOneOutput: AgreementDto = null;
+    repo_agreements.findOne.mockResolvedValue(findOneOutput);
+    await expect(svc_agreements.existCheck(existCheckInput)).rejects.toThrow(
+      BlccuExceptionTest('AGREEMENT_NOT_FOUND'),
+    );
+  });
 });
 
 //   it('createAgreement_ShouldReturnAgreementDto_ValidInput', async () => {
