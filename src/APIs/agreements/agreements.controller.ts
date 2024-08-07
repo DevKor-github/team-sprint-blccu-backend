@@ -5,15 +5,13 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { AgreementsService } from './agreements.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthGuardV2 } from 'src/common/guards/auth.guard';
 import { Request } from 'express';
-import { AgreementGetContractRequestDto } from './dtos/request/agreement-get-contract-request.dto';
 import { AgreementCreateRequestDto } from './dtos/request/agreement-create-request.dto';
 import { AgreementDto } from './dtos/common/agreement.dto';
 import { AgreementPatchRequestDto } from './dtos/request/agreement-patch-request.dto';
@@ -24,13 +22,6 @@ import { AgreementsDocs } from './docs/agreements-docs.decorator';
 @Controller('users')
 export class AgreementsController {
   constructor(private readonly svc_agreements: AgreementsService) {}
-
-  @ApiOperation({ summary: 'contract fetch' })
-  @Get('contracts')
-  async getContract(@Query() query: AgreementGetContractRequestDto) {
-    const data = await this.svc_agreements.findContract({ ...query });
-    return data;
-  }
 
   @UseGuards(AuthGuardV2)
   @Post('me/agreement')
