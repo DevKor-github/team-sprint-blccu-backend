@@ -5,6 +5,10 @@ export type MockRepository<T = any> = {
   [P in keyof T]?: jest.Mock<any>;
 };
 
+export type MockService<T = any> = {
+  [P in keyof T]?: jest.Mock<any>;
+};
+
 export class MockRepositoryFactory {
   static getMockRepository<T>(
     type: new (...args: any[]) => T,
@@ -34,3 +38,18 @@ export const TEST_DATE_FIELDS = {
   dateUpdated: expect.any(Date),
   dateDeleted: expect.any(Date),
 };
+
+export class MockServiceFactory {
+  static getMockService<T>(type: new (...args: any[]) => T): MockService<T> {
+    const mockService: MockService<T> = {};
+
+    // 서비스 클래스의 메서드를 jest.fn()으로 대체
+    Object.getOwnPropertyNames(type.prototype)
+      .filter((key: string) => key !== 'constructor')
+      .forEach((key: string) => {
+        mockService[key] = jest.fn<any>();
+      });
+
+    return mockService;
+  }
+}
