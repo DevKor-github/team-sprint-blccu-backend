@@ -76,6 +76,7 @@ export class UsersUpdateService {
       ext: 'jpg',
       file,
       resize: 800,
+      tag: 'users/images/profiles',
     });
     await this.svc_images.deleteImage({ url: user.profileImage });
 
@@ -99,6 +100,7 @@ export class UsersUpdateService {
       ext: 'jpg',
       file,
       resize: 1600,
+      tag: 'users/images/backgrounds',
     });
     await this.svc_images.deleteImage({ url: user.backgroundImage });
 

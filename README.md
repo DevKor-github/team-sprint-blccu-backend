@@ -206,8 +206,6 @@ erDiagram
     sticker_category_mapper ||--o{ sticker_category : categorized_as
 ```
 
-## 커밋 컨벤션
-
 ## 네이밍 룰의 우선사항
 
 **엔티티 중심의 클래스 작명**: {Entity}{Action}{Purpose}{Layer}
@@ -326,12 +324,12 @@ AgreementsService
 - **접두사:** `dto_`
 - **예시:** `dto_agreement`
 
-### DB 관련 변수 (db connection pool 등)
+### DB 관련 변수 (db connection pool 등)
 
 - **접두사:** `db_`
 - **예시:** `db_redisQueue`, `db_dataSource`
 
-커밋 메세지과 머지 룰
+## 커밋 메세지과 머지 룰
 
 ### 커밋 컨벤션
 

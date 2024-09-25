@@ -49,6 +49,7 @@ export class StickersService {
       file,
       resize: 1600,
       ext: 'png',
+      tag: 'stickers/images',
     });
     const insertData = await this.repo_stickers
       .createQueryBuilder()

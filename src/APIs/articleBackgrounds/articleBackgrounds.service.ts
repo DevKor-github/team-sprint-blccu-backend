@@ -30,6 +30,7 @@ export class ArticleBackgroundsService {
       file,
       resize: 2000,
       ext: 'png',
+      tag: 'articles/images/backgrounds',
     });
     await this.repo_articleBackgrounds.save({ imageUrl });
     return { imageUrl };
