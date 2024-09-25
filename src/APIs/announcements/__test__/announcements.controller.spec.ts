@@ -9,7 +9,6 @@ import {
 import { Request } from 'express';
 import { AnnouncementCreateRequestDto } from '../dtos/request/announcement-create-request.dto';
 import { AnnouncementDto } from '../dtos/common/announcement.dto';
-import exp from 'constants';
 import { AnnouncementPatchRequestDto } from '../dtos/request/announcement-patch-request.dto';
 import {
   BlccuExceptionTest,

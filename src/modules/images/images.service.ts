@@ -19,10 +19,11 @@ export class ImagesService {
     file,
     resize,
     ext,
+    tag,
   }: IImagesServiceUploadImage): Promise<ImageUploadResponseDto> {
     const imageName = getUUID();
     const imageUrl = await this.svc_aws.imageUploadToS3(
-      `${imageName}.${ext}`,
+      `${tag}/${imageName}.${ext}`,
       file,
       ext,
       resize,

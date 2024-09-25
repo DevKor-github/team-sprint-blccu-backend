@@ -133,6 +133,7 @@ export class ArticlesCreateService {
       file,
       ext: 'png',
       resize: 1280,
+      tag: 'articles/images/views',
     });
 
     return { imageUrl };

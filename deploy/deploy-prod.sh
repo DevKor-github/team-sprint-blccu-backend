@@ -2,7 +2,7 @@
 # 스크립트의 실제 위치를 기준으로 경로 설정
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR=$(cd "$SCRIPT_DIR/.."; pwd)
-PEM_PATH="$SCRIPT_DIR/../../../keys/blccu-prod.pem"
+PEM_PATH="$SCRIPT_DIR/../../../keys/blccu-dev-rsa.pem"
 
 # PEM 파일 경로가 올바른지 확인
 if [[ ! -f "$PEM_PATH" ]]; then
@@ -13,12 +13,12 @@ fi
 # PEM 파일 권한 확인 및 수정
 chmod 400 "$PEM_PATH"
 
-HOSTS=("13.209.215.21")
+HOSTS=("3.34.58.11")
 ACCOUNT=ubuntu
-SERVICE_NAME=blccu
+SERVICE_NAME=blccu-ecr
 DOCKER_TAG=latest
-ECR_URL="792939917746.dkr.ecr.ap-northeast-2.amazonaws.com"
-AWS_PROFILE=production  # 배포 프로파일 사용
+ECR_URL="637423583546.dkr.ecr.ap-northeast-2.amazonaws.com"
+AWS_PROFILE=staging  # 배포 프로파일 사용
 ENV_FILE="$ROOT_DIR/.env.prod"
 
 NGINX_CONFIG=/etc/nginx/nginx.conf
@@ -66,7 +66,7 @@ for HOST in "${HOSTS[@]}"; do
   echo -e "\n## new docker pull & run on $HOST ##\n"
   ssh -i $PEM_PATH $SERVER "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $ECR_URL"
   ssh -i $PEM_PATH $SERVER "docker pull $ECR_URL/$SERVICE_NAME:$DOCKER_TAG"
-  ssh -i $PEM_PATH $SERVER "docker run --env-file /home/$ACCOUNT/upload/.env.prod -d -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul --network blccu_network $ECR_URL/$SERVICE_NAME"
+  ssh -i $PEM_PATH $SERVER "docker run --env-file /home/$ACCOUNT/upload/.env.prod -d -p $NEW_PORT:3000 --name $NEW_SERVICE_NAME -e TZ=Asia/Seoul $ECR_URL/$SERVICE_NAME"
 
   # 헬스체크 수행
   echo -e "\n## 헬스체크 수행 on $HOST ##\n"
